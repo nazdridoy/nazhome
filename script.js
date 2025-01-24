@@ -31,7 +31,7 @@ const searchEngines = {
 // Search functionality
 document.getElementById('searchForm').onsubmit = function(e) {
     e.preventDefault();
-    const query = document.querySelector('input').value.trim();
+    const query = document.querySelector('input[type="search"]').value.trim();
     if (!query) return;
     
     const engine = document.getElementById('searchEngine').dataset.engine;
