@@ -85,15 +85,19 @@ function setBackgroundCache(cache) {
 async function imageToBase64(url) {
     try {
         const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+        }
         const blob = await response.blob();
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
+            reader.onerror = (error) => reject(new Error(`Failed to convert image: ${error}`));
             reader.readAsDataURL(blob);
         });
     } catch (error) {
         console.error('Failed to convert image to base64:', error);
+        // Return a default image or null instead of silently failing
         return null;
     }
 }
@@ -111,15 +115,13 @@ async function fetchNewBackgroundImage() {
     const timestamp = Date.now();
     const url = `https://picsum.photos/1920/1080?random=${timestamp}`;
     try {
-        // No need for separate preloadImage call
-        const response = await fetch(url);
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
+        const base64Image = await imageToBase64(url);
+        if (!base64Image) {
+            // Handle the failure case by using a fallback or previous image
+            console.warn('Failed to load new background image, using fallback');
+            return null;
+        }
+        return base64Image;
     } catch (error) {
         console.error('Failed to load new background:', error);
         return null;
