@@ -205,6 +205,15 @@ function getBestIcon(url) {
     }
 }
 
+// Add this constant for the default fallback icon
+const DEFAULT_FALLBACK_ICON = 'data:image/svg+xml,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="20" fill="#555"/>
+        <text x="50" y="50" font-family="Arial" font-size="50" 
+              text-anchor="middle" dy=".3em" fill="#fff">?</text>
+    </svg>
+`);
+
 // Bookmark management
 function loadBookmarks() {
     const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
@@ -229,7 +238,7 @@ function loadBookmarks() {
             <div class="icon-wrapper">
                 <img src="${faviconUrl}" 
                      alt="${bookmark.name}"
-                     onerror="this.src='https://www.google.com/s2/favicons?domain=${hostname}&sz=64'">
+                     onerror="if(this.src !== '${DEFAULT_FALLBACK_ICON}') this.src='https://www.google.com/s2/favicons?domain=${hostname}&sz=64'; else this.onerror=null;">
             </div>
             <span>${bookmark.name}</span>
         `;
