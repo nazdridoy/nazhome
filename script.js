@@ -214,9 +214,41 @@ const DEFAULT_FALLBACK_ICON = 'data:image/svg+xml,' + encodeURIComponent(`
     </svg>
 `);
 
+// Add these helper functions at the top
+function safeGet(key, defaultValue = null) {
+    try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : defaultValue;
+    } catch (error) {
+        console.error('LocalStorage read error:', error);
+        return defaultValue;
+    }
+}
+
+function safeSet(key, value) {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+    } catch (error) {
+        console.error('LocalStorage write error:', error);
+        alert('Failed to save data. Your storage might be full. Please clear some space.');
+        return false;
+    }
+}
+
+function safeRemove(key) {
+    try {
+        localStorage.removeItem(key);
+        return true;
+    } catch (error) {
+        console.error('LocalStorage remove error:', error);
+        return false;
+    }
+}
+
 // Bookmark management
 function loadBookmarks() {
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    const bookmarks = safeGet('bookmarks') || [];
     const grid = document.getElementById('quickLinks');
     grid.innerHTML = '';
 
@@ -288,7 +320,7 @@ function loadBookmarks() {
                         name: nameInput.value.trim(),
                         url: parsedUrl.href
                     };
-                    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                    if (!safeSet('bookmarks', bookmarks)) return;
                     loadBookmarks();
                     dialog.remove();
                 } catch {
@@ -325,13 +357,13 @@ function loadBookmarks() {
                     const deletedDefaults = getDeletedDefaults();
                     if (!deletedDefaults.includes(bookmark.url)) {
                         deletedDefaults.push(bookmark.url);
-                        localStorage.setItem('deletedDefaults', JSON.stringify(deletedDefaults));
+                        if (!safeSet('deletedDefaults', deletedDefaults)) return;
                     }
                 }
                 
                 // Remove from current bookmarks
                 bookmarks.splice(index, 1);
-                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                if (!safeSet('bookmarks', bookmarks)) return;
                 loadBookmarks();
             });
         });
@@ -376,7 +408,7 @@ function loadBookmarks() {
             e.preventDefault();
             try {
                 const parsedUrl = new URL(urlInput.value);
-                const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+                const bookmarks = safeGet('bookmarks') || [];
                 
                 // Check for duplicates
                 const isDuplicate = bookmarks.some(bookmark => 
@@ -394,7 +426,7 @@ function loadBookmarks() {
                     url: parsedUrl.href
                 });
                 
-                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                if (!safeSet('bookmarks', bookmarks)) return;
                 loadBookmarks();
                 dialog.remove();
             } catch {
@@ -429,18 +461,16 @@ function getDefaultBookmarks() {
 
 // Add this function to track deleted default bookmarks
 function getDeletedDefaults() {
-    return JSON.parse(localStorage.getItem('deletedDefaults') || '[]');
+    return safeGet('deletedDefaults') || [];
 }
 
 // Update the addDefaultBookmarks function
 function addDefaultBookmarks() {
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
-    const deletedDefaults = getDeletedDefaults();
+    const bookmarks = safeGet('bookmarks') || [];
+    const deletedDefaults = safeGet('deletedDefaults') || [];
     
-    // If this is first time (no bookmarks stored yet)
     if (bookmarks.length === 0) {
-        // Add all default bookmarks
-        localStorage.setItem('bookmarks', JSON.stringify(getDefaultBookmarks()));
+        if (!safeSet('bookmarks', getDefaultBookmarks())) return;
         loadBookmarks();
         return;
     }
@@ -455,7 +485,7 @@ function addDefaultBookmarks() {
     if (missingDefaults.length > 0) {
         // Add missing defaults to the existing bookmarks
         const updatedBookmarks = [...bookmarks, ...missingDefaults];
-        localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+        if (!safeSet('bookmarks', updatedBookmarks)) return;
         loadBookmarks();
     }
 }
@@ -1199,16 +1229,16 @@ document.getElementById('closeSettings').addEventListener('click', function() {
 // Add this function to restore default bookmarks
 function restoreDefaultBookmarks() {
     // Clear deleted defaults
-    localStorage.removeItem('deletedDefaults');
+    safeRemove('deletedDefaults');
     
     // Get current custom bookmarks
-    const currentBookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    const currentBookmarks = safeGet('bookmarks') || [];
     const customBookmarks = currentBookmarks.filter(bookmark => 
         !getDefaultBookmarks().some(def => def.url === bookmark.url)
     );
     
     // Combine default and custom bookmarks
     const allBookmarks = [...getDefaultBookmarks(), ...customBookmarks];
-    localStorage.setItem('bookmarks', JSON.stringify(allBookmarks));
+    if (!safeSet('bookmarks', allBookmarks)) return;
     loadBookmarks();
 } 
