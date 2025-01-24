@@ -400,7 +400,10 @@ function loadBookmarks() {
                 if (!nameInput.value) {
                     nameInput.value = url.hostname.replace('www.', '');
                 }
-            } catch {}
+            } catch (error) {
+                // Invalid URL, skip auto-fill
+                console.log('Invalid URL for auto-fill:', error);
+            }
         });
 
         // Handle form submission
@@ -549,11 +552,6 @@ initializeBackground();
 updateDateTime();
 document.querySelector('input[type="search"]').value = '';
 
-// Update background periodically (every hour)
-setInterval(() => {
-    loadBackground();
-}, 3600000);
-
 // Add this function at the top of your script
 function createEditDialog(name, url) {
     const dialog = document.createElement('div');
@@ -681,7 +679,9 @@ function createSearchEngineSelector() {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
     
-    const customEngines = JSON.parse(localStorage.getItem('customSearchEngines') || '{}');
+    // Fix the custom engines loading using our safe localStorage helper
+    const customEngines = safeGet('customSearchEngines') || {};
+    
     const defaultEngines = [
         { key: 'google', name: 'Google', icon: 'https://www.google.com/favicon.ico' },
         { key: 'ddg', name: 'DuckDuckGo', icon: 'https://duckduckgo.com/favicon.ico' },
