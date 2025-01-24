@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Homepage</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="datetime"></div>
+    
+    <div class="main-content">
+        <div class="search-container">
+            <form id="searchForm">
+                <div class="search-engine-wrapper">
+                    <button id="searchEngine" type="button" title="Select Search Engine" data-engine="google"></button>
+                </div>
+                <input type="search" placeholder="Search the web..." autofocus autocomplete="off">
+            </form>
+        </div>
+
+        <div class="grid-container" id="quickLinks"></div>
+    </div>
+
+    <div class="settings-panel">
+        <div class="settings-header">
+            <h3>Settings</h3>
+            <button id="closeSettings" class="close-btn" aria-label="Close settings">×</button>
+        </div>
+        <div class="settings-content">
+            <button id="restoreDefaults" class="settings-btn">
+                Restore Default Bookmarks
+            </button>
+        </div>
+    </div>
+
+    <button id="settingsToggle">⚙</button>
+
+    <script src="script.js"></script>
+</body>
+</html> 
