@@ -378,6 +378,17 @@ function loadBookmarks() {
                 const parsedUrl = new URL(urlInput.value);
                 const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
                 
+                // Check for duplicates
+                const isDuplicate = bookmarks.some(bookmark => 
+                    bookmark.url === parsedUrl.href || 
+                    bookmark.name === nameInput.value.trim()
+                );
+                
+                if (isDuplicate) {
+                    alert('This bookmark already exists!');
+                    return;
+                }
+                
                 bookmarks.push({
                     name: nameInput.value.trim(),
                     url: parsedUrl.href
