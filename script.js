@@ -216,13 +216,53 @@ const DEFAULT_FALLBACK_ICON = 'data:image/svg+xml,' + encodeURIComponent(`
     </svg>
 `);
 
-// Add these helper functions at the top
+// Add these validation helpers
+function isValidBookmark(bookmark) {
+    try {
+        return (
+            bookmark &&
+            typeof bookmark === 'object' &&
+            typeof bookmark.name === 'string' &&
+            typeof bookmark.url === 'string' &&
+            bookmark.name.length > 0 &&
+            bookmark.name.length < 100 && // reasonable length limit
+            new URL(bookmark.url) // validates URL format
+        );
+    } catch {
+        return false;
+    }
+}
+
+function isValidBookmarksArray(bookmarks) {
+    return (
+        Array.isArray(bookmarks) &&
+        bookmarks.length <= 100 && // reasonable limit
+        bookmarks.every(isValidBookmark)
+    );
+}
+
+// Update safeGet to include validation
 function safeGet(key, defaultValue = null) {
     try {
         const value = localStorage.getItem(key);
-        return value ? JSON.parse(value) : defaultValue;
+        if (!value) return defaultValue;
+        
+        const parsed = JSON.parse(value);
+        
+        // Validate based on key type
+        switch(key) {
+            case 'bookmarks':
+                return isValidBookmarksArray(parsed) ? parsed : defaultValue;
+            case 'deletedDefaults':
+                return Array.isArray(parsed) ? parsed.filter(url => typeof url === 'string') : defaultValue;
+            case 'customSearchEngines':
+                // Add validation for custom search engines if needed
+                return typeof parsed === 'object' ? parsed : defaultValue;
+            default:
+                return parsed;
+        }
     } catch (error) {
-        console.error('LocalStorage read error:', error);
+        console.error('LocalStorage read/validation error:', error);
         return defaultValue;
     }
 }
@@ -248,6 +288,13 @@ function safeRemove(key) {
     }
 }
 
+// Add this sanitization helper at the top
+function sanitizeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 // Bookmark management
 function loadBookmarks() {
     const bookmarks = safeGet('bookmarks') || [];
@@ -258,8 +305,10 @@ function loadBookmarks() {
         const link = document.createElement('a');
         link.href = bookmark.url;
         const hostname = new URL(bookmark.url).hostname;
-        
         const faviconUrl = getBestIcon(bookmark.url);
+        
+        // Sanitize user-provided content
+        const sanitizedName = sanitizeHTML(bookmark.name);
         
         const content = `
             <div class="quick-link-menu">
@@ -271,10 +320,10 @@ function loadBookmarks() {
             </div>
             <div class="icon-wrapper">
                 <img src="${faviconUrl}" 
-                     alt="${bookmark.name}"
+                     alt="${sanitizedName}"
                      onerror="if(this.src !== '${DEFAULT_FALLBACK_ICON}') this.src='https://www.google.com/s2/favicons?domain=${hostname}&sz=64'; else this.onerror=null;">
             </div>
-            <span>${bookmark.name}</span>
+            <span>${sanitizedName}</span>
         `;
         link.innerHTML = content;
 
@@ -316,18 +365,26 @@ function loadBookmarks() {
             // Handle form submission
             editForm.onsubmit = (e) => {
                 e.preventDefault();
-                try {
-                    const parsedUrl = new URL(urlInput.value);
-                    bookmarks[index] = {
-                        name: nameInput.value.trim(),
-                        url: parsedUrl.href
-                    };
-                    if (!safeSet('bookmarks', bookmarks)) return;
-                    loadBookmarks();
-                    dialog.remove();
-                } catch {
-                    alert('Please enter a valid URL (include http:// or https://)');
+                const nameValidation = validateInput(nameInput, { maxLength: 50 });
+                if (!nameValidation.valid) {
+                    alert(nameValidation.error);
+                    return;
                 }
+
+                const urlValidation = validateInput(urlInput, { type: 'url' });
+                if (!urlValidation.valid) {
+                    alert(urlValidation.error);
+                    return;
+                }
+                
+                bookmarks[index] = {
+                    name: sanitizeHTML(nameValidation.value),
+                    url: urlValidation.value
+                };
+                
+                if (!safeSet('bookmarks', bookmarks)) return;
+                loadBookmarks();
+                dialog.remove();
             };
 
             // Handle cancel button
@@ -411,32 +468,46 @@ function loadBookmarks() {
         // Handle form submission
         addForm.onsubmit = (e) => {
             e.preventDefault();
-            try {
-                const parsedUrl = new URL(urlInput.value);
-                const bookmarks = safeGet('bookmarks') || [];
-                
-                // Check for duplicates
-                const isDuplicate = bookmarks.some(bookmark => 
-                    bookmark.url === parsedUrl.href || 
-                    bookmark.name === nameInput.value.trim()
-                );
-                
-                if (isDuplicate) {
-                    alert('This bookmark already exists!');
-                    return;
-                }
-                
-                bookmarks.push({
-                    name: nameInput.value.trim(),
-                    url: parsedUrl.href
-                });
-                
-                if (!safeSet('bookmarks', bookmarks)) return;
-                loadBookmarks();
-                dialog.remove();
-            } catch {
-                alert('Please enter a valid URL (include http:// or https://)');
+            const nameValidation = validateInput(nameInput, { maxLength: 50 });
+            if (!nameValidation.valid) {
+                alert(nameValidation.error);
+                return;
             }
+
+            const urlValidation = validateInput(urlInput, { type: 'url' });
+            if (!urlValidation.valid) {
+                alert(urlValidation.error);
+                return;
+            }
+            
+            const bookmarks = safeGet('bookmarks') || [];
+            
+            // Check total bookmarks limit
+            if (bookmarks.length >= 100) {
+                alert('Maximum number of bookmarks reached (100)');
+                return;
+            }
+
+            // Check for duplicates
+            const isDuplicate = bookmarks.some(bookmark => 
+                bookmark.url === urlValidation.value || 
+                bookmark.name === nameValidation.value
+            );
+            
+            if (isDuplicate) {
+                alert('This bookmark already exists!');
+                return;
+            }
+            
+            // Add sanitized values
+            bookmarks.push({
+                name: sanitizeHTML(nameValidation.value),
+                url: urlValidation.value
+            });
+            
+            if (!safeSet('bookmarks', bookmarks)) return;
+            loadBookmarks();
+            dialog.remove();
         };
 
         // Handle cancel button
@@ -1243,4 +1314,115 @@ function restoreDefaultBookmarks() {
     const allBookmarks = [...getDefaultBookmarks(), ...customBookmarks];
     if (!safeSet('bookmarks', allBookmarks)) return;
     loadBookmarks();
-} 
+}
+
+// Add this function to manage local URL settings
+function isLocalUrlAllowed() {
+    return safeGet('allowLocalUrls') || false;
+}
+
+// Update the validateInput function
+function validateInput(input, options = {}) {
+    const {
+        maxLength = 100,
+        minLength = 1,
+        type = 'text',
+        maxBookmarks = 100
+    } = options;
+
+    const value = input.value.trim();
+    
+    // Basic security checks
+    if (!value || typeof value !== 'string') {
+        return {
+            valid: false,
+            error: 'Invalid input'
+        };
+    }
+
+    // Prevent extremely long inputs that could cause DoS
+    if (value.length > 2000) {
+        return {
+            valid: false,
+            error: 'Input is too long'
+        };
+    }
+
+    // Check length
+    if (value.length < minLength || value.length > maxLength) {
+        return {
+            valid: false,
+            error: `Length must be between ${minLength} and ${maxLength} characters`
+        };
+    }
+
+    // URL-specific validation
+    if (type === 'url') {
+        try {
+            const url = new URL(value);
+            
+            // Allow file:// protocol if local URLs are enabled
+            const allowedProtocols = ['http:', 'https:'];
+            if (isLocalUrlAllowed()) {
+                allowedProtocols.push('file:');
+            }
+            
+            if (!allowedProtocols.includes(url.protocol)) {
+                return {
+                    valid: false,
+                    error: `Only ${allowedProtocols.join(', ')} protocols are allowed`
+                };
+            }
+
+            // Check for local URLs only if not allowed
+            if (!isLocalUrlAllowed()) {
+                const hostname = url.hostname.toLowerCase();
+                if (hostname === 'localhost' || 
+                    hostname.match(/^127\./) ||
+                    hostname.match(/^192\.168\./) ||
+                    hostname.match(/^10\./) ||
+                    hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./) ||
+                    hostname.endsWith('.local')) {
+                    return {
+                        valid: false,
+                        error: 'Local addresses are not allowed. Enable local URLs in settings to use them.'
+                    };
+                }
+            }
+        } catch {
+            return {
+                valid: false,
+                error: 'Please enter a valid URL'
+            };
+        }
+    }
+
+    // Name-specific validation for bookmarks
+    if (type === 'text') {
+        // Prevent HTML-like content
+        if (value.includes('<') || value.includes('>')) {
+            return {
+                valid: false,
+                error: 'HTML tags are not allowed in names'
+            };
+        }
+
+        // Prevent potentially malicious characters
+        if (/[<>{}()\[\]\\\/]/.test(value)) {
+            return {
+                valid: false,
+                error: 'Name contains invalid characters'
+            };
+        }
+    }
+
+    return { valid: true, value: value };
+}
+
+// Update the event listener for the local URLs toggle
+document.getElementById('allowLocalUrls').addEventListener('change', function(e) {
+    safeSet('allowLocalUrls', e.target.checked);
+});
+
+// Initialize the toggle state
+document.getElementById('allowLocalUrls').checked = isLocalUrlAllowed(); 

@@ -865,4 +865,27 @@ input[type="search"]:focus {
 .confirm-dialog .restore-btn:hover {
     background: rgba(33, 150, 243, 1);
     transform: translateY(-1px);
+}
+
+/* Add styles for settings options */
+.settings-option {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toggle-label {
+    display: flex;
+    flex-direction: column;
+    color: white;
+    gap: 0.3rem;
+    cursor: pointer;
+}
+
+.toggle-label .help-text {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+.toggle-label input[type="checkbox"] {
+    margin-right: 0.5rem;
 } 
