@@ -303,8 +303,11 @@ input[type="search"]:focus {
     gap: 1rem;
 }
 
-/* Update settings button style */
+/* Update settings button style to handle help text */
 .settings-btn {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
     background: rgba(255, 255, 255, 0.1);
     color: white;
     border: none;
@@ -315,6 +318,12 @@ input[type="search"]:focus {
     transition: all 0.2s;
     border: 1px solid rgba(255, 255, 255, 0.1);
     text-align: left;
+    width: 100%;
+}
+
+.settings-btn .help-text {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
 }
 
 .settings-btn:hover {

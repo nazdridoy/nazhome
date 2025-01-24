@@ -267,13 +267,51 @@ function safeGet(key, defaultValue = null) {
     }
 }
 
+// Add these storage management functions
+function getStorageInfo() {
+    let total = 0;
+    let items = {};
+    
+    try {
+        for (let key in localStorage) {
+            if (localStorage.hasOwnProperty(key)) {
+                const size = localStorage[key].length * 2; // in bytes
+                total += size;
+                items[key] = (size / 1024).toFixed(2) + ' KB';
+            }
+        }
+        
+        return {
+            total: (total / 1024).toFixed(2) + ' KB',
+            items: items,
+            percentUsed: ((total / 5242880) * 100).toFixed(1) + '%' // 5MB limit
+        };
+    } catch (error) {
+        console.error('Error calculating storage:', error);
+        return null;
+    }
+}
+
+// Update safeSet with better error handling
 function safeSet(key, value) {
     try {
         localStorage.setItem(key, JSON.stringify(value));
         return true;
     } catch (error) {
         console.error('LocalStorage write error:', error);
-        alert('Failed to save data. Your storage might be full. Please clear some space.');
+        
+        // Check if it's a quota error
+        if (error.name === 'QuotaExceededError' || error.code === 22) {
+            const storageInfo = getStorageInfo();
+            const message = `Storage is full (${storageInfo?.percentUsed} used).\n\n` +
+                          'Would you like to open storage settings to clear some space?';
+            
+            if (confirm(message)) {
+                showStorageManager();
+            }
+        } else {
+            alert('Failed to save data: ' + error.message);
+        }
         return false;
     }
 }
@@ -1425,4 +1463,96 @@ document.getElementById('allowLocalUrls').addEventListener('change', function(e)
 });
 
 // Initialize the toggle state
-document.getElementById('allowLocalUrls').checked = isLocalUrlAllowed(); 
+document.getElementById('allowLocalUrls').checked = isLocalUrlAllowed();
+
+// Add storage manager dialog
+function showStorageManager() {
+    const storageInfo = getStorageInfo();
+    const dialog = document.createElement('div');
+    dialog.className = 'edit-dialog';
+    dialog.innerHTML = `
+        <div class="edit-dialog-content storage-manager">
+            <h3>Storage Management</h3>
+            <div class="storage-info">
+                <p>Total Used: ${storageInfo.total} (${storageInfo.percentUsed})</p>
+                <div class="storage-items">
+                    ${Object.entries(storageInfo.items).map(([key, size]) => `
+                        <div class="storage-item">
+                            <span>${key}: ${size}</span>
+                            <button class="clear-btn" data-key="${key}">Clear</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="clear-all-btn">Clear All Data</button>
+                <button class="cancel-btn">Close</button>
+            </div>
+        </div>
+    `;
+
+    // Add event handlers
+    dialog.querySelector('.clear-all-btn').onclick = () => {
+        if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+            localStorage.clear();
+            location.reload();
+        }
+    };
+
+    dialog.querySelectorAll('.clear-btn').forEach(btn => {
+        btn.onclick = () => {
+            const key = btn.dataset.key;
+            if (confirm(`Clear ${key}? This cannot be undone.`)) {
+                localStorage.removeItem(key);
+                showStorageManager(); // Refresh the dialog
+            }
+        };
+    });
+
+    dialog.querySelector('.cancel-btn').onclick = () => dialog.remove();
+
+    document.body.appendChild(dialog);
+}
+
+// Add styles for the storage manager
+const style = document.createElement('style');
+style.textContent = `
+    .storage-manager {
+        max-width: 400px !important;
+    }
+    .storage-info {
+        margin: 1rem 0;
+        color: white;
+    }
+    .storage-items {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .storage-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+    .clear-btn {
+        padding: 0.2rem 0.5rem;
+        background: rgba(220, 53, 69, 0.9);
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+    }
+    .clear-btn:hover {
+        background: rgba(220, 53, 69, 1);
+    }
+`;
+document.head.appendChild(style);
+
+// Add event listener for the manage storage button
+document.getElementById('manageStorage').addEventListener('click', function() {
+    showStorageManager();
+}); 
