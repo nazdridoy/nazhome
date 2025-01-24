@@ -209,10 +209,10 @@ input[type="search"]:focus {
 /* Quick links grid */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(6, 90px);
+    grid-template-columns: repeat(auto-fill, minmax(min(90px, 100%), 1fr));
     gap: 1.2rem;
-    width: fit-content;
-    max-width: min(90%, 800px);
+    width: 90%;
+    max-width: 800px;
     justify-content: center;
     margin: 0 auto;
     padding: 1rem;
@@ -246,19 +246,6 @@ input[type="search"]:focus {
     font-size: 0.85rem; /* Increased from 0.75rem */
     text-shadow: 0 1px 3px rgba(0,0,0,0.7);
     text-align: center;
-}
-
-/* Add media queries for responsive grid */
-@media (max-width: 600px) {
-    .grid-container {
-        grid-template-columns: repeat(4, 90px);
-    }
-}
-
-@media (max-width: 400px) {
-    .grid-container {
-        grid-template-columns: repeat(3, 90px);
-    }
 }
 
 /* Settings panel */
