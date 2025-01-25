@@ -303,7 +303,7 @@ input[type="search"]:focus {
     gap: 1rem;
 }
 
-/* Update settings button style to handle help text */
+/* Update settings button styles */
 .settings-btn {
     display: flex;
     flex-direction: column;
@@ -321,15 +321,26 @@ input[type="search"]:focus {
     width: 100%;
 }
 
+.settings-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.toggle-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .settings-btn .help-text {
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.8rem;
 }
 
-.settings-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-1px);
-    border-color: rgba(255, 255, 255, 0.2);
+/* Remove old settings option styles */
+.settings-option,
+.toggle-label {
+    display: none;
 }
 
 /* Update the menu styles */
@@ -874,29 +885,6 @@ input[type="search"]:focus {
 .confirm-dialog .restore-btn:hover {
     background: rgba(33, 150, 243, 1);
     transform: translateY(-1px);
-}
-
-/* Add styles for settings options */
-.settings-option {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.toggle-label {
-    display: flex;
-    flex-direction: column;
-    color: white;
-    gap: 0.3rem;
-    cursor: pointer;
-}
-
-.toggle-label .help-text {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.8rem;
-}
-
-.toggle-label input[type="checkbox"] {
-    margin-right: 0.5rem;
 }
 
 /* Add styles for storage manager */

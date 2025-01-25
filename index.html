@@ -28,13 +28,13 @@
             <button id="closeSettings" class="close-btn" aria-label="Close settings">×</button>
         </div>
         <div class="settings-content">
-            <div class="settings-option">
-                <label class="toggle-label">
+            <button class="settings-btn">
+                <div class="toggle-wrapper">
+                    <span>Allow Local URLs</span>
                     <input type="checkbox" id="allowLocalUrls">
-                    Allow Local URLs
-                    <small class="help-text">Enable access to localhost, private IPs, and file:// URLs</small>
-                </label>
-            </div>
+                </div>
+                <small class="help-text">Enable access to localhost, private IPs, and file:// URLs</small>
+            </button>
             <button id="manageStorage" class="settings-btn">
                 Manage Storage
                 <small class="help-text">View and clear stored data</small>

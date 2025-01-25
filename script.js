@@ -220,10 +220,24 @@ function initializeBackground() {
     loadBackground();
 }
 
-// Function to get the best available icon
+// Update the getBestIcon function to handle local URLs
 function getBestIcon(url) {
     try {
-        const hostname = new URL(url).hostname;
+        const urlObj = new URL(url);
+        
+        // Return default icon for local/file URLs
+        if (urlObj.protocol === 'file:' || 
+            urlObj.hostname === 'localhost' || 
+            urlObj.hostname.match(/^127\./) ||
+            urlObj.hostname.match(/^192\.168\./) ||
+            urlObj.hostname.match(/^10\./) ||
+            urlObj.hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./) ||
+            urlObj.hostname.endsWith('.local')) {
+            return DEFAULT_FALLBACK_ICON;
+        }
+        
+        // For regular URLs, continue with normal icon resolution
+        const hostname = urlObj.hostname;
         
         // 1. Check our mapped icons first
         if (ICON_MAP[hostname]) {
@@ -234,8 +248,8 @@ function getBestIcon(url) {
         return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
         
     } catch (error) {
-        // Fallback to a default icon
-        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23555"/></svg>';
+        // Fallback to default icon
+        return DEFAULT_FALLBACK_ICON;
     }
 }
 
