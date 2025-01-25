@@ -133,9 +133,9 @@ async function updateBackgroundCache() {
     const newImage = await fetchNewBackgroundImage();
     
     if (newImage) {
-        // Keep the four most recent images
+        // Keep the three most recent images
         cache.push(newImage);
-        while (cache.length > 4) {  // Changed from 2 to 4
+        while (cache.length > 3) {  // Changed from 4 to 3
             cache.shift(); // Remove oldest image
         }
         setBackgroundCache(cache);
@@ -155,7 +155,7 @@ function rotateBackground() {
     document.body.style.backgroundImage = `url('${rotatedCache[0]}')`;
 }
 
-// Update loadBackground function to handle offline scenarios better
+// Update loadBackground function to prioritize filling the cache
 function loadBackground() {
     const cache = getBackgroundCache();
     
@@ -164,37 +164,43 @@ function loadBackground() {
         const oldestImage = cache[0];
         document.body.style.backgroundImage = `url('${oldestImage}')`;
         
-        // After page loads, try to fetch new image
+        // After page loads, check if we need to fill cache or update
         window.addEventListener('load', () => {
             setTimeout(async () => {
-                const newImage = await fetchNewBackgroundImage();
-                if (newImage) {
-                    // Keep up to 4 images in cache
-                    const newCache = [...cache.slice(1), newImage];
-                    while (newCache.length > 4) {
-                        newCache.shift();
+                if (cache.length < 3) {
+                    // Still filling up cache
+                    const newImage = await fetchNewBackgroundImage();
+                    if (newImage) {
+                        setBackgroundCache([...cache, newImage]);
                     }
-                    setBackgroundCache(newCache);
                 } else {
-                    // If we couldn't fetch a new image, rotate through the cache
-                    rotateBackground();
+                    // Cache is full, update oldest image
+                    const newImage = await fetchNewBackgroundImage();
+                    if (newImage) {
+                        const newCache = [...cache.slice(1), newImage];
+                        setBackgroundCache(newCache);
+                    } else {
+                        // If fetch fails, rotate through cache
+                        rotateBackground();
+                    }
                 }
             }, 1000);
         });
     } else {
-        // No cache, fetch one image and use it
+        // No cache, start fresh
         fetchNewBackgroundImage().then(base64Image => {
             if (base64Image) {
                 document.body.style.backgroundImage = `url('${base64Image}')`;
                 setBackgroundCache([base64Image]);
                 
-                // Fetch three more for next time
+                // Fill remaining cache slots
                 setTimeout(async () => {
-                    for (let i = 0; i < 3; i++) {
+                    const cache = getBackgroundCache();
+                    while (cache.length < 3) {
                         const nextImage = await fetchNewBackgroundImage();
                         if (nextImage) {
-                            const currentCache = getBackgroundCache();
-                            setBackgroundCache([...currentCache, nextImage].slice(-4));
+                            cache.push(nextImage);
+                            setBackgroundCache(cache);
                         }
                         // Add small delay between fetches
                         await new Promise(resolve => setTimeout(resolve, 500));
