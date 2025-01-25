@@ -1497,8 +1497,14 @@ document.getElementById('allowLocalUrls').addEventListener('change', function(e)
 // Initialize the toggle state
 document.getElementById('allowLocalUrls').checked = isLocalUrlAllowed();
 
-// Add storage manager dialog
+// Update the showStorageManager function
 function showStorageManager() {
+    // Remove any existing storage manager dialog first
+    const existingDialog = document.querySelector('.storage-manager')?.closest('.edit-dialog');
+    if (existingDialog) {
+        existingDialog.remove();
+    }
+
     const storageInfo = getStorageInfo();
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
