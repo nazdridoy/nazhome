@@ -133,15 +133,29 @@ async function updateBackgroundCache() {
     const newImage = await fetchNewBackgroundImage();
     
     if (newImage) {
-        // Keep only the two most recent images
+        // Keep the four most recent images
         cache.push(newImage);
-        if (cache.length > 2) {
+        while (cache.length > 4) {  // Changed from 2 to 4
             cache.shift(); // Remove oldest image
         }
         setBackgroundCache(cache);
     }
 }
 
+// Add a function to rotate through cached backgrounds
+function rotateBackground() {
+    const cache = getBackgroundCache();
+    if (cache.length <= 1) return; // Nothing to rotate if only one or no images
+    
+    // Move the first (currently displayed) image to the end
+    const rotatedCache = [...cache.slice(1), cache[0]];
+    setBackgroundCache(rotatedCache);
+    
+    // Display the new first image
+    document.body.style.backgroundImage = `url('${rotatedCache[0]}')`;
+}
+
+// Update loadBackground function to handle offline scenarios better
 function loadBackground() {
     const cache = getBackgroundCache();
     
@@ -150,13 +164,20 @@ function loadBackground() {
         const oldestImage = cache[0];
         document.body.style.backgroundImage = `url('${oldestImage}')`;
         
-        // After page loads, fetch one new image for cache
+        // After page loads, try to fetch new image
         window.addEventListener('load', () => {
             setTimeout(async () => {
                 const newImage = await fetchNewBackgroundImage();
                 if (newImage) {
-                    const newCache = [cache[1], newImage]; // Keep the newer cached image and add new one
+                    // Keep up to 4 images in cache
+                    const newCache = [...cache.slice(1), newImage];
+                    while (newCache.length > 4) {
+                        newCache.shift();
+                    }
                     setBackgroundCache(newCache);
+                } else {
+                    // If we couldn't fetch a new image, rotate through the cache
+                    rotateBackground();
                 }
             }, 1000);
         });
@@ -167,11 +188,16 @@ function loadBackground() {
                 document.body.style.backgroundImage = `url('${base64Image}')`;
                 setBackgroundCache([base64Image]);
                 
-                // Fetch one more for next time
+                // Fetch three more for next time
                 setTimeout(async () => {
-                    const nextImage = await fetchNewBackgroundImage();
-                    if (nextImage) {
-                        setBackgroundCache([base64Image, nextImage]);
+                    for (let i = 0; i < 3; i++) {
+                        const nextImage = await fetchNewBackgroundImage();
+                        if (nextImage) {
+                            const currentCache = getBackgroundCache();
+                            setBackgroundCache([...currentCache, nextImage].slice(-4));
+                        }
+                        // Add small delay between fetches
+                        await new Promise(resolve => setTimeout(resolve, 500));
                     }
                 }, 1000);
             }
@@ -1555,4 +1581,19 @@ document.head.appendChild(style);
 // Add event listener for the manage storage button
 document.getElementById('manageStorage').addEventListener('click', function() {
     showStorageManager();
-}); 
+});
+
+// Add automatic background rotation every hour if offline
+setInterval(async () => {
+    const online = navigator.onLine;
+    if (!online) {
+        rotateBackground();
+    } else {
+        // Try to fetch new image if online
+        const newImage = await fetchNewBackgroundImage();
+        if (!newImage) {
+            // If fetch fails, rotate through cache
+            rotateBackground();
+        }
+    }
+}, 3600000); // Every hour 
