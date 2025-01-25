@@ -13,6 +13,7 @@ const ICON_MAP = {
     'notion.so': 'https://www.notion.so/images/logo-ios.png',
     'www.notion.so': 'https://www.notion.so/images/logo-ios.png',
     'discord.com': 'https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5493894cf60b300587_icon_clyde_white_RGB.svg',
+    'discord.com/channels/@me': 'https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5493894cf60b300587_icon_clyde_white_RGB.svg',
     'slack.com': 'https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png',
     
     // Dev
@@ -642,7 +643,7 @@ function getDefaultBookmarks() {
     return [
         { name: 'Google', url: 'https://www.google.com' },
         { name: 'YouTube', url: 'https://youtube.com' },
-        { name: 'Reddit', url: 'https://reddit.com' }
+        { name: 'Discord', url: 'https://discord.com/channels/@me' }
     ];
 }
 
