@@ -1,26 +1,3 @@
-// Expand the icon mapping with more popular sites
-const ICON_MAP = {
-    // Social & Media
-    'github.com': 'https://github.githubassets.com/favicons/favicon-dark.svg',
-    'www.google.com': 'https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png',
-    'youtube.com': 'https://www.youtube.com/s/desktop/12d6b690/img/favicon_144x144.png',
-    'www.youtube.com': 'https://www.youtube.com/s/desktop/12d6b690/img/favicon_144x144.png',
-    'twitter.com': 'https://abs.twimg.com/responsive-web/client-web/icon-svg.168b89d5.svg',
-    'www.facebook.com': 'https://static.xx.fbcdn.net/rsrc.php/yD/r/d4ZIVX-5C-b.ico',
-    'linkedin.com': 'https://static.licdn.com/aero-v1/sc/h/al2o9zrvru7aqj8e1x2rzsrca',
-    
-    // Productivity
-    'notion.so': 'https://www.notion.so/images/logo-ios.png',
-    'www.notion.so': 'https://www.notion.so/images/logo-ios.png',
-    'discord.com': 'https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5493894cf60b300587_icon_clyde_white_RGB.svg',
-    'discord.com/channels/@me': 'https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5493894cf60b300587_icon_clyde_white_RGB.svg',
-    'slack.com': 'https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_256.png',
-    
-    // Dev
-    'stackoverflow.com': 'https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon.png',
-    'www.figma.com': 'https://static.figma.com/app/icon/1/icon-192.png',
-};
-
 // Search engines configuration
 const searchEngines = {
     google: 'https://www.google.com/search?q=',
@@ -248,7 +225,7 @@ function initializeBackground() {
     loadBackground();
 }
 
-// Update the getBestIcon function to handle local URLs
+// Update getBestIcon function to use DuckDuckGo's favicon service
 function getBestIcon(url) {
     try {
         const urlObj = new URL(url);
@@ -264,16 +241,8 @@ function getBestIcon(url) {
             return DEFAULT_FALLBACK_ICON;
         }
         
-        // For regular URLs, continue with normal icon resolution
-        const hostname = urlObj.hostname;
-        
-        // 1. Check our mapped icons first
-        if (ICON_MAP[hostname]) {
-            return ICON_MAP[hostname];
-        }
-        
-        // 2. Use Google's favicon service directly (faster)
-        return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
+        // Use DuckDuckGo's favicon service
+        return `https://icons.duckduckgo.com/ip3/${urlObj.hostname}.ico`;
         
     } catch (error) {
         // Fallback to default icon
