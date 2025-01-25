@@ -1540,44 +1540,6 @@ function showStorageManager() {
     document.body.appendChild(dialog);
 }
 
-// Add styles for the storage manager
-const style = document.createElement('style');
-style.textContent = `
-    .storage-manager {
-        max-width: 400px !important;
-    }
-    .storage-info {
-        margin: 1rem 0;
-        color: white;
-    }
-    .storage-items {
-        margin-top: 0.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    .storage-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
-    }
-    .clear-btn {
-        padding: 0.2rem 0.5rem;
-        background: rgba(220, 53, 69, 0.9);
-        border: none;
-        border-radius: 4px;
-        color: white;
-        cursor: pointer;
-    }
-    .clear-btn:hover {
-        background: rgba(220, 53, 69, 1);
-    }
-`;
-document.head.appendChild(style);
-
 // Add event listener for the manage storage button
 document.getElementById('manageStorage').addEventListener('click', function() {
     showStorageManager();
