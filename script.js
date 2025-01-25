@@ -79,7 +79,18 @@ function getBackgroundCache() {
 }
 
 function setBackgroundCache(cache) {
-    localStorage.setItem('backgroundCache', JSON.stringify(cache));
+    const cacheWithTimestamps = cache.map(item => {
+        // If item is already in the new format, keep it as is
+        if (typeof item === 'object' && item.image) {
+            return item;
+        }
+        // Convert old format (just image string) to new format
+        return {
+            image: item,
+            timestamp: Date.now()
+        };
+    });
+    localStorage.setItem('backgroundCache', JSON.stringify(cacheWithTimestamps));
 }
 
 async function imageToBase64(url) {
@@ -147,12 +158,15 @@ function rotateBackground() {
     const cache = getBackgroundCache();
     if (cache.length <= 1) return; // Nothing to rotate if only one or no images
     
-    // Move the first (currently displayed) image to the end
-    const rotatedCache = [...cache.slice(1), cache[0]];
-    setBackgroundCache(rotatedCache);
+    // Sort by timestamp to ensure proper rotation
+    const sortedCache = [...cache].sort((a, b) => a.timestamp - b.timestamp);
+    const rotatedCache = [...sortedCache.slice(1), {
+        ...sortedCache[0],
+        timestamp: Date.now() // Update timestamp when rotated
+    }];
     
-    // Display the new first image
-    document.body.style.backgroundImage = `url('${rotatedCache[0]}')`;
+    setBackgroundCache(rotatedCache);
+    document.body.style.backgroundImage = `url('${rotatedCache[0].image}')`;
 }
 
 // Update loadBackground function to prioritize filling the cache
@@ -161,7 +175,7 @@ function loadBackground() {
     
     if (cache.length > 0) {
         // Use the oldest cached image
-        const oldestImage = cache[0];
+        const oldestImage = cache[0].image;
         document.body.style.backgroundImage = `url('${oldestImage}')`;
         
         // After page loads, check if we need to fill cache or update
@@ -171,16 +185,24 @@ function loadBackground() {
                     // Still filling up cache
                     const newImage = await fetchNewBackgroundImage();
                     if (newImage) {
-                        setBackgroundCache([...cache, newImage]);
+                        setBackgroundCache([...cache, {
+                            image: newImage,
+                            timestamp: Date.now()
+                        }]);
                     }
                 } else {
-                    // Cache is full, update oldest image
+                    // Find the oldest image by timestamp
+                    const oldestTimestamp = Math.min(...cache.map(item => item.timestamp));
                     const newImage = await fetchNewBackgroundImage();
                     if (newImage) {
-                        const newCache = [...cache.slice(1), newImage];
+                        const newCache = cache
+                            .filter(item => item.timestamp !== oldestTimestamp)
+                            .concat({
+                                image: newImage,
+                                timestamp: Date.now()
+                            });
                         setBackgroundCache(newCache);
                     } else {
-                        // If fetch fails, rotate through cache
                         rotateBackground();
                     }
                 }
@@ -191,7 +213,10 @@ function loadBackground() {
         fetchNewBackgroundImage().then(base64Image => {
             if (base64Image) {
                 document.body.style.backgroundImage = `url('${base64Image}')`;
-                setBackgroundCache([base64Image]);
+                setBackgroundCache([{
+                    image: base64Image,
+                    timestamp: Date.now()
+                }]);
                 
                 // Fill remaining cache slots
                 setTimeout(async () => {
@@ -199,10 +224,12 @@ function loadBackground() {
                     while (cache.length < 3) {
                         const nextImage = await fetchNewBackgroundImage();
                         if (nextImage) {
-                            cache.push(nextImage);
+                            cache.push({
+                                image: nextImage,
+                                timestamp: Date.now()
+                            });
                             setBackgroundCache(cache);
                         }
-                        // Add small delay between fetches
                         await new Promise(resolve => setTimeout(resolve, 500));
                     }
                 }, 1000);
