@@ -1869,10 +1869,20 @@ class Calculator {
         this.updateMode();
     }
 
+    formatDisplayValue(value) {
+        // Replace Math.PI with π for display
+        return value.replace(/Math\.PI/g, 'π');
+    }
+
     updateDisplay() {
         let displayText = this.currentCalculation;
         if (this.pendingFunction) {
-            displayText = `${this.pendingFunction}(${this.pendingValue || ''})`;
+            // Format the pending value to show π instead of Math.PI
+            const formattedValue = this.formatDisplayValue(this.pendingValue);
+            displayText = `${this.pendingFunction}(${formattedValue})`;
+        } else {
+            // Format the current calculation to show π instead of Math.PI
+            displayText = this.formatDisplayValue(displayText);
         }
         this.calculation.textContent = displayText;
         this.result.textContent = this.lastResult;
@@ -1894,56 +1904,74 @@ class Calculator {
             return;
         }
 
-        const value = parseFloat(this.pendingValue);
-        if (isNaN(value)) {
+        let value;
+        try {
+            // If the pending value contains Math.PI, evaluate it first
+            if (this.pendingValue.includes('Math.PI')) {
+                value = Function('"use strict";return (' + this.pendingValue + ')')();
+            } else {
+                value = parseFloat(this.pendingValue);
+            }
+
+            if (isNaN(value)) {
+                this.lastResult = 'Error';
+                this.pendingFunction = null;
+                this.pendingValue = '';
+                return;
+            }
+
+            let result;
+            switch (this.pendingFunction) {
+                case 'sin':
+                    // If value contains Math.PI, don't convert to radians
+                    result = this.pendingValue.includes('Math.PI') ? 
+                        Math.sin(value) : 
+                        Math.sin(value * Math.PI / 180);
+                    break;
+                case 'cos':
+                    result = this.pendingValue.includes('Math.PI') ? 
+                        Math.cos(value) : 
+                        Math.cos(value * Math.PI / 180);
+                    break;
+                case 'tan':
+                    result = this.pendingValue.includes('Math.PI') ? 
+                        Math.tan(value) : 
+                        Math.tan(value * Math.PI / 180);
+                    break;
+                case 'sqrt':
+                    result = Math.sqrt(value);
+                    break;
+                case 'log':
+                    result = Math.log10(value);
+                    break;
+                case 'ln':
+                    result = Math.log(value);
+                    break;
+            }
+
+            if (Math.abs(result) < 1e-10) {
+                result = 0;
+            }
+
+            this.lastResult = formatNumber(result);
+            this.lastAnswer = this.lastResult;
+            this.currentCalculation = this.lastResult;  // Set currentCalculation to the result
+            this.pendingFunction = null;
+            this.pendingValue = '';
+            this.updateDisplay();
+        } catch (e) {
             this.lastResult = 'Error';
             this.pendingFunction = null;
             this.pendingValue = '';
-            return;
+            this.updateDisplay();
+            console.error('Error in applyPendingFunction:', e);
         }
-
-        let result;
-        switch (this.pendingFunction) {
-            case 'sin':
-                result = Math.sin(value * Math.PI / 180);
-                break;
-            case 'cos':
-                result = Math.cos(value * Math.PI / 180);
-                break;
-            case 'tan':
-                result = Math.tan(value * Math.PI / 180);
-                break;
-            case 'sqrt':
-                result = Math.sqrt(value);
-                break;
-            case 'log':
-                result = Math.log10(value);
-                break;
-            case 'ln':
-                result = Math.log(value);
-                break;
-        }
-
-        if (Math.abs(result) < 1e-10) {
-            result = 0;
-        }
-
-        this.lastResult = formatNumber(result);
-        this.lastAnswer = this.lastResult;
-        this.currentCalculation = this.lastResult;  // Set currentCalculation to the result
-        this.pendingFunction = null;
-        this.pendingValue = '';
-        this.updateDisplay();
     }
 
     appendOperator(operator) {
         // If starting a new operation after equals, use the last answer
         if (this.currentCalculation === '' && this.lastAnswer !== '0') {
             this.currentCalculation = parseFormattedNumber(this.lastAnswer);
-        }
-
-        if (this.pendingFunction) {
-            this.applyPendingFunction();
         }
 
         // Handle special operators
@@ -1955,6 +1983,12 @@ class Calculator {
                 operator = '/';
                 break;
             case 'π':
+                // Don't override pending function when adding π
+                if (this.pendingFunction) {
+                    this.pendingValue += 'Math.PI';
+                    this.updateDisplay();
+                    return;
+                }
                 operator = 'Math.PI';
                 break;
             case '^':
@@ -1991,20 +2025,38 @@ class Calculator {
                 this.updateDisplay();
                 return;
         }
-        this.currentCalculation += operator;
+
+        if (this.pendingFunction) {
+            this.pendingValue += operator;
+        } else {
+            this.currentCalculation += operator;
+        }
         this.updateDisplay();
     }
 
     compute() {
         if (this.pendingFunction) {
             this.applyPendingFunction();
-            return;  // Add this line to prevent double computation
+            return;
         }
 
         try {
             let computation = this.currentCalculation
                 .replace(/×/g, '*')
                 .replace(/÷/g, '/');
+            
+            // First handle π symbol
+            computation = computation.replace(/π/g, 'Math.PI');
+            
+            // Handle trig functions with proper radian handling
+            computation = computation.replace(/(sin|cos|tan)\(([^)]+)\)/g, (match, func, arg) => {
+                // If the argument contains Math.PI, don't convert to degrees
+                if (arg.includes('Math.PI')) {
+                    return `Math.${func}(${arg})`;
+                }
+                // Otherwise, convert to radians
+                return `Math.${func}((${arg}) * Math.PI / 180)`;
+            });
             
             // Parse any formatted numbers in the calculation
             computation = computation.split(/([+\-*/()])/).map(part => {
@@ -2023,9 +2075,11 @@ class Calculator {
             
             this.lastResult = formatNumber(result);
             this.lastAnswer = this.lastResult;
-            this.currentCalculation = '';
+            this.currentCalculation = expression;
+            this.expressionInput.value = '';
         } catch (e) {
-            this.lastResult = this.currentCalculation || '0';
+            this.lastResult = 'Error';
+            console.error('Calculation error:', e);
         }
         this.updateDisplay();
     }
@@ -2073,14 +2127,21 @@ class Calculator {
             parsed = parsed
                 .replace(/\^/g, '**')
                 .replace(/(\d+e[+-]\d+)/g, match => parseFormattedNumber(match))
-                .replace(/(?<!Math\.\w+)(\d+)\s*\(/g, '$1*(')  // Exclude Math functions from this replacement
+                .replace(/(?<!Math\.\w+)(\d+)\s*\(/g, '$1*(')
                 .replace(/\)\s*(\d+)/g, ')*$1')
                 .replace(/(\d+)\s*π/g, '$1*Math.PI')
                 .replace(/π\s*(\d+)/g, 'Math.PI*$1')
                 .replace(/\)\s*\(/g, ')*(');
 
-            // Add *Math.PI/180 for trig functions to convert degrees to radians
-            parsed = parsed.replace(/Math\.(sin|cos|tan)\(([^)]+)\)/g, 'Math.$1(($2) * Math.PI / 180)');
+            // Add *Math.PI/180 for trig functions ONLY when the argument doesn't contain Math.PI
+            parsed = parsed.replace(/Math\.(sin|cos|tan)\(([^)]+)\)/g, (match, func, arg) => {
+                // If the argument contains Math.PI, don't convert to degrees
+                if (arg.includes('Math.PI')) {
+                    return `Math.${func}(${arg})`;
+                }
+                // Otherwise, convert to radians
+                return `Math.${func}((${arg}) * Math.PI / 180)`;
+            });
 
             // For debugging
             console.log('Parsed expression:', parsed);
