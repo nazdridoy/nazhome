@@ -1591,167 +1591,93 @@ setInterval(async () => {
 // Add these functions for data export/import
 function exportUserData() {
     const data = {
-        version: 1,  // for future compatibility
-        timestamp: Date.now(),
         bookmarks: safeGet('bookmarks') || [],
+        deletedDefaults: safeGet('deletedDefaults') || [],
         customSearchEngines: safeGet('customSearchEngines') || {},
         settings: {
-            allowLocalUrls: safeGet('allowLocalUrls') || false,
-            lastSelectedEngine: localStorage.getItem('lastSelectedEngine') || 'google',
-            deletedDefaults: safeGet('deletedDefaults') || [],
-            weather: {
-                city: localStorage.getItem('weatherCity') || 'Dhaka',
-                country: localStorage.getItem('weatherCountry') || 'BD'
-            },
-            widgets: {
-                calculator: {
-                    enabled: localStorage.getItem('calculatorWidget') === 'true',
-                    mode: localStorage.getItem('calculatorMode') || 'basic'
-                },
-                calendar: {
-                    enabled: localStorage.getItem('calendarWidget') === 'true'
-                }
-            }
+            hideAddButton: safeGet('hideAddButton') || false,
+            allowLocalUrls: localStorage.getItem('allowLocalUrls') === 'true',
+            weatherWidget: safeGet('weatherWidget') !== false,
+            timeWidget: safeGet('timeWidget') !== false,
+            calendarWidget: localStorage.getItem('calendarWidget') === 'true',
+            calculatorWidget: localStorage.getItem('calculatorWidget') === 'true'
+        },
+        weather: {
+            city: localStorage.getItem('weatherCity') || 'Dhaka',
+            country: localStorage.getItem('weatherCountry') || 'BD'
         }
     };
 
-    // Create and download the file
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `nazhome-backup-${new Date().toISOString().split('T')[0]}.json`;
+    const timestamp = new Date().toISOString().split('.')[0].replace(/[:]/g, '-');
+    a.download = `nazhome_backup_${timestamp}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
 
-function importUserData(file) {
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            
-            // Validate the data structure
-            if (!data.version || !data.timestamp) {
-                throw new Error('Invalid backup file format');
-            }
-
-            // Show confirmation dialog with details
-            const timestamp = new Date(data.timestamp).toLocaleString();
-            const message = `Import data from ${timestamp}?\n\nThis will replace your current:\n` +
-                          `- ${data.bookmarks.length} bookmarks\n` +
-                          `- ${Object.keys(data.customSearchEngines).length} custom search engines\n` +
-                          `- Weather settings (${data.settings.weather?.city || 'Default'}, ${data.settings.weather?.country || 'BD'})\n` +
-                          `- Widget configurations\n` +
-                          `\nExisting data will be backed up and can be restored.`;
-
-            createConfirmDialog(message, () => {
-                // Backup current data first
-                const currentData = {
-                    version: 1,
-                    timestamp: Date.now(),
-                    bookmarks: safeGet('bookmarks') || [],
-                    customSearchEngines: safeGet('customSearchEngines') || {},
-                    settings: {
-                        allowLocalUrls: safeGet('allowLocalUrls') || false,
-                        lastSelectedEngine: localStorage.getItem('lastSelectedEngine') || 'google',
-                        deletedDefaults: safeGet('deletedDefaults') || [],
-                        weather: {
-                            city: localStorage.getItem('weatherCity') || 'Dhaka',
-                            country: localStorage.getItem('weatherCountry') || 'BD'
-                        },
-                        widgets: {
-                            calculator: {
-                                enabled: localStorage.getItem('calculatorWidget') === 'true',
-                                mode: localStorage.getItem('calculatorMode') || 'basic'
-                            },
-                            calendar: {
-                                enabled: localStorage.getItem('calendarWidget') === 'true'
-                            }
-                        }
-                    }
-                };
-                
-                safeSet('dataBackup', currentData);
-
-                // Import new data
-                safeSet('bookmarks', data.bookmarks);
-                safeSet('customSearchEngines', data.customSearchEngines);
-                safeSet('allowLocalUrls', data.settings.allowLocalUrls);
-                safeSet('deletedDefaults', data.settings.deletedDefaults);
-                localStorage.setItem('lastSelectedEngine', data.settings.lastSelectedEngine);
-
-                // Import weather settings
-                if (data.settings.weather) {
-                    localStorage.setItem('weatherCity', data.settings.weather.city);
-                    localStorage.setItem('weatherCountry', data.settings.weather.country);
-                }
-
-                // Import widget settings
-                if (data.settings.widgets) {
-                    // Calculator widget settings
-                    if (data.settings.widgets.calculator) {
-                        localStorage.setItem('calculatorWidget', 
-                            data.settings.widgets.calculator.enabled);
-                        localStorage.setItem('calculatorMode', 
-                            data.settings.widgets.calculator.mode || 'basic');
-                    }
-
-                    // Calendar widget settings
-                    if (data.settings.widgets.calendar) {
-                        localStorage.setItem('calendarWidget', 
-                            data.settings.widgets.calendar.enabled);
-                    }
-                }
-
-                // Refresh the UI
-                loadBookmarks();
-                loadCustomEngines();
-                handleEngineSelection(data.settings.lastSelectedEngine);
-                document.getElementById('allowLocalUrls').checked = data.settings.allowLocalUrls;
-                
-                // Update weather UI and refresh weather data
-                if (data.settings.weather) {
-                    document.getElementById('weatherCity').value = data.settings.weather.city;
-                    document.getElementById('weatherCountry').value = data.settings.weather.country;
-                    updateWeather();
-                }
-
-                // Update widget states
-                if (data.settings.widgets) {
-                    if (data.settings.widgets.calculator) {
-                        const calcWidget = document.getElementById('calculatorWidget');
-                        calcWidget.checked = data.settings.widgets.calculator.enabled;
-                        document.getElementById('calculator-widget').style.display = 
-                            calcWidget.checked ? 'block' : 'none';
-                    }
-
-                    if (data.settings.widgets.calendar) {
-                        const calWidget = document.getElementById('calendarWidget');
-                        calWidget.checked = data.settings.widgets.calendar.enabled;
-                        document.getElementById('calendar-widget').style.display = 
-                            calWidget.checked ? 'block' : 'none';
-                    }
-                }
-
-                // Show success message
-                createConfirmDialog('Data imported successfully! Reload the page to see all changes.', 
-                    () => location.reload(), 
-                    'Reload'
-                );
-
-            }, 'Import');
-
-        } catch (error) {
-            console.error('Import error:', error);
-            alert('Error importing data: ' + error.message);
+async function importUserData(file) {
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        // Import bookmarks
+        if (Array.isArray(data.bookmarks)) {
+            safeSet('bookmarks', data.bookmarks);
         }
-    };
+        
+        // Import deleted defaults
+        if (Array.isArray(data.deletedDefaults)) {
+            safeSet('deletedDefaults', data.deletedDefaults);
+        }
+        
+        // Import custom search engines
+        if (data.customSearchEngines && typeof data.customSearchEngines === 'object') {
+            safeSet('customSearchEngines', data.customSearchEngines);
+        }
+        
+        // Import settings
+        if (data.settings) {
+            if (typeof data.settings.hideAddButton === 'boolean') {
+                safeSet('hideAddButton', data.settings.hideAddButton);
+            }
+            if (typeof data.settings.allowLocalUrls === 'boolean') {
+                localStorage.setItem('allowLocalUrls', data.settings.allowLocalUrls);
+            }
+            if (typeof data.settings.weatherWidget === 'boolean') {
+                safeSet('weatherWidget', data.settings.weatherWidget);
+            }
+            if (typeof data.settings.timeWidget === 'boolean') {
+                safeSet('timeWidget', data.settings.timeWidget);
+            }
+            if (typeof data.settings.calendarWidget === 'boolean') {
+                localStorage.setItem('calendarWidget', data.settings.calendarWidget);
+            }
+            if (typeof data.settings.calculatorWidget === 'boolean') {
+                localStorage.setItem('calculatorWidget', data.settings.calculatorWidget);
+            }
+        }
+        
+        // Import weather settings
+        if (data.weather) {
+            if (data.weather.city) {
+                localStorage.setItem('weatherCity', data.weather.city);
+            }
+            if (data.weather.country) {
+                localStorage.setItem('weatherCountry', data.weather.country);
+            }
+        }
 
-    reader.readAsText(file);
+        // Reload the page to apply all settings
+        window.location.reload();
+    } catch (error) {
+        console.error('Failed to import data:', error);
+        alert('Failed to import data. Please check if the file is valid.');
+    }
 }
 
 // Add event listeners for the new buttons
