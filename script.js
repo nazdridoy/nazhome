@@ -2143,7 +2143,7 @@ class Calculator {
 
             this.lastResult = formatNumber(result);
             this.lastAnswer = this.lastResult;
-            this.currentCalculation = expression;
+            this.currentCalculation = this.lastResult;
             this.expressionInput.value = '';
         } catch (e) {
             this.lastResult = 'Error';
@@ -2223,7 +2223,7 @@ class Calculator {
 
             this.lastResult = formatNumber(result);
             this.lastAnswer = this.lastResult;
-            this.currentCalculation = expression;
+            this.currentCalculation = this.lastResult;
             this.expressionInput.value = '';
         } catch (e) {
             this.lastResult = 'Error';
