@@ -1487,7 +1487,11 @@ function exportUserData() {
         settings: {
             allowLocalUrls: safeGet('allowLocalUrls') || false,
             lastSelectedEngine: localStorage.getItem('lastSelectedEngine') || 'google',
-            deletedDefaults: safeGet('deletedDefaults') || []
+            deletedDefaults: safeGet('deletedDefaults') || [],
+            weather: {
+                city: localStorage.getItem('weatherCity') || 'Dhaka',
+                country: localStorage.getItem('weatherCountry') || 'BD'
+            }
         }
     };
 
@@ -1520,6 +1524,7 @@ function importUserData(file) {
             const message = `Import data from ${timestamp}?\n\nThis will replace your current:\n` +
                           `- ${data.bookmarks.length} bookmarks\n` +
                           `- ${Object.keys(data.customSearchEngines).length} custom search engines\n` +
+                          `- Weather settings (${data.settings.weather?.city || 'Default'}, ${data.settings.weather?.country || 'BD'})\n` +
                           `\nExisting data will be backed up and can be restored.`;
 
             createConfirmDialog(message, () => {
@@ -1532,7 +1537,11 @@ function importUserData(file) {
                     settings: {
                         allowLocalUrls: safeGet('allowLocalUrls') || false,
                         lastSelectedEngine: localStorage.getItem('lastSelectedEngine') || 'google',
-                        deletedDefaults: safeGet('deletedDefaults') || []
+                        deletedDefaults: safeGet('deletedDefaults') || [],
+                        weather: {
+                            city: localStorage.getItem('weatherCity') || 'Dhaka',
+                            country: localStorage.getItem('weatherCountry') || 'BD'
+                        }
                     }
                 };
                 
@@ -1545,11 +1554,24 @@ function importUserData(file) {
                 safeSet('deletedDefaults', data.settings.deletedDefaults);
                 localStorage.setItem('lastSelectedEngine', data.settings.lastSelectedEngine);
 
+                // Import weather settings
+                if (data.settings.weather) {
+                    localStorage.setItem('weatherCity', data.settings.weather.city);
+                    localStorage.setItem('weatherCountry', data.settings.weather.country);
+                }
+
                 // Refresh the UI
                 loadBookmarks();
                 loadCustomEngines();
                 handleEngineSelection(data.settings.lastSelectedEngine);
                 document.getElementById('allowLocalUrls').checked = data.settings.allowLocalUrls;
+                
+                // Update weather UI and refresh weather data
+                if (data.settings.weather) {
+                    document.getElementById('weatherCity').value = data.settings.weather.city;
+                    document.getElementById('weatherCountry').value = data.settings.weather.country;
+                    updateWeather();
+                }
 
                 // Show success message
                 createConfirmDialog('Data imported successfully! Reload the page to see all changes.', 
