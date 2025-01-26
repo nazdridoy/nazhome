@@ -1311,13 +1311,36 @@ input[type="search"]:focus {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.expression-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.5rem;
+    width: 100%;
+    font-size: 0.9rem;
+    outline: none;
+    text-align: right;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.expression-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    font-style: italic;
+}
+
+.expression-input:focus {
+    border-bottom-color: rgba(33, 150, 243, 0.5);
 }
 
 .calculator-screen .calculation {
     font-size: 0.9rem;
     opacity: 0.7;
     min-height: 1.2em;
-    margin-bottom: 0.5rem;
     word-wrap: break-word;
 }
 
@@ -1325,6 +1348,7 @@ input[type="search"]:focus {
     font-size: 1.5rem;
     font-weight: 500;
     word-wrap: break-word;
+    margin-top: 0.2rem;
 }
 
 .calculator-grid {

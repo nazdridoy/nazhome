@@ -1831,10 +1831,19 @@ class Calculator {
         this.pendingFunction = null;
         this.pendingValue = '';
         this.lastAnswer = '0';  // Add this line to store the last answer
+        this.expressionInput = document.querySelector('.expression-input');
         
         // Initialize mode from localStorage
         this.isScientific = localStorage.getItem('calculatorMode') === 'scientific';
         this.updateMode();
+
+        // Add input handler
+        this.expressionInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.parseAndCompute(this.expressionInput.value);
+            }
+        });
     }
 
     updateMode() {
@@ -1864,17 +1873,6 @@ class Calculator {
         let displayText = this.currentCalculation;
         if (this.pendingFunction) {
             displayText = `${this.pendingFunction}(${this.pendingValue || ''})`;
-        } else {
-            // Clean up the display text
-            displayText = displayText
-                .replace(/Math\.PI/g, 'π')
-                .replace(/Math\.sin\(\(([^)]+)\) \* Math\.PI \/ 180\)/g, 'sin($1)')
-                .replace(/Math\.cos\(\(([^)]+)\) \* Math\.PI \/ 180\)/g, 'cos($1)')
-                .replace(/Math\.tan\(\(([^)]+)\) \* Math\.PI \/ 180\)/g, 'tan($1)')
-                .replace(/Math\.sqrt\(([^)]+)\)/g, '√($1)')
-                .replace(/Math\.log10\(([^)]+)\)/g, 'log($1)')
-                .replace(/Math\.log\(([^)]+)\)/g, 'ln($1)')
-                .replace(/\*\*/g, '^');  // Add this line to display ^ instead of **
         }
         this.calculation.textContent = displayText;
         this.result.textContent = this.lastResult;
@@ -2035,9 +2033,10 @@ class Calculator {
     clear() {
         this.currentCalculation = '';
         this.lastResult = '0';
-        this.lastAnswer = '0';  // Reset lastAnswer too
+        this.lastAnswer = '0';
         this.pendingFunction = null;
         this.pendingValue = '';
+        this.expressionInput.value = '';  // Add this line to clear the input field
         this.updateDisplay();
     }
 
@@ -2054,12 +2053,67 @@ class Calculator {
         }
         this.updateDisplay();
     }
+
+    parseAndCompute(expression) {
+        try {
+            // First normalize the expression by removing all whitespace
+            let parsed = expression.replace(/\s+/g, '');
+            
+            // First handle functions before any other replacements
+            parsed = parsed
+                .replace(/\blog\(/g, 'Math.log10(')
+                .replace(/\bsin\(/g, 'Math.sin(')
+                .replace(/\bcos\(/g, 'Math.cos(')
+                .replace(/\btan\(/g, 'Math.tan(')
+                .replace(/\bln\(/g, 'Math.log(')
+                .replace(/\bsqrt\(/g, 'Math.sqrt(')
+                .replace(/π/g, 'Math.PI');
+
+            // Then handle implicit multiplication, but exclude Math functions
+            parsed = parsed
+                .replace(/\^/g, '**')
+                .replace(/(\d+e[+-]\d+)/g, match => parseFormattedNumber(match))
+                .replace(/(?<!Math\.\w+)(\d+)\s*\(/g, '$1*(')  // Exclude Math functions from this replacement
+                .replace(/\)\s*(\d+)/g, ')*$1')
+                .replace(/(\d+)\s*π/g, '$1*Math.PI')
+                .replace(/π\s*(\d+)/g, 'Math.PI*$1')
+                .replace(/\)\s*\(/g, ')*(');
+
+            // Add *Math.PI/180 for trig functions to convert degrees to radians
+            parsed = parsed.replace(/Math\.(sin|cos|tan)\(([^)]+)\)/g, 'Math.$1(($2) * Math.PI / 180)');
+
+            // For debugging
+            console.log('Parsed expression:', parsed);
+
+            // Compute the result
+            let result = Function('"use strict";return (' + parsed + ')')();
+            
+            if (Math.abs(result) < 1e-10) {
+                result = 0;
+            }
+
+            this.lastResult = formatNumber(result);
+            this.lastAnswer = this.lastResult;
+            this.currentCalculation = expression;
+            this.expressionInput.value = '';
+        } catch (e) {
+            this.lastResult = 'Error';
+            console.error('Calculation error:', e);
+        }
+        this.updateDisplay();
+    }
 }
 
 // Update the calculator initialization
 document.addEventListener('DOMContentLoaded', function() {
     initializeCalculator();
     const calculator = new Calculator();
+    
+    // Clear the input field on page load
+    const expressionInput = document.querySelector('.expression-input');
+    if (expressionInput) {
+        expressionInput.value = '';
+    }
 
     // Add mode toggle handler
     document.querySelector('.mode-toggle').addEventListener('click', () => {
