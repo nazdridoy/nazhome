@@ -47,6 +47,27 @@
                 <small class="help-text">Enable access to localhost, private IPs, and file:// URLs</small>
             </div>
             <div class="setting-item">
+                <label class="weather-location-label">Weather Location</label>
+                <div class="weather-location">
+                    <div class="input-group">
+                        <input type="text" id="weatherCity" placeholder="City" value="Dhaka">
+                    </div>
+                    <div class="input-group">
+                        <select id="weatherCountry">
+                            <option value="AF">Afghanistan</option>
+                            <option value="BD" selected>Bangladesh</option>
+                            <!-- Add more countries as needed -->
+                            <option value="IN">India</option>
+                            <option value="NP">Nepal</option>
+                            <option value="PK">Pakistan</option>
+                            <!-- Add other countries alphabetically -->
+                        </select>
+                    </div>
+                </div>
+                <small class="help-text">Set your location for weather information</small>
+                <button id="updateWeatherLocation" class="update-btn">Update Location</button>
+            </div>
+            <div class="setting-item">
                 <button id="restoreDefaults">Restore Default Bookmarks</button>
                 <small class="help-text">Reset to original bookmark collection</small>
             </div>

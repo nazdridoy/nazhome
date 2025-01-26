@@ -1586,9 +1586,11 @@ async function updateWeather() {
     weatherContainer.style.opacity = '0';
     weatherContainer.style.display = 'none'; // Hide initially
     
+    const location = loadWeatherLocation();
+    
     try {
         const response = await fetch(
-            'https://api.openweathermap.org/data/2.5/weather?q=Dhaka,BD&units=metric&appid=6d055e39ee237af35ca066f35474e9df'
+            `https://api.openweathermap.org/data/2.5/weather?q=${location.city},${location.country}&units=metric&appid=6d055e39ee237af35ca066f35474e9df`
         );
         
         if (!response.ok) {
@@ -1629,4 +1631,36 @@ async function updateWeather() {
 setInterval(updateWeather, 30 * 60 * 1000);
 
 // Initial weather update
-updateWeather(); 
+updateWeather();
+
+// Function to save weather location
+function saveWeatherLocation(city, country) {
+    localStorage.setItem('weatherCity', city);
+    localStorage.setItem('weatherCountry', country);
+}
+
+// Function to load weather location
+function loadWeatherLocation() {
+    return {
+        city: localStorage.getItem('weatherCity') || 'Dhaka',
+        country: localStorage.getItem('weatherCountry') || 'BD'
+    };
+}
+
+// Add event listener for the update button
+document.getElementById('updateWeatherLocation').addEventListener('click', function() {
+    const city = document.getElementById('weatherCity').value.trim();
+    const country = document.getElementById('weatherCountry').value;
+    
+    if (city) {
+        saveWeatherLocation(city, country);
+        updateWeather();
+    }
+});
+
+// Add this to your initialization code
+document.addEventListener('DOMContentLoaded', function() {
+    const location = loadWeatherLocation();
+    document.getElementById('weatherCity').value = location.city;
+    document.getElementById('weatherCountry').value = location.country;
+}); 
