@@ -269,6 +269,7 @@ function isValidBookmark(bookmark) {
             typeof bookmark.url === 'string' &&
             bookmark.name.length > 0 &&
             bookmark.name.length < 100 && // reasonable length limit
+            (!bookmark.iconUrl || typeof bookmark.iconUrl === 'string') && // optional icon URL
             new URL(bookmark.url) // validates URL format
         );
     } catch {
@@ -386,7 +387,7 @@ function loadBookmarks() {
         const link = document.createElement('a');
         link.href = bookmark.url;
         const hostname = new URL(bookmark.url).hostname;
-        const faviconUrl = getBestIcon(bookmark.url);
+        const faviconUrl = bookmark.iconUrl || getBestIcon(bookmark.url);
         
         // Sanitize user-provided content
         const sanitizedName = sanitizeHTML(bookmark.name);
@@ -437,11 +438,12 @@ function loadBookmarks() {
         // Edit button handler
         link.querySelector('.edit-btn').addEventListener('click', (e) => {
             e.preventDefault();
-            const dialog = createEditDialog(bookmark.name, bookmark.url);
+            const dialog = createEditDialog(bookmark.name, bookmark.url, bookmark.iconUrl);
             
             const editForm = dialog.querySelector('#editForm');
             const nameInput = dialog.querySelector('#editName');
             const urlInput = dialog.querySelector('#editUrl');
+            const iconInput = dialog.querySelector('#editIcon');
             
             // Handle form submission
             editForm.onsubmit = (e) => {
@@ -457,10 +459,17 @@ function loadBookmarks() {
                     alert(urlValidation.error);
                     return;
                 }
+
+                const iconUrl = iconInput.value.trim();
+                if (iconUrl && !validateInput(iconInput, { type: 'url', optional: true }).valid) {
+                    alert('Please enter a valid icon URL or leave it empty');
+                    return;
+                }
                 
                 bookmarks[index] = {
                     name: sanitizeHTML(nameValidation.value),
-                    url: urlValidation.value
+                    url: urlValidation.value,
+                    iconUrl: iconUrl || null
                 };
                 
                 if (!safeSet('bookmarks', bookmarks)) return;
@@ -529,6 +538,7 @@ function loadBookmarks() {
         const addForm = dialog.querySelector('#addForm');
         const urlInput = dialog.querySelector('#addUrl');
         const nameInput = dialog.querySelector('#addName');
+        const iconInput = dialog.querySelector('#addIcon');
         
         // Focus URL input
         urlInput.focus();
@@ -560,6 +570,12 @@ function loadBookmarks() {
                 alert(urlValidation.error);
                 return;
             }
+
+            const iconUrl = iconInput.value.trim();
+            if (iconUrl && !validateInput(iconInput, { type: 'url', optional: true }).valid) {
+                alert('Please enter a valid icon URL or leave it empty');
+                return;
+            }
             
             const bookmarks = safeGet('bookmarks') || [];
             
@@ -583,7 +599,8 @@ function loadBookmarks() {
             // Add sanitized values
             bookmarks.push({
                 name: sanitizeHTML(nameValidation.value),
-                url: urlValidation.value
+                url: urlValidation.value,
+                iconUrl: iconUrl || null
             });
             
             if (!safeSet('bookmarks', bookmarks)) return;
@@ -704,7 +721,7 @@ updateDateTime();
 document.querySelector('input[type="search"]').value = '';
 
 // Add this function at the top of your script
-function createEditDialog(name, url) {
+function createEditDialog(name, url, iconUrl = '') {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
     
@@ -714,6 +731,7 @@ function createEditDialog(name, url) {
     // Set initial values
     dialog.querySelector('#editName').value = name;
     dialog.querySelector('#editUrl').value = url;
+    dialog.querySelector('#editIcon').value = iconUrl || '';
     
     document.body.appendChild(dialog);
     return dialog;
@@ -1961,9 +1979,6 @@ class Calculator {
             this.updateDisplay();
         } catch (e) {
             this.lastResult = 'Error';
-            this.pendingFunction = null;
-            this.pendingValue = '';
-            this.updateDisplay();
             console.error('Error in applyPendingFunction:', e);
         }
     }
