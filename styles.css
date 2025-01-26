@@ -1277,13 +1277,28 @@ input[type="search"]:focus {
 
 .calculator-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     opacity: 0.8;
+}
+
+.mode-toggle {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-size: 1.2rem;
+}
+
+.mode-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .calculator-screen {
@@ -1363,4 +1378,19 @@ input[type="search"]:focus {
 
 .calc-btn.delete:hover {
     background: rgba(255, 152, 0, 0.4);
+}
+
+.calculator-grid.scientific-mode {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+/* Adjust calculator width for scientific mode */
+#calculator-widget.scientific {
+    width: 320px;
+}
+
+/* Make operator buttons slightly smaller font in scientific mode */
+.scientific-mode .calc-btn.operator {
+    font-size: 0.9rem;
 } 

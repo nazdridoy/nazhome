@@ -1827,46 +1827,163 @@ class Calculator {
         this.result = document.querySelector('.result');
         this.currentCalculation = '';
         this.lastResult = '0';
+        this.isScientific = false;
+        this.pendingFunction = null;
+        this.pendingValue = '';
+        
+        // Initialize mode from localStorage
+        this.isScientific = localStorage.getItem('calculatorMode') === 'scientific';
+        this.updateMode();
+    }
+
+    updateMode() {
+        const widget = document.getElementById('calculator-widget');
+        const basicGrid = document.querySelector('.calculator-grid.basic-mode');
+        const scientificGrid = document.querySelector('.calculator-grid.scientific-mode');
+        
+        if (this.isScientific) {
+            widget.classList.add('scientific');
+            basicGrid.style.display = 'none';
+            scientificGrid.style.display = 'grid';
+        } else {
+            widget.classList.remove('scientific');
+            basicGrid.style.display = 'grid';
+            scientificGrid.style.display = 'none';
+        }
+        
+        localStorage.setItem('calculatorMode', this.isScientific ? 'scientific' : 'basic');
+    }
+
+    toggleMode() {
+        this.isScientific = !this.isScientific;
+        this.updateMode();
     }
 
     updateDisplay() {
-        this.calculation.textContent = this.currentCalculation;
+        let displayText = this.currentCalculation;
+        if (this.pendingFunction) {
+            // Show a cleaner format without the Math. prefix and conversion formula
+            displayText = `${this.pendingFunction}(${this.pendingValue || ''})`;
+        } else {
+            // Clean up the display text by removing Math. prefixes and conversion formulas
+            displayText = displayText
+                .replace(/Math\.PI/g, 'π')
+                .replace(/Math\.sin\(\((\d+)\) \* Math\.PI \/ 180\)/g, 'sin($1)')
+                .replace(/Math\.cos\(\((\d+)\) \* Math\.PI \/ 180\)/g, 'cos($1)')
+                .replace(/Math\.tan\(\((\d+)\) \* Math\.PI \/ 180\)/g, 'tan($1)')
+                .replace(/Math\.sqrt/g, '√')
+                .replace(/Math\.log10/g, 'log')
+                .replace(/Math\.log/g, 'ln');
+        }
+        this.calculation.textContent = displayText;
         this.result.textContent = this.lastResult;
     }
 
     appendNumber(number) {
-        this.currentCalculation += number;
+        if (this.pendingFunction) {
+            this.pendingValue += number;
+        } else {
+            this.currentCalculation += number;
+        }
+        this.updateDisplay();
+    }
+
+    applyPendingFunction() {
+        if (!this.pendingFunction || !this.pendingValue) return;
+
+        switch (this.pendingFunction) {
+            case 'sin':
+                this.currentCalculation = `Math.sin((${this.pendingValue}) * Math.PI / 180)`;
+                break;
+            case 'cos':
+                this.currentCalculation = `Math.cos((${this.pendingValue}) * Math.PI / 180)`;
+                break;
+            case 'tan':
+                this.currentCalculation = `Math.tan((${this.pendingValue}) * Math.PI / 180)`;
+                break;
+            case 'sqrt':
+                this.currentCalculation = `Math.sqrt(${this.pendingValue})`;
+                break;
+            case 'log':
+                this.currentCalculation = `Math.log10(${this.pendingValue})`;
+                break;
+            case 'ln':
+                this.currentCalculation = `Math.log(${this.pendingValue})`;
+                break;
+        }
+        this.pendingFunction = null;
+        this.pendingValue = '';
         this.compute();
     }
 
     appendOperator(operator) {
-        if (operator === '×') operator = '*';
-        if (operator === '÷') operator = '/';
+        if (this.pendingFunction) {
+            this.applyPendingFunction();
+        }
+
+        // Handle special operators
+        switch(operator) {
+            case '×':
+                operator = '*';
+                break;
+            case '÷':
+                operator = '/';
+                break;
+            case 'π':
+                operator = 'Math.PI';
+                break;
+            case '^':
+                operator = '**';
+                break;
+            case '√':
+                this.pendingFunction = 'sqrt';
+                this.pendingValue = '';
+                this.updateDisplay();
+                return;
+            case 'sin':
+                this.pendingFunction = 'sin';
+                this.pendingValue = '';
+                this.updateDisplay();
+                return;
+            case 'cos':
+                this.pendingFunction = 'cos';
+                this.pendingValue = '';
+                this.updateDisplay();
+                return;
+            case 'tan':
+                this.pendingFunction = 'tan';
+                this.pendingValue = '';
+                this.updateDisplay();
+                return;
+            case 'log':
+                this.pendingFunction = 'log';
+                this.pendingValue = '';
+                this.updateDisplay();
+                return;
+            case 'ln':
+                this.pendingFunction = 'ln';
+                this.pendingValue = '';
+                this.updateDisplay();
+                return;
+        }
         this.currentCalculation += operator;
         this.updateDisplay();
     }
 
-    clear() {
-        this.currentCalculation = '';
-        this.lastResult = '0';
-        this.updateDisplay();
-    }
-
-    delete() {
-        this.currentCalculation = this.currentCalculation.slice(0, -1);
-        this.compute();
-    }
-
     compute() {
+        if (this.pendingFunction) {
+            this.applyPendingFunction();
+        }
         try {
             let computation = this.currentCalculation
                 .replace(/×/g, '*')
                 .replace(/÷/g, '/');
             
-            // Evaluate the expression
             let result = Function('"use strict";return (' + computation + ')')();
             
-            // Format the result
+            if (Math.abs(result) < 1e-10) {
+                result = 0;
+            }
             this.lastResult = Number.isInteger(result) ? 
                 result.toString() : 
                 parseFloat(result.toFixed(8)).toString();
@@ -1875,12 +1992,34 @@ class Calculator {
         }
         this.updateDisplay();
     }
+
+    clear() {
+        this.currentCalculation = '';
+        this.lastResult = '0';
+        this.pendingFunction = null;
+        this.pendingValue = '';
+        this.updateDisplay();
+    }
+
+    delete() {
+        if (this.pendingFunction) {
+            this.pendingValue = this.pendingValue.slice(0, -1);
+        } else {
+            this.currentCalculation = this.currentCalculation.slice(0, -1);
+        }
+        this.updateDisplay();
+    }
 }
 
-// Initialize calculator functionality
+// Update the calculator initialization
 document.addEventListener('DOMContentLoaded', function() {
     initializeCalculator();
     const calculator = new Calculator();
+
+    // Add mode toggle handler
+    document.querySelector('.mode-toggle').addEventListener('click', () => {
+        calculator.toggleMode();
+    });
 
     // Add event listener for calculator widget toggle
     document.getElementById('calculatorWidget').addEventListener('change', function(e) {
@@ -1890,23 +2029,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Add event listeners for calculator buttons
-    document.querySelector('.calculator-grid').addEventListener('click', e => {
-        if (!e.target.matches('button')) return;
+    document.querySelectorAll('.calculator-grid').forEach(grid => {
+        grid.addEventListener('click', e => {
+            if (!e.target.matches('button')) return;
 
-        const button = e.target;
-        const buttonText = button.textContent;
+            const button = e.target;
+            const buttonText = button.textContent;
 
-        if (button.classList.contains('clear')) {
-            calculator.clear();
-        } else if (button.classList.contains('delete')) {
-            calculator.delete();
-        } else if (button.classList.contains('equals')) {
-            calculator.compute();
-        } else if (button.classList.contains('operator')) {
-            calculator.appendOperator(buttonText);
-        } else {
-            calculator.appendNumber(buttonText);
-        }
+            if (button.classList.contains('clear')) {
+                calculator.clear();
+            } else if (button.classList.contains('delete')) {
+                calculator.delete();
+            } else if (button.classList.contains('equals')) {
+                calculator.compute();
+            } else if (button.classList.contains('operator')) {
+                calculator.appendOperator(buttonText);
+            } else {
+                calculator.appendNumber(buttonText);
+            }
+        });
     });
 
     // Add keyboard support

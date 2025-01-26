@@ -22,12 +22,13 @@
     <div id="calculator-widget" style="display: none;">
         <div class="calculator-header">
             <span>Calculator</span>
+            <button class="mode-toggle" title="Toggle Scientific Mode">🔬</button>
         </div>
         <div class="calculator-screen">
             <div class="calculation"></div>
             <div class="result">0</div>
         </div>
-        <div class="calculator-grid">
+        <div class="calculator-grid basic-mode">
             <button class="calc-btn clear">C</button>
             <button class="calc-btn operator">(</button>
             <button class="calc-btn operator">)</button>
@@ -47,6 +48,36 @@
             <button class="calc-btn">0</button>
             <button class="calc-btn">.</button>
             <button class="calc-btn delete">⌫</button>
+            <button class="calc-btn equals">=</button>
+        </div>
+        <div class="calculator-grid scientific-mode" style="display: none;">
+            <button class="calc-btn clear">C</button>
+            <button class="calc-btn operator">sin</button>
+            <button class="calc-btn operator">cos</button>
+            <button class="calc-btn operator">tan</button>
+            <button class="calc-btn operator">(</button>
+            <button class="calc-btn operator">)</button>
+            <button class="calc-btn operator">π</button>
+            <button class="calc-btn operator">^</button>
+            <button class="calc-btn">7</button>
+            <button class="calc-btn">8</button>
+            <button class="calc-btn">9</button>
+            <button class="calc-btn operator">÷</button>
+            <button class="calc-btn">4</button>
+            <button class="calc-btn">5</button>
+            <button class="calc-btn">6</button>
+            <button class="calc-btn operator">×</button>
+            <button class="calc-btn">1</button>
+            <button class="calc-btn">2</button>
+            <button class="calc-btn">3</button>
+            <button class="calc-btn operator">-</button>
+            <button class="calc-btn">0</button>
+            <button class="calc-btn">.</button>
+            <button class="calc-btn delete">⌫</button>
+            <button class="calc-btn operator">+</button>
+            <button class="calc-btn operator">√</button>
+            <button class="calc-btn operator">log</button>
+            <button class="calc-btn operator">ln</button>
             <button class="calc-btn equals">=</button>
         </div>
     </div>
