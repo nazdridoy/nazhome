@@ -842,31 +842,31 @@ function createSearchEngineSelector() {
         const menuDots = item.querySelector('.menu-dots');
         const menuItems = item.querySelector('.menu-items');
         
-            menuDots.addEventListener('click', (e) => {
-                e.stopPropagation();
-                menuItems.classList.toggle('active');
-            });
+        menuDots.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuItems.classList.toggle('active');
+        });
 
         // Add edit handler
         item.querySelector('.edit-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                dialog.remove();
+            e.stopPropagation();
+            dialog.remove();
             showEditEngineDialog(key, engine);
-            });
+        });
 
         // Add delete handler
         item.querySelector('.delete-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                createConfirmDialog('Delete this search engine?', () => {
+            e.stopPropagation();
+            createConfirmDialog('Delete this search engine?', () => {
                 delete customEngines[key];
-                    localStorage.setItem('customSearchEngines', JSON.stringify(customEngines));
+                localStorage.setItem('customSearchEngines', JSON.stringify(customEngines));
                 if (document.getElementById('searchEngine').dataset.engine === key) {
-                        handleEngineSelection('google');
-                    }
+                    handleEngineSelection('google');
+                }
                 dialog.remove();
                 createSearchEngineSelector();
-                });
             });
+        });
 
         // Add click handler for selection
         item.addEventListener('click', (e) => {
@@ -1830,6 +1830,7 @@ class Calculator {
         this.isScientific = false;
         this.pendingFunction = null;
         this.pendingValue = '';
+        this.lastAnswer = '0';  // Add this line to store the last answer
         
         // Initialize mode from localStorage
         this.isScientific = localStorage.getItem('calculatorMode') === 'scientific';
@@ -1868,12 +1869,12 @@ class Calculator {
             // Clean up the display text by removing Math. prefixes and conversion formulas
             displayText = displayText
                 .replace(/Math\.PI/g, 'π')
-                .replace(/Math\.sin\(\((\d+)\) \* Math\.PI \/ 180\)/g, 'sin($1)')
-                .replace(/Math\.cos\(\((\d+)\) \* Math\.PI \/ 180\)/g, 'cos($1)')
-                .replace(/Math\.tan\(\((\d+)\) \* Math\.PI \/ 180\)/g, 'tan($1)')
-                .replace(/Math\.sqrt/g, '√')
-                .replace(/Math\.log10/g, 'log')
-                .replace(/Math\.log/g, 'ln');
+                .replace(/Math\.sin\(\(([^)]+)\) \* Math\.PI \/ 180\)/g, 'sin($1)')
+                .replace(/Math\.cos\(\(([^)]+)\) \* Math\.PI \/ 180\)/g, 'cos($1)')
+                .replace(/Math\.tan\(\(([^)]+)\) \* Math\.PI \/ 180\)/g, 'tan($1)')
+                .replace(/Math\.sqrt\(([^)]+)\)/g, '√($1)')
+                .replace(/Math\.log10\(([^)]+)\)/g, 'log($1)')
+                .replace(/Math\.log\(([^)]+)\)/g, 'ln($1)');
         }
         this.calculation.textContent = displayText;
         this.result.textContent = this.lastResult;
@@ -1889,34 +1890,60 @@ class Calculator {
     }
 
     applyPendingFunction() {
-        if (!this.pendingFunction || !this.pendingValue) return;
+        if (!this.pendingFunction || !this.pendingValue) {
+            this.pendingFunction = null;
+            this.pendingValue = '';
+            return;
+        }
 
+        const value = parseFloat(this.pendingValue);
+        if (isNaN(value)) {
+            this.lastResult = 'Error';
+            this.pendingFunction = null;
+            this.pendingValue = '';
+            return;
+        }
+
+        let result;
         switch (this.pendingFunction) {
             case 'sin':
-                this.currentCalculation = `Math.sin((${this.pendingValue}) * Math.PI / 180)`;
+                result = Math.sin(value * Math.PI / 180);
                 break;
             case 'cos':
-                this.currentCalculation = `Math.cos((${this.pendingValue}) * Math.PI / 180)`;
+                result = Math.cos(value * Math.PI / 180);
                 break;
             case 'tan':
-                this.currentCalculation = `Math.tan((${this.pendingValue}) * Math.PI / 180)`;
+                result = Math.tan(value * Math.PI / 180);
                 break;
             case 'sqrt':
-                this.currentCalculation = `Math.sqrt(${this.pendingValue})`;
+                result = Math.sqrt(value);
                 break;
             case 'log':
-                this.currentCalculation = `Math.log10(${this.pendingValue})`;
+                result = Math.log10(value);
                 break;
             case 'ln':
-                this.currentCalculation = `Math.log(${this.pendingValue})`;
+                result = Math.log(value);
                 break;
         }
+
+        if (Math.abs(result) < 1e-10) {
+            result = 0;
+        }
+
+        this.lastResult = formatNumber(result);
+        this.lastAnswer = this.lastResult;
+        this.currentCalculation = '';
         this.pendingFunction = null;
         this.pendingValue = '';
-        this.compute();
+        this.updateDisplay();
     }
 
     appendOperator(operator) {
+        // If starting a new operation after equals, use the last answer
+        if (this.currentCalculation === '' && this.lastAnswer !== '0') {
+            this.currentCalculation = parseFormattedNumber(this.lastAnswer);
+        }
+
         if (this.pendingFunction) {
             this.applyPendingFunction();
         }
@@ -1979,14 +2006,24 @@ class Calculator {
                 .replace(/×/g, '*')
                 .replace(/÷/g, '/');
             
+            // Parse any formatted numbers in the calculation
+            computation = computation.split(/([+\-*/()])/).map(part => {
+                part = part.trim();
+                if (part.includes('×10')) {
+                    return parseFormattedNumber(part);
+                }
+                return part;
+            }).join('');
+            
             let result = Function('"use strict";return (' + computation + ')')();
             
             if (Math.abs(result) < 1e-10) {
                 result = 0;
             }
-            this.lastResult = Number.isInteger(result) ? 
-                result.toString() : 
-                parseFloat(result.toFixed(8)).toString();
+            
+            this.lastResult = formatNumber(result);
+            this.lastAnswer = this.lastResult;
+            this.currentCalculation = '';
         } catch (e) {
             this.lastResult = this.currentCalculation || '0';
         }
@@ -1996,6 +2033,7 @@ class Calculator {
     clear() {
         this.currentCalculation = '';
         this.lastResult = '0';
+        this.lastAnswer = '0';  // Reset lastAnswer too
         this.pendingFunction = null;
         this.pendingValue = '';
         this.updateDisplay();
@@ -2067,4 +2105,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-}); 
+});
+
+// Add this helper function to format large numbers
+function formatNumber(num) {
+    const str = num.toString();
+    if (str.includes('e+') || str.includes('e-')) {
+        const [base, exponent] = str.split('e');
+        const formattedBase = parseFloat(base).toFixed(8).replace(/\.?0+$/, '');
+        const exp = exponent.replace('+', '');
+        return `${formattedBase}×10${exp.split('').map(d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]).join('')}`;
+    }
+    return str;
+}
+
+// Add this helper function to parse formatted numbers
+function parseFormattedNumber(str) {
+    if (str.includes('×10')) {
+        const [base, exp] = str.split('×10');
+        const exponent = exp.split('').map(d => '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d)).join('');
+        return `${base}e${exponent}`;
+    }
+    return str;
+} 
