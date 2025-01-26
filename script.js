@@ -450,20 +450,39 @@ function saveBookmarkSettings(settings) {
     return safeSet('hideAddButton', settings.hideAddButton);
 }
 
-// Add these functions for favicon management
+// Update these functions for favicon management
 let alternativeIcons = null;
+let alternativeIconsPromise = null;  // Add this to store the fetch promise
 
 async function fetchAlternativeIcons() {
+    // Return cached result if available
     if (alternativeIcons !== null) return alternativeIcons;
     
+    // Return existing promise if a fetch is already in progress
+    if (alternativeIconsPromise !== null) return alternativeIconsPromise;
+    
     try {
-        const response = await fetch('https://gist.githubusercontent.com/nazdridoy/01ff4927589f27977eff4620f1220a1c/raw/alternativeIcons.txt');
-        if (!response.ok) throw new Error('Failed to fetch alternative icons');
-        const data = await response.json();
-        alternativeIcons = data;
-        return data;
+        // Store the promise so concurrent calls can use it
+        alternativeIconsPromise = fetch('https://gist.githubusercontent.com/nazdridoy/01ff4927589f27977eff4620f1220a1c/raw/alternativeIcons.txt')
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch alternative icons');
+                return response.json();
+            })
+            .then(data => {
+                alternativeIcons = data;  // Cache the result
+                alternativeIconsPromise = null;  // Clear the promise
+                return data;
+            })
+            .catch(error => {
+                console.error('Error fetching alternative icons:', error);
+                alternativeIconsPromise = null;  // Clear the promise on error
+                return {};
+            });
+        
+        return alternativeIconsPromise;
     } catch (error) {
         console.error('Error fetching alternative icons:', error);
+        alternativeIconsPromise = null;
         return {};
     }
 }
@@ -489,7 +508,23 @@ async function resolveFavicon(url, userIcon = '') {
     }
 }
 
-// Update the loadBookmarks function to use the new favicon resolution
+// Add this helper function to check for duplicate bookmarks
+function isDuplicateBookmark(url, bookmarks) {
+    // Normalize URLs for comparison by removing trailing slashes and protocol
+    const normalizeUrl = (u) => {
+        try {
+            const urlObj = new URL(u);
+            return urlObj.hostname + urlObj.pathname.replace(/\/$/, '') + urlObj.search;
+        } catch {
+            return u;
+        }
+    };
+    
+    const normalizedNew = normalizeUrl(url);
+    return bookmarks.some(bookmark => normalizeUrl(bookmark.url) === normalizedNew);
+}
+
+// Update the loadBookmarks function with fade-in animation
 async function loadBookmarks() {
     const bookmarks = safeGet('bookmarks') || [];
     const grid = document.getElementById('quickLinks');
@@ -499,11 +534,11 @@ async function loadBookmarks() {
     grid.addEventListener('dragover', handleDragOver);
     grid.addEventListener('drop', handleDrop);
 
-    // Use Promise.all to wait for all bookmarks to be processed
-    await Promise.all(bookmarks.map(async (bookmark, index) => {
+    // Create all bookmark elements first but keep them invisible
+    const bookmarkPromises = bookmarks.map(async (bookmark, index) => {
         const link = document.createElement('a');
         link.href = bookmark.url;
-        link.className = 'quick-link';
+        link.className = 'quick-link invisible'; // Add invisible class
         link.draggable = true;
         link.dataset.index = index;
         
@@ -511,13 +546,13 @@ async function loadBookmarks() {
         link.addEventListener('dragstart', handleDragStart);
         link.addEventListener('dragend', handleDragEnd);
         
-        // Create the initial HTML with placeholder icon
         link.innerHTML = `
             <div class="icon-wrapper">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23555'/%3E%3C/svg%3E" 
-                     alt="${bookmark.name}">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='rgba(255,255,255,0.15)'/%3E%3Cstop offset='100%25' stop-color='rgba(255,255,255,0.05)'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E" 
+                     alt="${sanitizeHTML(bookmark.name)}"
+                     style="opacity: 0.8; transition: opacity 0.3s ease;">
             </div>
-            <span>${bookmark.name}</span>
+            <span>${sanitizeHTML(bookmark.name)}</span>
             <div class="quick-link-menu">
                 <div class="menu-items">
                     <button class="edit-btn">Edit</button>
@@ -527,18 +562,25 @@ async function loadBookmarks() {
             </div>
         `;
         
-        // Add to grid immediately with placeholder
         grid.appendChild(link);
 
-        // Resolve favicon using the new flow
-        const iconUrl = await resolveFavicon(bookmark.url, bookmark.icon);
-        
-        // Update the icon once resolved
-        const iconImg = link.querySelector('.icon-wrapper img');
-        iconImg.src = iconUrl;
-        iconImg.onerror = () => {
-            iconImg.src = `https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=32`;
-        };
+        // Load icon with timeout
+        try {
+            const iconPromise = resolveFavicon(bookmark.url, bookmark.icon);
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Icon load timeout')), 3000); // 3 second timeout
+            });
+
+            const iconUrl = await Promise.race([iconPromise, timeoutPromise]);
+            const iconImg = link.querySelector('.icon-wrapper img');
+            iconImg.src = iconUrl;
+            iconImg.style.opacity = '1';
+        } catch (error) {
+            console.log(`Failed to load icon for ${bookmark.url}:`, error);
+            const iconImg = link.querySelector('.icon-wrapper img');
+            iconImg.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='rgba(255,255,255,0.2)'/%3E%3Cstop offset='100%25' stop-color='rgba(255,255,255,0.1)'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M16 8C11.6 8 8 11.6 8 16s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z' fill='rgba(255,255,255,0.5)'/%3E%3C/svg%3E`;
+            iconImg.style.opacity = '1';
+        }
 
         // Update menu click handling
         const menuDots = link.querySelector('.menu-dots');
@@ -652,12 +694,17 @@ async function loadBookmarks() {
                 loadBookmarks();
             });
         });
-    }));
 
-    // Add the "+" button (not draggable)
+        return link;
+    });
+
+    // Wait for all bookmarks to be processed
+    await Promise.all(bookmarkPromises);
+
+    // Add the "+" button
     const addButton = document.createElement('a');
     addButton.href = '#';
-    addButton.className = 'add-bookmark';
+    addButton.className = 'add-bookmark invisible'; // Add invisible class
     addButton.draggable = false;
     addButton.innerHTML = `
         <div class="add-button">
@@ -719,13 +766,20 @@ async function loadBookmarks() {
                 return;
             }
             
+            const bookmarks = safeGet('bookmarks') || [];
+            
+            // Check for duplicates before adding
+            if (isDuplicateBookmark(urlValidation.value, bookmarks)) {
+                alert('This URL already exists in your bookmarks');
+                return;
+            }
+            
             const bookmark = {
                 name: sanitizeHTML(nameValidation.value),
                 url: urlValidation.value,
-                icon: iconUrl || null  // Changed from iconUrl to icon to match our new schema
+                icon: iconUrl || null
             };
 
-            const bookmarks = safeGet('bookmarks') || [];
             bookmarks.push(bookmark);
             
             if (!safeSet('bookmarks', bookmarks)) return;
@@ -744,6 +798,14 @@ async function loadBookmarks() {
                 dialog.remove();
             }
         };
+    });
+
+    // Fade in all elements with a stagger effect
+    const allItems = grid.querySelectorAll('.quick-link, .add-bookmark');
+    allItems.forEach((item, index) => {
+        setTimeout(() => {
+            item.classList.remove('invisible');
+        }, index * 50); // 50ms delay between each item
     });
 }
 
@@ -2099,7 +2161,7 @@ class Calculator {
 
             this.lastResult = formatNumber(result);
             this.lastAnswer = this.lastResult;
-            this.currentCalculation = this.lastResult;  // Set currentCalculation to the result
+            this.currentCalculation = this.lastResult;
             this.pendingFunction = null;
             this.pendingValue = '';
             this.updateDisplay();

@@ -1426,4 +1426,16 @@ input[type="search"]:focus {
 /* Make operator buttons slightly smaller font in scientific mode */
 .scientific-mode .calc-btn.operator {
     font-size: 0.9rem;
+}
+
+/* Add fade-in animation styles */
+.quick-link, .add-bookmark {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.quick-link.invisible, .add-bookmark.invisible {
+    opacity: 0;
+    transform: translateY(10px);
 } 
