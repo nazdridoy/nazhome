@@ -842,31 +842,31 @@ function createSearchEngineSelector() {
         const menuDots = item.querySelector('.menu-dots');
         const menuItems = item.querySelector('.menu-items');
         
-        menuDots.addEventListener('click', (e) => {
-            e.stopPropagation();
-            menuItems.classList.toggle('active');
-        });
+            menuDots.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menuItems.classList.toggle('active');
+            });
 
         // Add edit handler
         item.querySelector('.edit-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            dialog.remove();
+                e.stopPropagation();
+                dialog.remove();
             showEditEngineDialog(key, engine);
-        });
+            });
 
         // Add delete handler
         item.querySelector('.delete-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            createConfirmDialog('Delete this search engine?', () => {
+                e.stopPropagation();
+                createConfirmDialog('Delete this search engine?', () => {
                 delete customEngines[key];
-                localStorage.setItem('customSearchEngines', JSON.stringify(customEngines));
+                    localStorage.setItem('customSearchEngines', JSON.stringify(customEngines));
                 if (document.getElementById('searchEngine').dataset.engine === key) {
-                    handleEngineSelection('google');
-                }
+                        handleEngineSelection('google');
+                    }
                 dialog.remove();
                 createSearchEngineSelector();
+                });
             });
-        });
 
         // Add click handler for selection
         item.addEventListener('click', (e) => {
@@ -1932,7 +1932,7 @@ class Calculator {
 
         this.lastResult = formatNumber(result);
         this.lastAnswer = this.lastResult;
-        this.currentCalculation = '';
+        this.currentCalculation = this.lastResult;  // Set currentCalculation to the result
         this.pendingFunction = null;
         this.pendingValue = '';
         this.updateDisplay();
@@ -2000,7 +2000,9 @@ class Calculator {
     compute() {
         if (this.pendingFunction) {
             this.applyPendingFunction();
+            return;  // Add this line to prevent double computation
         }
+
         try {
             let computation = this.currentCalculation
                 .replace(/×/g, '*')
