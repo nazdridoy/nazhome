@@ -1509,6 +1509,15 @@ function exportUserData() {
             weather: {
                 city: localStorage.getItem('weatherCity') || 'Dhaka',
                 country: localStorage.getItem('weatherCountry') || 'BD'
+            },
+            widgets: {
+                calculator: {
+                    enabled: localStorage.getItem('calculatorWidget') === 'true',
+                    mode: localStorage.getItem('calculatorMode') || 'basic'
+                },
+                calendar: {
+                    enabled: localStorage.getItem('calendarWidget') === 'true'
+                }
             }
         }
     };
@@ -1518,7 +1527,7 @@ function exportUserData() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `homepage-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `nazhome-backup-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1543,6 +1552,7 @@ function importUserData(file) {
                           `- ${data.bookmarks.length} bookmarks\n` +
                           `- ${Object.keys(data.customSearchEngines).length} custom search engines\n` +
                           `- Weather settings (${data.settings.weather?.city || 'Default'}, ${data.settings.weather?.country || 'BD'})\n` +
+                          `- Widget configurations\n` +
                           `\nExisting data will be backed up and can be restored.`;
 
             createConfirmDialog(message, () => {
@@ -1559,6 +1569,15 @@ function importUserData(file) {
                         weather: {
                             city: localStorage.getItem('weatherCity') || 'Dhaka',
                             country: localStorage.getItem('weatherCountry') || 'BD'
+                        },
+                        widgets: {
+                            calculator: {
+                                enabled: localStorage.getItem('calculatorWidget') === 'true',
+                                mode: localStorage.getItem('calculatorMode') || 'basic'
+                            },
+                            calendar: {
+                                enabled: localStorage.getItem('calendarWidget') === 'true'
+                            }
                         }
                     }
                 };
@@ -1578,6 +1597,23 @@ function importUserData(file) {
                     localStorage.setItem('weatherCountry', data.settings.weather.country);
                 }
 
+                // Import widget settings
+                if (data.settings.widgets) {
+                    // Calculator widget settings
+                    if (data.settings.widgets.calculator) {
+                        localStorage.setItem('calculatorWidget', 
+                            data.settings.widgets.calculator.enabled);
+                        localStorage.setItem('calculatorMode', 
+                            data.settings.widgets.calculator.mode || 'basic');
+                    }
+
+                    // Calendar widget settings
+                    if (data.settings.widgets.calendar) {
+                        localStorage.setItem('calendarWidget', 
+                            data.settings.widgets.calendar.enabled);
+                    }
+                }
+
                 // Refresh the UI
                 loadBookmarks();
                 loadCustomEngines();
@@ -1589,6 +1625,23 @@ function importUserData(file) {
                     document.getElementById('weatherCity').value = data.settings.weather.city;
                     document.getElementById('weatherCountry').value = data.settings.weather.country;
                     updateWeather();
+                }
+
+                // Update widget states
+                if (data.settings.widgets) {
+                    if (data.settings.widgets.calculator) {
+                        const calcWidget = document.getElementById('calculatorWidget');
+                        calcWidget.checked = data.settings.widgets.calculator.enabled;
+                        document.getElementById('calculator-widget').style.display = 
+                            calcWidget.checked ? 'block' : 'none';
+                    }
+
+                    if (data.settings.widgets.calendar) {
+                        const calWidget = document.getElementById('calendarWidget');
+                        calWidget.checked = data.settings.widgets.calendar.enabled;
+                        document.getElementById('calendar-widget').style.display = 
+                            calWidget.checked ? 'block' : 'none';
+                    }
                 }
 
                 // Show success message
@@ -2087,7 +2140,7 @@ class Calculator {
             if (Math.abs(result) < 1e-10) {
                 result = 0;
             }
-            
+
             this.lastResult = formatNumber(result);
             this.lastAnswer = this.lastResult;
             this.currentCalculation = expression;
