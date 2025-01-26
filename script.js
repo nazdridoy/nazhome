@@ -1522,10 +1522,15 @@ function validateInput(input, options = {}) {
         maxLength = 100,
         minLength = 1,
         type = 'text',
-        maxBookmarks = 100
+        optional = false
     } = options;
 
     const value = input.value.trim();
+    
+    // Allow empty value if optional
+    if (!value && optional) {
+        return { valid: true, value: '' };
+    }
     
     // Basic security checks
     if (!value || typeof value !== 'string') {
@@ -1535,19 +1540,19 @@ function validateInput(input, options = {}) {
         };
     }
 
-    // Prevent extremely long inputs that could cause DoS
-    if (value.length > 2000) {
+    // Prevent extremely long inputs
+    if (value.length > maxLength) {
         return {
             valid: false,
-            error: 'Input is too long'
+            error: `Input must be less than ${maxLength} characters`
         };
     }
 
-    // Check length
-    if (value.length < minLength || value.length > maxLength) {
+    // Check minimum length
+    if (value.length < minLength) {
         return {
             valid: false,
-            error: `Length must be between ${minLength} and ${maxLength} characters`
+            error: `Input must be at least ${minLength} characters`
         };
     }
 
@@ -1569,7 +1574,7 @@ function validateInput(input, options = {}) {
                 };
             }
 
-            // Check for local URLs only if not allowed
+            // Check for local URLs
             if (!isLocalUrlAllowed()) {
                 const hostname = url.hostname.toLowerCase();
                 if (hostname === 'localhost' || 
@@ -1584,6 +1589,8 @@ function validateInput(input, options = {}) {
                     };
                 }
             }
+
+            return { valid: true, value: value };
         } catch {
             return {
                 valid: false,
@@ -1592,18 +1599,10 @@ function validateInput(input, options = {}) {
         }
     }
 
-    // Name-specific validation for bookmarks
+    // Name-specific validation
     if (type === 'text') {
-        // Prevent HTML-like content
-        if (value.includes('<') || value.includes('>')) {
-            return {
-                valid: false,
-                error: 'HTML tags are not allowed in names'
-            };
-        }
-
-        // Prevent potentially malicious characters
-        if (/[<>{}()\[\]\\\/]/.test(value)) {
+        // Prevent HTML-like content and potentially malicious characters
+        if (value.includes('<') || value.includes('>') || /[<>{}()\[\]\\\/]/.test(value)) {
             return {
                 valid: false,
                 error: 'Name contains invalid characters'
@@ -1812,52 +1811,57 @@ document.getElementById('importFile').addEventListener('change', function(e) {
 // Update the updateWeather function
 async function updateWeather() {
     const settings = getWeatherSettings();
-    if (!settings.showWeather) return;
-
     const weatherContainer = document.getElementById('weather');
+    
+    if (!settings.showWeather || !weatherContainer) {
+        return;
+    }
+
     weatherContainer.style.opacity = '0';
     weatherContainer.style.display = 'none';
     
     const location = loadWeatherLocation();
+    if (!location.city || !location.country) {
+        console.warn('Invalid weather location');
+        return;
+    }
     
     try {
         const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?q=${location.city},${location.country}&units=metric&appid=6d055e39ee237af35ca066f35474e9df`
+            `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location.city)},${encodeURIComponent(location.country)}&units=metric&appid=6d055e39ee237af35ca066f35474e9df`
         );
         
         if (!response.ok) {
-            throw new Error('Weather data fetch failed');
+            throw new Error(`Weather API error: ${response.status}`);
         }
 
         const data = await response.json();
         
-        const cityElement = document.querySelector('#weather .city');
-        const tempElement = document.querySelector('#weather .temp');
-        const descElement = document.querySelector('#weather .description');
-        const iconElement = document.querySelector('#weather .weather-icon');
+        const elements = {
+            city: weatherContainer.querySelector('.city'),
+            temp: weatherContainer.querySelector('.temp'),
+            desc: weatherContainer.querySelector('.description'),
+            icon: weatherContainer.querySelector('.weather-icon')
+        };
         
-        // Add city name
-        cityElement.textContent = data.name;
-        
-        // Round temperature to nearest whole number
-        const temp = Math.round(data.main.temp);
-        tempElement.textContent = `${temp}°C`;
-        descElement.textContent = data.weather[0].description;
+        // Verify all elements exist
+        if (!Object.values(elements).every(el => el)) {
+            throw new Error('Missing weather widget elements');
+        }
 
-        // Update weather icon
-        const iconCode = data.weather[0].icon;
-        iconElement.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-        iconElement.alt = data.weather[0].description;
+        elements.city.textContent = data.name;
+        elements.temp.textContent = `${Math.round(data.main.temp)}°C`;
+        elements.desc.textContent = data.weather[0].description;
+        elements.icon.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        elements.icon.alt = data.weather[0].description;
 
-        // Show weather container with fade-in animation
         weatherContainer.style.display = 'block';
-        // Trigger reflow to ensure the transition works
+        // Force reflow
         weatherContainer.offsetHeight;
         weatherContainer.style.opacity = '1';
 
     } catch (error) {
         console.error('Weather update failed:', error);
-        // Keep weather display hidden on error
         weatherContainer.style.display = 'none';
         weatherContainer.style.opacity = '0';
     }
@@ -1900,7 +1904,7 @@ async function populateCountryDropdown() {
     const savedCountry = localStorage.getItem('weatherCountry') || 'BD';
     
     try {
-        const response = await fetch('http://api.geonames.org/countryInfoJSON?username=nazhome');
+        const response = await fetch('https://secure.geonames.org/countryInfoJSON?username=nazhome');
         if (!response.ok) throw new Error('Failed to fetch countries');
         
         const data = await response.json();
@@ -2054,8 +2058,13 @@ class Calculator {
 
     updateMode() {
         const widget = document.getElementById('calculator-widget');
-        const basicGrid = document.querySelector('.calculator-grid.basic-mode');
-        const scientificGrid = document.querySelector('.calculator-grid.scientific-mode');
+        const basicGrid = widget?.querySelector('.calculator-grid.basic-mode');
+        const scientificGrid = widget?.querySelector('.calculator-grid.scientific-mode');
+        
+        if (!widget || !basicGrid || !scientificGrid) {
+            console.warn('Calculator elements not found');
+            return;
+        }
         
         if (this.isScientific) {
             widget.classList.add('scientific');
@@ -2415,12 +2424,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add keyboard support
     document.addEventListener('keydown', e => {
-        if (!document.getElementById('calculator-widget').style.display === 'none') {
+        const calculatorWidget = document.getElementById('calculator-widget');
+        // Check if calculator is visible AND we're not focused on an input element
+        if (calculatorWidget.style.display !== 'none' && 
+            !e.target.matches('input, textarea')) {
+            
             const key = e.key;
-            if (/[0-9\.]/.test(key)) {
+            
+            // Prevent default behavior for calculator keys
+            if (!/^F\d+$/.test(key)) { // Don't prevent F1-F12 keys
+                e.preventDefault();
+            }
+            
+            if (/[0-9.]/.test(key)) {
                 calculator.appendNumber(key);
-            } else if (['+', '-', '*', '/', '(', ')'].includes(key)) {
-                calculator.appendOperator(key);
+            } else if (['+', '-', '*', '/', '(', ')', '^'].includes(key)) {
+                // Map keyboard operators to calculator operators
+                const operatorMap = {
+                    '*': '×',
+                    '/': '÷',
+                    '^': '^'
+                };
+                calculator.appendOperator(operatorMap[key] || key);
             } else if (key === 'Enter') {
                 calculator.compute();
             } else if (key === 'Backspace') {
@@ -2485,6 +2510,9 @@ function initializeWeatherWidget() {
     const settings = getWeatherSettings();
     const weatherWidget = document.getElementById('weather');
     const weatherToggle = document.getElementById('weatherWidget');
+    
+    // Add null checks
+    if (!weatherWidget || !weatherToggle) return;
     
     weatherToggle.checked = settings.showWeather;
     weatherWidget.style.display = settings.showWeather ? 'block' : 'none';
