@@ -1580,8 +1580,12 @@ document.getElementById('importFile').addEventListener('change', function(e) {
     }
 });
 
-// Add this function to fetch and update weather
+// Update the updateWeather function
 async function updateWeather() {
+    const weatherContainer = document.getElementById('weather');
+    weatherContainer.style.opacity = '0';
+    weatherContainer.style.display = 'none'; // Hide initially
+    
     try {
         const response = await fetch(
             'https://api.openweathermap.org/data/2.5/weather?q=Dhaka&units=metric&appid=6d055e39ee237af35ca066f35474e9df'
@@ -1607,10 +1611,17 @@ async function updateWeather() {
         iconElement.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
         iconElement.alt = data.weather[0].description;
 
+        // Show weather container with fade-in animation
+        weatherContainer.style.display = 'block';
+        // Trigger reflow to ensure the transition works
+        weatherContainer.offsetHeight;
+        weatherContainer.style.opacity = '1';
+
     } catch (error) {
         console.error('Weather update failed:', error);
-        // Hide weather display on error
-        document.getElementById('weather').style.display = 'none';
+        // Keep weather display hidden on error
+        weatherContainer.style.display = 'none';
+        weatherContainer.style.opacity = '0';
     }
 }
 

@@ -1000,7 +1000,7 @@ input[type="search"]:focus {
     left: calc(50% + 150px);
     transform: none;
     font-size: 1.2rem;
-    opacity: 0.95;
+    opacity: 0;
     filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
     z-index: 5;
     background: rgba(0, 0, 0, 0.2);
@@ -1009,6 +1009,7 @@ input[type="search"]:focus {
     padding: 0.4rem 0.8rem;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: opacity 0.3s ease-in-out;
 }
 
 .weather-content {
