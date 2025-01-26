@@ -842,31 +842,31 @@ function createSearchEngineSelector() {
         const menuDots = item.querySelector('.menu-dots');
         const menuItems = item.querySelector('.menu-items');
         
-        menuDots.addEventListener('click', (e) => {
-            e.stopPropagation();
-            menuItems.classList.toggle('active');
-        });
+            menuDots.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menuItems.classList.toggle('active');
+            });
 
         // Add edit handler
         item.querySelector('.edit-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            dialog.remove();
+                e.stopPropagation();
+                dialog.remove();
             showEditEngineDialog(key, engine);
-        });
+            });
 
         // Add delete handler
         item.querySelector('.delete-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            createConfirmDialog('Delete this search engine?', () => {
+                e.stopPropagation();
+                createConfirmDialog('Delete this search engine?', () => {
                 delete customEngines[key];
-                localStorage.setItem('customSearchEngines', JSON.stringify(customEngines));
+                    localStorage.setItem('customSearchEngines', JSON.stringify(customEngines));
                 if (document.getElementById('searchEngine').dataset.engine === key) {
-                    handleEngineSelection('google');
-                }
+                        handleEngineSelection('google');
+                    }
                 dialog.remove();
                 createSearchEngineSelector();
+                });
             });
-        });
 
         // Add click handler for selection
         item.addEventListener('click', (e) => {
@@ -921,7 +921,7 @@ function showEditEngineDialog(engineKey, engineData) {
     dialog.querySelector('#engineName').value = engineData.name;
     dialog.querySelector('#engineUrl').value = engineData.url;
     dialog.querySelector('#engineIcon').value = engineData.icon || '';
-    
+
     document.body.appendChild(dialog);
 
     const form = dialog.querySelector('#searchEngineForm');
@@ -1125,18 +1125,18 @@ function createConfirmDialog(message, onConfirm, confirmText = 'Delete') {
         onConfirm();
         dialog.remove();
     });
-    
+
     dialog.querySelector('.cancel-btn').addEventListener('click', () => {
         dialog.remove();
     });
-    
+
     // Close dialog when clicking outside
     dialog.addEventListener('click', (e) => {
         if (e.target === dialog) {
             dialog.remove();
         }
     });
-    
+
     document.body.appendChild(dialog);
     return dialog;
 }
@@ -1165,7 +1165,7 @@ function showAddEngineDialog() {
     
     const template = document.getElementById('searchEngineDialogTemplate');
     dialog.appendChild(template.content.cloneNode(true));
-    
+
     document.body.appendChild(dialog);
 
     // Get form elements
@@ -1418,12 +1418,12 @@ function showStorageManager() {
         const item = document.createElement('div');
         item.className = 'storage-item';
         item.innerHTML = `
-            <span>${key}: ${size}</span>
-            <button class="clear-btn" data-key="${key}">Clear</button>
+                            <span>${key}: ${size}</span>
+                            <button class="clear-btn" data-key="${key}">Clear</button>
         `;
         itemsContainer.appendChild(item);
     });
-    
+
     // Add event handlers
     dialog.querySelectorAll('.clear-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1452,7 +1452,7 @@ function showStorageManager() {
             dialog.remove();
         }
     });
-    
+
     document.body.appendChild(dialog);
     return dialog;
 }
@@ -1475,7 +1475,7 @@ setInterval(async () => {
             rotateBackground();
         }
     }
-}, 3600000); // Every hour
+}, 3600000); // Every hour 
 
 // Add these functions for data export/import
 function exportUserData() {
@@ -1578,4 +1578,44 @@ document.getElementById('importFile').addEventListener('change', function(e) {
     if (e.target.files.length > 0) {
         importUserData(e.target.files[0]);
     }
-}); 
+});
+
+// Add this function to fetch and update weather
+async function updateWeather() {
+    try {
+        const response = await fetch(
+            'https://api.openweathermap.org/data/2.5/weather?q=Dhaka&units=metric&appid=6d055e39ee237af35ca066f35474e9df'
+        );
+        
+        if (!response.ok) {
+            throw new Error('Weather data fetch failed');
+        }
+
+        const data = await response.json();
+        
+        const tempElement = document.querySelector('#weather .temp');
+        const descElement = document.querySelector('#weather .description');
+        const iconElement = document.querySelector('#weather .weather-icon');
+        
+        // Round temperature to nearest whole number
+        const temp = Math.round(data.main.temp);
+        tempElement.textContent = `${temp}°C`;
+        descElement.textContent = data.weather[0].description;
+
+        // Update weather icon
+        const iconCode = data.weather[0].icon;
+        iconElement.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+        iconElement.alt = data.weather[0].description;
+
+    } catch (error) {
+        console.error('Weather update failed:', error);
+        // Hide weather display on error
+        document.getElementById('weather').style.display = 'none';
+    }
+}
+
+// Update weather every 30 minutes
+setInterval(updateWeather, 30 * 60 * 1000);
+
+// Initial weather update
+updateWeather(); 

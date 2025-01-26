@@ -45,6 +45,7 @@ body::after {
     gap: 0.5rem;
     filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
     z-index: 5;
+    width: 400px;
 }
 
 #datetime .time {
@@ -52,6 +53,7 @@ body::after {
     font-weight: 400;
     text-shadow: 0 2px 15px rgba(0,0,0,0.4);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1;
 }
 
 #datetime .date {
@@ -61,6 +63,7 @@ body::after {
     letter-spacing: 4px;
     opacity: 0.9;
     text-shadow: 0 2px 15px rgba(0,0,0,0.4);
+    margin-bottom: 1rem;
 }
 
 /* Main content styles */
@@ -987,4 +990,91 @@ input[type="search"]:focus {
 
 .clear-btn:hover {
     background: rgba(220, 53, 69, 1);
+}
+
+/* Weather styles */
+#weather {
+    color: white;
+    position: fixed;
+    top: 2.8rem;
+    left: calc(50% + 150px);
+    transform: none;
+    font-size: 1.2rem;
+    opacity: 0.95;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+    z-index: 5;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weather-content {
+    display: flex;
+    align-items: center;
+}
+
+.weather-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.weather-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.weather-icon {
+    width: 45px;
+    height: 45px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.weather-content .temp {
+    font-size: 1.6rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.weather-content .description {
+    font-size: 0.8rem;
+    text-transform: capitalize;
+    opacity: 0.8;
+    letter-spacing: 0.5px;
+}
+
+/* Add media query for smaller screens */
+@media (max-width: 1024px) {
+    #datetime {
+        width: auto;
+    }
+
+    #weather {
+        top: 1rem;
+        left: auto;
+        right: 4rem;
+    }
+}
+
+@media (max-width: 768px) {
+    #weather {
+        padding: 0.3rem 0.6rem;
+    }
+    
+    .weather-icon {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .weather-content .temp {
+        font-size: 1.2rem;
+    }
+
+    .weather-content .description {
+        font-size: 0.7rem;
+    }
 } 
