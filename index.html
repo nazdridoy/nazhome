@@ -8,6 +8,17 @@
 </head>
 <body>
     <div id="datetime"></div>
+    <div id="calendar-widget" style="display: none;">
+        <div class="calendar-header">
+            <button class="calendar-nav" id="prevMonth">&lt;</button>
+            <span class="calendar-title"></span>
+            <button class="calendar-nav" id="nextMonth">&gt;</button>
+        </div>
+        <div class="calendar-grid">
+            <div class="calendar-days"></div>
+            <div class="calendar-dates"></div>
+        </div>
+    </div>
     <div id="weather">
         <div class="weather-content">
             <div class="weather-main">
@@ -39,6 +50,18 @@
             <button id="closeSettings">×</button>
         </div>
         <div class="settings-content">
+            <div class="setting-item">
+                <label class="widgets-label">Widgets</label>
+                <div class="widgets-grid">
+                    <div class="widget-toggle">
+                        <label>
+                            <input type="checkbox" id="calendarWidget">
+                            <span>Calendar</span>
+                        </label>
+                        <small class="help-text">Show calendar in upper left corner</small>
+                    </div>
+                </div>
+            </div>
             <div class="setting-item">
                 <label>
                     <input type="checkbox" id="allowLocalUrls">

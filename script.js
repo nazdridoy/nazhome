@@ -1685,6 +1685,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const location = loadWeatherLocation();
     document.getElementById('weatherCity').value = location.city;
     populateCountryDropdown(); // Replace the static country selection with dynamic population
+    initializeCalendar();
 });
 
 // Add this function to fetch countries
@@ -1719,9 +1720,95 @@ async function populateCountryDropdown() {
     }
 }
 
-// Update the DOMContentLoaded event listener
-document.addEventListener('DOMContentLoaded', function() {
-    const location = loadWeatherLocation();
-    document.getElementById('weatherCity').value = location.city;
-    populateCountryDropdown(); // Replace the static country selection with dynamic population
-}); 
+// Calendar Widget functionality
+let currentDate = new Date();
+
+function initializeCalendar() {
+    const savedState = localStorage.getItem('calendarWidget') === 'true';
+    document.getElementById('calendarWidget').checked = savedState;
+    document.getElementById('calendar-widget').style.display = savedState ? 'block' : 'none';
+    
+    if (savedState) {
+        updateCalendar();
+    }
+}
+
+function updateCalendar() {
+    const calendarTitle = document.querySelector('.calendar-title');
+    const calendarDays = document.querySelector('.calendar-days');
+    const calendarDates = document.querySelector('.calendar-dates');
+    
+    // Set title
+    calendarTitle.textContent = currentDate.toLocaleDateString('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+    });
+    
+    // Set weekday names
+    calendarDays.innerHTML = 'SMTWTFS'.split('').map(day => 
+        `<div class="calendar-day">${day}</div>`
+    ).join('');
+    
+    // Calculate dates
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const prevMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate();
+    
+    let dates = [];
+    
+    // Previous month dates
+    for (let i = firstDay.getDay() - 1; i >= 0; i--) {
+        dates.push({
+            date: prevMonthDays - i,
+            class: 'other-month'
+        });
+    }
+    
+    // Current month dates
+    const today = new Date();
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+        dates.push({
+            date: i,
+            class: today.getDate() === i && 
+                   today.getMonth() === currentDate.getMonth() && 
+                   today.getFullYear() === currentDate.getFullYear() ? 'today' : ''
+        });
+    }
+    
+    // Next month dates
+    const remainingDays = 42 - dates.length; // 6 rows × 7 days = 42
+    for (let i = 1; i <= remainingDays; i++) {
+        dates.push({
+            date: i,
+            class: 'other-month'
+        });
+    }
+    
+    // Render dates
+    calendarDates.innerHTML = dates.map(({ date, class: className }) => 
+        `<div class="calendar-date ${className}">${date}</div>`
+    ).join('');
+}
+
+// Add event listeners
+document.getElementById('calendarWidget').addEventListener('change', function(e) {
+    const calendarWidget = document.getElementById('calendar-widget');
+    calendarWidget.style.display = e.target.checked ? 'block' : 'none';
+    localStorage.setItem('calendarWidget', e.target.checked);
+    if (e.target.checked) {
+        updateCalendar();
+    }
+});
+
+document.getElementById('prevMonth').addEventListener('click', () => {
+    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+    updateCalendar();
+});
+
+document.getElementById('nextMonth').addEventListener('click', () => {
+    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
+    updateCalendar();
+});
+
+// Initialize calendar on page load
+document.addEventListener('DOMContentLoaded', initializeCalendar); 
