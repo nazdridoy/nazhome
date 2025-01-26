@@ -1863,10 +1863,9 @@ class Calculator {
     updateDisplay() {
         let displayText = this.currentCalculation;
         if (this.pendingFunction) {
-            // Show a cleaner format without the Math. prefix and conversion formula
             displayText = `${this.pendingFunction}(${this.pendingValue || ''})`;
         } else {
-            // Clean up the display text by removing Math. prefixes and conversion formulas
+            // Clean up the display text
             displayText = displayText
                 .replace(/Math\.PI/g, 'π')
                 .replace(/Math\.sin\(\(([^)]+)\) \* Math\.PI \/ 180\)/g, 'sin($1)')
@@ -1874,7 +1873,8 @@ class Calculator {
                 .replace(/Math\.tan\(\(([^)]+)\) \* Math\.PI \/ 180\)/g, 'tan($1)')
                 .replace(/Math\.sqrt\(([^)]+)\)/g, '√($1)')
                 .replace(/Math\.log10\(([^)]+)\)/g, 'log($1)')
-                .replace(/Math\.log\(([^)]+)\)/g, 'ln($1)');
+                .replace(/Math\.log\(([^)]+)\)/g, 'ln($1)')
+                .replace(/\*\*/g, '^');  // Add this line to display ^ instead of **
         }
         this.calculation.textContent = displayText;
         this.result.textContent = this.lastResult;
@@ -2043,7 +2043,12 @@ class Calculator {
         if (this.pendingFunction) {
             this.pendingValue = this.pendingValue.slice(0, -1);
         } else {
-            this.currentCalculation = this.currentCalculation.slice(0, -1);
+            // Handle ** as a single operator when deleting
+            if (this.currentCalculation.endsWith('**')) {
+                this.currentCalculation = this.currentCalculation.slice(0, -2);
+            } else {
+                this.currentCalculation = this.currentCalculation.slice(0, -1);
+            }
         }
         this.updateDisplay();
     }
