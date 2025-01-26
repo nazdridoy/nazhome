@@ -19,6 +19,37 @@
             <div class="calendar-dates"></div>
         </div>
     </div>
+    <div id="calculator-widget" style="display: none;">
+        <div class="calculator-header">
+            <span>Calculator</span>
+        </div>
+        <div class="calculator-screen">
+            <div class="calculation"></div>
+            <div class="result">0</div>
+        </div>
+        <div class="calculator-grid">
+            <button class="calc-btn clear">C</button>
+            <button class="calc-btn operator">(</button>
+            <button class="calc-btn operator">)</button>
+            <button class="calc-btn operator">÷</button>
+            <button class="calc-btn">7</button>
+            <button class="calc-btn">8</button>
+            <button class="calc-btn">9</button>
+            <button class="calc-btn operator">×</button>
+            <button class="calc-btn">4</button>
+            <button class="calc-btn">5</button>
+            <button class="calc-btn">6</button>
+            <button class="calc-btn operator">-</button>
+            <button class="calc-btn">1</button>
+            <button class="calc-btn">2</button>
+            <button class="calc-btn">3</button>
+            <button class="calc-btn operator">+</button>
+            <button class="calc-btn">0</button>
+            <button class="calc-btn">.</button>
+            <button class="calc-btn delete">⌫</button>
+            <button class="calc-btn equals">=</button>
+        </div>
+    </div>
     <div id="weather">
         <div class="weather-content">
             <div class="weather-main">
@@ -59,6 +90,13 @@
                             <span>Calendar</span>
                         </label>
                         <small class="help-text">Show calendar in upper left corner</small>
+                    </div>
+                    <div class="widget-toggle">
+                        <label>
+                            <input type="checkbox" id="calculatorWidget">
+                            <span>Calculator</span>
+                        </label>
+                        <small class="help-text">Show calculator widget</small>
                     </div>
                 </div>
             </div>

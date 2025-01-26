@@ -1578,6 +1578,7 @@ function importUserData(file) {
                     () => location.reload(), 
                     'Reload'
                 );
+
             }, 'Import');
 
         } catch (error) {
@@ -1811,4 +1812,118 @@ document.getElementById('nextMonth').addEventListener('click', () => {
 });
 
 // Initialize calendar on page load
-document.addEventListener('DOMContentLoaded', initializeCalendar); 
+document.addEventListener('DOMContentLoaded', initializeCalendar);
+
+// Calculator Widget functionality
+function initializeCalculator() {
+    const savedState = localStorage.getItem('calculatorWidget') === 'true';
+    document.getElementById('calculatorWidget').checked = savedState;
+    document.getElementById('calculator-widget').style.display = savedState ? 'block' : 'none';
+}
+
+class Calculator {
+    constructor() {
+        this.calculation = document.querySelector('.calculation');
+        this.result = document.querySelector('.result');
+        this.currentCalculation = '';
+        this.lastResult = '0';
+    }
+
+    updateDisplay() {
+        this.calculation.textContent = this.currentCalculation;
+        this.result.textContent = this.lastResult;
+    }
+
+    appendNumber(number) {
+        this.currentCalculation += number;
+        this.compute();
+    }
+
+    appendOperator(operator) {
+        if (operator === '×') operator = '*';
+        if (operator === '÷') operator = '/';
+        this.currentCalculation += operator;
+        this.updateDisplay();
+    }
+
+    clear() {
+        this.currentCalculation = '';
+        this.lastResult = '0';
+        this.updateDisplay();
+    }
+
+    delete() {
+        this.currentCalculation = this.currentCalculation.slice(0, -1);
+        this.compute();
+    }
+
+    compute() {
+        try {
+            let computation = this.currentCalculation
+                .replace(/×/g, '*')
+                .replace(/÷/g, '/');
+            
+            // Evaluate the expression
+            let result = Function('"use strict";return (' + computation + ')')();
+            
+            // Format the result
+            this.lastResult = Number.isInteger(result) ? 
+                result.toString() : 
+                parseFloat(result.toFixed(8)).toString();
+        } catch (e) {
+            this.lastResult = this.currentCalculation || '0';
+        }
+        this.updateDisplay();
+    }
+}
+
+// Initialize calculator functionality
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCalculator();
+    const calculator = new Calculator();
+
+    // Add event listener for calculator widget toggle
+    document.getElementById('calculatorWidget').addEventListener('change', function(e) {
+        const calculatorWidget = document.getElementById('calculator-widget');
+        calculatorWidget.style.display = e.target.checked ? 'block' : 'none';
+        localStorage.setItem('calculatorWidget', e.target.checked);
+    });
+
+    // Add event listeners for calculator buttons
+    document.querySelector('.calculator-grid').addEventListener('click', e => {
+        if (!e.target.matches('button')) return;
+
+        const button = e.target;
+        const buttonText = button.textContent;
+
+        if (button.classList.contains('clear')) {
+            calculator.clear();
+        } else if (button.classList.contains('delete')) {
+            calculator.delete();
+        } else if (button.classList.contains('equals')) {
+            calculator.compute();
+        } else if (button.classList.contains('operator')) {
+            calculator.appendOperator(buttonText);
+        } else {
+            calculator.appendNumber(buttonText);
+        }
+    });
+
+    // Add keyboard support
+    document.addEventListener('keydown', e => {
+        if (!document.getElementById('calculator-widget').style.display === 'none') {
+            const key = e.key;
+            if (/[0-9\.]/.test(key)) {
+                calculator.appendNumber(key);
+            } else if (['+', '-', '*', '/', '(', ')'].includes(key)) {
+                calculator.appendOperator(key);
+            } else if (key === 'Enter') {
+                calculator.compute();
+            } else if (key === 'Backspace') {
+                calculator.delete();
+            } else if (key === 'Escape') {
+                calculator.clear();
+            }
+        }
+    });
+}); 
