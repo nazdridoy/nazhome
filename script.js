@@ -663,9 +663,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Initialize settings panel as hidden
-document.querySelector('.settings-panel').style.display = 'none';
-
 // Search engine logo management
 function updateSearchEngineLogo() {
     const button = document.getElementById('searchEngine');

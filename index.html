@@ -22,26 +22,27 @@
         <div class="grid-container" id="quickLinks"></div>
     </div>
 
-    <div class="settings-panel">
+    <div class="settings-panel" style="display: none;">
         <div class="settings-header">
             <h3>Settings</h3>
-            <button id="closeSettings" class="close-btn" aria-label="Close settings">×</button>
+            <button id="closeSettings">×</button>
         </div>
         <div class="settings-content">
-            <button class="settings-btn">
-                <div class="toggle-wrapper">
-                    <span>Allow Local URLs</span>
+            <div class="setting-item">
+                <label>
                     <input type="checkbox" id="allowLocalUrls">
-                </div>
+                    <span>Allow local URLs</span>
+                </label>
                 <small class="help-text">Enable access to localhost, private IPs, and file:// URLs</small>
-            </button>
-            <button id="manageStorage" class="settings-btn">
-                Manage Storage
+            </div>
+            <div class="setting-item">
+                <button id="restoreDefaults">Restore Default Bookmarks</button>
+                <small class="help-text">Reset to original bookmark collection</small>
+            </div>
+            <div class="setting-item">
+                <button id="manageStorage">Manage Storage</button>
                 <small class="help-text">View and clear stored data</small>
-            </button>
-            <button id="restoreDefaults" class="settings-btn">
-                Restore Default Bookmarks
-            </button>
+            </div>
         </div>
     </div>
 
