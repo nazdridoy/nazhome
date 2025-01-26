@@ -1850,7 +1850,10 @@ document.getElementById('updateWeatherLocation').addEventListener('click', funct
 
 // Add this to your initialization code
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize weather widget first
+    // Initialize time widget first
+    initializeTimeWidget();
+    
+    // Initialize weather widget
     initializeWeatherWidget();
     
     // Only load weather location and update weather if widget is visible
@@ -2475,5 +2478,41 @@ document.getElementById('weatherWidget').addEventListener('change', function(e) 
         if (e.target.checked) {
             updateWeather(); // Refresh weather data when showing
         }
+    }
+});
+
+// Add these functions for time widget management
+function getTimeSettings() {
+    return {
+        showTime: safeGet('timeWidget') !== false  // Default to true
+    };
+}
+
+function saveTimeSettings(settings) {
+    return safeSet('timeWidget', settings.showTime);
+}
+
+// Update the initializeTimeWidget function
+function initializeTimeWidget() {
+    const settings = getTimeSettings();
+    const timeWidget = document.getElementById('datetime');
+    const timeToggle = document.getElementById('timeWidget');
+    
+    timeToggle.checked = settings.showTime;
+    timeWidget.style.opacity = settings.showTime ? '1' : '0';
+    timeWidget.style.visibility = settings.showTime ? 'visible' : 'hidden';
+    // Remove display: none to maintain layout
+    timeWidget.style.display = 'flex';
+}
+
+// Update the time widget event listener
+document.getElementById('timeWidget').addEventListener('change', function(e) {
+    const settings = getTimeSettings();
+    settings.showTime = e.target.checked;
+    if (saveTimeSettings(settings)) {
+        const timeWidget = document.getElementById('datetime');
+        // Use opacity and visibility instead of display
+        timeWidget.style.opacity = e.target.checked ? '1' : '0';
+        timeWidget.style.visibility = e.target.checked ? 'visible' : 'hidden';
     }
 }); 
