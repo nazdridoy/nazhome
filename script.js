@@ -707,52 +707,25 @@ document.querySelector('input[type="search"]').value = '';
 function createEditDialog(name, url) {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
-    dialog.innerHTML = `
-        <div class="edit-dialog-content">
-            <h3>Edit Bookmark</h3>
-            <form id="editForm">
-                <div class="input-group">
-                    <label for="editName">Name:</label>
-                    <input type="text" id="editName" value="${name}" required>
-                </div>
-                <div class="input-group">
-                    <label for="editUrl">URL:</label>
-                    <input type="url" id="editUrl" value="${url}" required>
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="save-btn">Save</button>
-                    <button type="button" class="cancel-btn">Cancel</button>
-                </div>
-            </form>
-        </div>
-    `;
+    
+    const template = document.getElementById('editDialogTemplate');
+    dialog.appendChild(template.content.cloneNode(true));
+    
+    // Set initial values
+    dialog.querySelector('#editName').value = name;
+    dialog.querySelector('#editUrl').value = url;
+    
     document.body.appendChild(dialog);
     return dialog;
 }
 
-// Add this function for creating new bookmarks
 function createAddDialog() {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
-    dialog.innerHTML = `
-        <div class="edit-dialog-content">
-            <h3>Add New Bookmark</h3>
-            <form id="addForm">
-                <div class="input-group">
-                    <label for="addUrl">URL:</label>
-                    <input type="url" id="addUrl" placeholder="https://example.com" required>
-                </div>
-                <div class="input-group">
-                    <label for="addName">Name:</label>
-                    <input type="text" id="addName" placeholder="Website Name" required>
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="save-btn">Add</button>
-                    <button type="button" class="cancel-btn">Cancel</button>
-                </div>
-            </form>
-        </div>
-    `;
+    
+    const template = document.getElementById('addDialogTemplate');
+    dialog.appendChild(template.content.cloneNode(true));
+    
     document.body.appendChild(dialog);
     return dialog;
 }
@@ -776,34 +749,24 @@ checkFirstVisit();
 function createSearchEngineDialog(isEdit = false, engineData = null) {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
-    dialog.innerHTML = `
-        <div class="edit-dialog-content">
-            <h3>${isEdit ? 'Edit' : 'Add'} Search Engine</h3>
-            <form id="searchEngineForm">
-                <div class="input-group">
-                    <label for="engineName">Name:</label>
-                    <input type="text" id="engineName" value="${engineData?.name || ''}" 
-                           placeholder="e.g., Bing" required>
-                </div>
-                <div class="input-group">
-                    <label for="engineUrl">Search URL:</label>
-                    <input type="url" id="engineUrl" value="${engineData?.url || ''}"
-                           placeholder="https://example.com/search?q={searchTerm}" required>
-                    <small class="help-text">Use {searchTerm} where the search query should go</small>
-                </div>
-                <div class="input-group">
-                    <label for="engineIcon">Icon URL: (optional)</label>
-                    <input type="url" id="engineIcon" value="${engineData?.icon || ''}"
-                           placeholder="https://example.com/favicon.ico">
-                    <small class="help-text">Leave empty for default icon</small>
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="save-btn">${isEdit ? 'Save' : 'Add'}</button>
-                    <button type="button" class="cancel-btn">Cancel</button>
-                </div>
-            </form>
-        </div>
-    `;
+    
+    const template = document.getElementById('searchEngineDialogTemplate');
+    dialog.appendChild(template.content.cloneNode(true));
+    
+    // Update the title if editing
+    if (isEdit) {
+        dialog.querySelector('h3').textContent = 'Edit Search Engine';
+        dialog.querySelector('.save-btn').textContent = 'Save';
+    }
+    
+    // Set initial values
+    if (engineData) {
+        dialog.querySelector('#engineName').value = engineData.name;
+        dialog.querySelector('#engineUrl').value = engineData.url;
+        dialog.querySelector('#engineIcon').value = engineData.icon || '';
+    }
+    
+    document.body.appendChild(dialog);
     return dialog;
 }
 
@@ -830,9 +793,11 @@ function createSearchEngineSelector() {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
     
-    // Fix the custom engines loading using our safe localStorage helper
-    const customEngines = safeGet('customSearchEngines') || {};
+    // Clone the main template
+    const template = document.getElementById('searchEngineSelectorTemplate');
+    dialog.appendChild(template.content.cloneNode(true));
     
+    const customEngines = JSON.parse(localStorage.getItem('customSearchEngines') || '{}');
     const defaultEngines = [
         { key: 'google', name: 'Google', icon: 'https://www.google.com/favicon.ico' },
         { key: 'ddg', name: 'DuckDuckGo', icon: 'https://duckduckgo.com/favicon.ico' },
@@ -840,107 +805,82 @@ function createSearchEngineSelector() {
         { key: 'yandex', name: 'Yandex', icon: 'https://yandex.com/favicon.ico' }
     ];
 
-    dialog.innerHTML = `
-        <div class="edit-dialog-content search-engine-selector">
-            <h3>Select Search Engine</h3>
-            <div class="search-engine-grid">
-                ${defaultEngines.map(engine => `
-                    <div class="search-engine-item" data-engine="${engine.key}">
-                        <div class="icon-wrapper">
-                            <img src="${engine.icon}" alt="${engine.name}">
-                        </div>
-                        <span>${engine.name}</span>
-                    </div>
-                `).join('')}
-                ${Object.entries(customEngines).map(([key, engine]) => `
-                    <div class="search-engine-item" data-engine="${key}">
-                        <div class="quick-link-menu">
-                            <div class="menu-items">
-                                <button class="edit-btn">Edit</button>
-                                <button class="delete-btn">Delete</button>
-                            </div>
-                            <span class="menu-dots">⋮</span>
-                        </div>
-                        <div class="icon-wrapper">
-                            <img src="${engine.icon || getDefaultSearchIcon(engine.url)}" 
-                                 alt="${engine.name}"
-                                 onerror="this.src='${getDefaultSearchIcon(engine.url)}'">
-                        </div>
-                        <span>${engine.name}</span>
-                    </div>
-                `).join('')}
-                <div class="search-engine-item add-engine">
-                    <div class="icon-wrapper">
-                        <span class="plus-icon">+</span>
-                    </div>
-                    <span>Add Custom</span>
-                </div>
-            </div>
-        </div>
-    `;
+    const grid = dialog.querySelector('.search-engine-grid');
+    const defaultTemplate = document.getElementById('searchEngineItemTemplate');
+    const customTemplate = document.getElementById('customSearchEngineItemTemplate');
+    const addButton = grid.querySelector('.add-engine');
+    
+    // Add default engines
+    defaultEngines.forEach(engine => {
+        const item = defaultTemplate.content.cloneNode(true).querySelector('.search-engine-item');
+        item.dataset.engine = engine.key;
+        const img = item.querySelector('img');
+        img.src = engine.icon;
+        img.alt = engine.name;
+        item.querySelector('span').textContent = engine.name;
+        
+        // Add click handler for selection
+        item.addEventListener('click', () => {
+            handleEngineSelection(engine.key);
+            dialog.remove();
+        });
+        
+        grid.insertBefore(item, addButton);
+    });
 
-    document.body.appendChild(dialog);
-
-    // Handle menu dots for custom engines
-    dialog.querySelectorAll('.search-engine-item[data-engine]').forEach(item => {
+    // Add custom engines
+    Object.entries(customEngines).forEach(([key, engine]) => {
+        const item = customTemplate.content.cloneNode(true).querySelector('.search-engine-item');
+        item.dataset.engine = key;
+        const img = item.querySelector('img');
+        img.src = engine.icon || getDefaultSearchIcon(engine.url);
+        img.alt = engine.name;
+        img.onerror = () => img.src = getDefaultSearchIcon(engine.url);
+        item.querySelector('span').textContent = engine.name;
+        
+        // Add menu dots handler
         const menuDots = item.querySelector('.menu-dots');
         const menuItems = item.querySelector('.menu-items');
         
-        if (menuDots && menuItems) {
-            menuDots.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Close all other open menus first
-                document.querySelectorAll('.menu-items.active').forEach(menu => {
-                    if (menu !== menuItems) {
-                        menu.classList.remove('active');
-                    }
-                });
-                
-                menuItems.classList.toggle('active');
-            });
+        menuDots.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuItems.classList.toggle('active');
+        });
 
-            // Edit handler
-            item.querySelector('.edit-btn')?.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const engineKey = item.dataset.engine;
-                const engineData = customEngines[engineKey];
+        // Add edit handler
+        item.querySelector('.edit-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            dialog.remove();
+            showEditEngineDialog(key, engine);
+        });
+
+        // Add delete handler
+        item.querySelector('.delete-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            createConfirmDialog('Delete this search engine?', () => {
+                delete customEngines[key];
+                localStorage.setItem('customSearchEngines', JSON.stringify(customEngines));
+                if (document.getElementById('searchEngine').dataset.engine === key) {
+                    handleEngineSelection('google');
+                }
                 dialog.remove();
-                showEditEngineDialog(engineKey, engineData);
+                createSearchEngineSelector();
             });
+        });
 
-            // Delete handler
-            item.querySelector('.delete-btn')?.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const engineKey = item.dataset.engine;
-                createConfirmDialog('Delete this search engine?', () => {
-                    delete customEngines[engineKey];
-                    localStorage.setItem('customSearchEngines', JSON.stringify(customEngines));
-                    dialog.remove();
-                    createSearchEngineSelector();
-                    // Reset to Google if the current engine was deleted
-                    if (document.getElementById('searchEngine').dataset.engine === engineKey) {
-                        handleEngineSelection('google');
-                    }
-                });
-            });
-        }
-
-        // Selection handler
+        // Add click handler for selection
         item.addEventListener('click', (e) => {
             if (!e.target.closest('.menu-items') && !e.target.closest('.menu-dots')) {
-                const engineKey = item.dataset.engine;
-                handleEngineSelection(engineKey);
+                handleEngineSelection(key);
                 dialog.remove();
             }
         });
+        
+        grid.insertBefore(item, addButton);
     });
 
-    // Handle add engine button
-    dialog.querySelector('.add-engine')?.addEventListener('click', () => {
+    // Add handler for the "Add Custom" button
+    grid.querySelector('.add-engine').addEventListener('click', () => {
         dialog.remove();
         showAddEngineDialog();
     });
@@ -952,7 +892,7 @@ function createSearchEngineSelector() {
         }
     });
 
-    // Close menus when clicking outside
+    // Close any open menus when clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.menu-items') && !e.target.closest('.menu-dots')) {
             dialog.querySelectorAll('.menu-items.active').forEach(menu => {
@@ -960,52 +900,31 @@ function createSearchEngineSelector() {
             });
         }
     });
+
+    document.body.appendChild(dialog);
+    return dialog;
 }
 
 // Add function to show edit dialog
 function showEditEngineDialog(engineKey, engineData) {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
-    dialog.innerHTML = `
-        <div class="edit-dialog-content">
-            <h3>Edit Search Engine</h3>
-            <form id="editEngineForm" name="editEngineForm">
-                <div class="input-group">
-                    <label for="engineName">Name:</label>
-                    <input type="text" 
-                           id="engineName" 
-                           name="engineName" 
-                           required 
-                           value="${engineData.name}">
-                </div>
-                <div class="input-group">
-                    <label for="engineUrl">Search URL:</label>
-                    <input type="text" 
-                           id="engineUrl" 
-                           name="engineUrl" 
-                           required 
-                           value="${engineData.url}">
-                    <small class="help-text">Use {searchTerm} where the search query should go</small>
-                    <small class="error-text"></small>
-                </div>
-                <div class="input-group">
-                    <label for="engineIcon">Icon URL (optional):</label>
-                    <input type="text" 
-                           id="engineIcon" 
-                           name="engineIcon" 
-                           value="${engineData.icon || ''}">
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="save-btn">Save</button>
-                    <button type="button" class="cancel-btn">Cancel</button>
-                </div>
-            </form>
-        </div>
-    `;
-
+    
+    const template = document.getElementById('searchEngineDialogTemplate');
+    dialog.appendChild(template.content.cloneNode(true));
+    
+    // Update the title if editing
+    dialog.querySelector('h3').textContent = 'Edit Search Engine';
+    dialog.querySelector('.save-btn').textContent = 'Save';
+    
+    // Set initial values
+    dialog.querySelector('#engineName').value = engineData.name;
+    dialog.querySelector('#engineUrl').value = engineData.url;
+    dialog.querySelector('#engineIcon').value = engineData.icon || '';
+    
     document.body.appendChild(dialog);
 
-    const form = dialog.querySelector('#editEngineForm');
+    const form = dialog.querySelector('#searchEngineForm');
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('engineName').value.trim();
@@ -1187,42 +1106,38 @@ function tryNextIcon(select, iconUrls, index = 0) {
     img.src = iconUrls[index];
 }
 
-// Update the createConfirmDialog function to handle different types
+// Update the createConfirmDialog function to properly handle events
 function createConfirmDialog(message, onConfirm, confirmText = 'Delete') {
-    const isDelete = confirmText === 'Delete';
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
-    dialog.innerHTML = `
-        <div class="edit-dialog-content confirm-dialog">
-            <h3>Confirm</h3>
-            <p class="confirm-message">${message}</p>
-            <div class="button-group">
-                <button type="button" class="${isDelete ? 'delete-btn' : 'restore-btn'}">${confirmText}</button>
-                <button type="button" class="cancel-btn">Cancel</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(dialog);
-
-    // Handle confirm button
-    const confirmBtn = dialog.querySelector(`.${isDelete ? 'delete-btn' : 'restore-btn'}`);
-    confirmBtn.onclick = () => {
+    
+    const template = document.getElementById('confirmDialogTemplate');
+    dialog.appendChild(template.content.cloneNode(true));
+    
+    // Update content
+    dialog.querySelector('.confirm-message').textContent = message;
+    const confirmBtn = dialog.querySelector('.confirm-btn');
+    confirmBtn.textContent = confirmText;
+    confirmBtn.className = `confirm-btn ${confirmText.toLowerCase()}-btn`;
+    
+    // Add event handlers
+    confirmBtn.addEventListener('click', () => {
         onConfirm();
         dialog.remove();
-    };
-
-    // Handle cancel button
-    dialog.querySelector('.cancel-btn').onclick = () => {
+    });
+    
+    dialog.querySelector('.cancel-btn').addEventListener('click', () => {
         dialog.remove();
-    };
-
-    // Handle click outside
-    dialog.onclick = (e) => {
+    });
+    
+    // Close dialog when clicking outside
+    dialog.addEventListener('click', (e) => {
         if (e.target === dialog) {
             dialog.remove();
         }
-    };
-
+    });
+    
+    document.body.appendChild(dialog);
     return dialog;
 }
 
@@ -1243,54 +1158,24 @@ if (!document.getElementById('searchEngine').dataset.engine) {
     updateSearchEngineLogo();
 }
 
-// Add this function to show add engine dialog
+// Update the showAddEngineDialog function to properly handle form submission
 function showAddEngineDialog() {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
-    dialog.innerHTML = `
-        <div class="edit-dialog-content">
-            <h3>Add Custom Search Engine</h3>
-            <form id="addEngineForm" name="addEngineForm">
-                <div class="input-group">
-                    <label for="engineName">Name:</label>
-                    <input type="text" 
-                           id="engineName" 
-                           name="engineName" 
-                           required 
-                           placeholder="e.g., Bing">
-                </div>
-                <div class="input-group">
-                    <label for="engineUrl">Search URL:</label>
-                    <input type="text" 
-                           id="engineUrl" 
-                           name="engineUrl" 
-                           required 
-                           placeholder="https://example.com/search?q={searchTerm}">
-                    <small class="help-text">Use {searchTerm} where the search query should go</small>
-                    <small class="error-text"></small>
-                </div>
-                <div class="input-group">
-                    <label for="engineIcon">Icon URL (optional):</label>
-                    <input type="text" 
-                           id="engineIcon" 
-                           name="engineIcon" 
-                           placeholder="https://example.com/favicon.ico">
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="save-btn">Add</button>
-                    <button type="button" class="cancel-btn">Cancel</button>
-                </div>
-            </form>
-        </div>
-    `;
-
+    
+    const template = document.getElementById('searchEngineDialogTemplate');
+    dialog.appendChild(template.content.cloneNode(true));
+    
     document.body.appendChild(dialog);
 
-    const form = dialog.querySelector('#addEngineForm');
-    const urlInput = document.getElementById('engineUrl');
-    const errorText = urlInput.nextElementSibling.nextElementSibling;
+    // Get form elements
+    const form = dialog.querySelector('#searchEngineForm');
+    const nameInput = dialog.querySelector('#engineName');
+    const urlInput = dialog.querySelector('#engineUrl');
+    const iconInput = dialog.querySelector('#engineIcon');
+    const errorText = dialog.querySelector('.error-text');
 
-    // Add real-time validation
+    // Add URL validation on input
     urlInput.addEventListener('input', () => {
         const url = urlInput.value.trim();
         if (url) {
@@ -1306,13 +1191,14 @@ function showAddEngineDialog() {
         }
     });
 
+    // Handle form submission
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const name = document.getElementById('engineName').value.trim();
+        const name = nameInput.value.trim();
         const url = urlInput.value.trim();
-        const icon = document.getElementById('engineIcon').value.trim();
+        const icon = iconInput.value.trim();
 
-        // Validate URL before saving
+        // Validate URL
         const validation = validateSearchEngineUrl(url);
         if (!validation.valid) {
             errorText.textContent = validation.error;
@@ -1334,17 +1220,21 @@ function showAddEngineDialog() {
         createSearchEngineSelector();
     });
 
+    // Handle cancel button
     dialog.querySelector('.cancel-btn').addEventListener('click', () => {
         dialog.remove();
         createSearchEngineSelector();
     });
 
+    // Close dialog when clicking outside
     dialog.addEventListener('click', (e) => {
         if (e.target === dialog) {
             dialog.remove();
             createSearchEngineSelector();
         }
     });
+
+    return dialog;
 }
 
 // Add function to validate search engine URL
@@ -1505,59 +1395,66 @@ document.getElementById('allowLocalUrls').addEventListener('change', function(e)
 // Initialize the toggle state
 document.getElementById('allowLocalUrls').checked = isLocalUrlAllowed();
 
-// Update the showStorageManager function
+// Update the showStorageManager function to properly handle events
 function showStorageManager() {
-    // Remove any existing storage manager dialog first
     const existingDialog = document.querySelector('.storage-manager')?.closest('.edit-dialog');
     if (existingDialog) {
         existingDialog.remove();
     }
 
-    const storageInfo = getStorageInfo();
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
-    dialog.innerHTML = `
-        <div class="edit-dialog-content storage-manager">
-            <h3>Storage Management</h3>
-            <div class="storage-info">
-                <p>Total Used: ${storageInfo.total} (${storageInfo.percentUsed})</p>
-                <div class="storage-items">
-                    ${Object.entries(storageInfo.items).map(([key, size]) => `
-                        <div class="storage-item">
-                            <span>${key}: ${size}</span>
-                            <button class="clear-btn" data-key="${key}">Clear</button>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-            <div class="button-group">
-                <button class="clear-all-btn">Clear All Data</button>
-                <button class="cancel-btn">Close</button>
-            </div>
-        </div>
-    `;
-
+    
+    const template = document.getElementById('storageManagerTemplate');
+    dialog.appendChild(template.content.cloneNode(true));
+    
+    // Update content with storage info
+    const storageInfo = getStorageInfo();
+    dialog.querySelector('.storage-total').textContent = 
+        `Total Used: ${storageInfo.total} (${storageInfo.percentUsed})`;
+    
+    const itemsContainer = dialog.querySelector('.storage-items');
+    Object.entries(storageInfo.items).forEach(([key, size]) => {
+        const item = document.createElement('div');
+        item.className = 'storage-item';
+        item.innerHTML = `
+            <span>${key}: ${size}</span>
+            <button class="clear-btn" data-key="${key}">Clear</button>
+        `;
+        itemsContainer.appendChild(item);
+    });
+    
     // Add event handlers
-    dialog.querySelector('.clear-all-btn').onclick = () => {
-        if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
-            localStorage.clear();
-            location.reload();
-        }
-    };
-
     dialog.querySelectorAll('.clear-btn').forEach(btn => {
-        btn.onclick = () => {
+        btn.addEventListener('click', () => {
             const key = btn.dataset.key;
-            if (confirm(`Clear ${key}? This cannot be undone.`)) {
+            createConfirmDialog(`Clear ${key}?`, () => {
                 localStorage.removeItem(key);
                 showStorageManager(); // Refresh the dialog
-            }
-        };
+            });
+        });
     });
-
-    dialog.querySelector('.cancel-btn').onclick = () => dialog.remove();
-
+    
+    dialog.querySelector('.clear-all-btn').addEventListener('click', () => {
+        createConfirmDialog('Clear all data? This cannot be undone.', () => {
+            localStorage.clear();
+            location.reload();
+        });
+    });
+    
+    dialog.querySelector('.cancel-btn').addEventListener('click', () => {
+        dialog.remove();
+    });
+    
+    // Close dialog when clicking outside
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            dialog.remove();
+        }
+    });
+    
     document.body.appendChild(dialog);
+    return dialog;
 }
 
 // Add event listener for the manage storage button

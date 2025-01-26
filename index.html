@@ -48,6 +48,137 @@
 
     <button id="settingsToggle">⚙</button>
 
+    <!-- HTML Templates -->
+    <template id="editDialogTemplate">
+        <div class="edit-dialog-content">
+            <h3>Edit Bookmark</h3>
+            <form id="editForm">
+                <div class="input-group">
+                    <label for="editName">Name:</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="input-group">
+                    <label for="editUrl">URL:</label>
+                    <input type="url" id="editUrl" required>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="save-btn">Save</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </template>
+
+    <template id="addDialogTemplate">
+        <div class="edit-dialog-content">
+            <h3>Add New Bookmark</h3>
+            <form id="addForm">
+                <div class="input-group">
+                    <label for="addUrl">URL:</label>
+                    <input type="url" id="addUrl" placeholder="https://example.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="addName">Name:</label>
+                    <input type="text" id="addName" placeholder="Website Name" required>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="save-btn">Add</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </template>
+
+    <template id="searchEngineDialogTemplate">
+        <div class="edit-dialog-content">
+            <h3>Add Custom Search Engine</h3>
+            <form id="searchEngineForm">
+                <div class="input-group">
+                    <label for="engineName">Name:</label>
+                    <input type="text" id="engineName" required placeholder="e.g., Bing">
+                </div>
+                <div class="input-group">
+                    <label for="engineUrl">Search URL:</label>
+                    <input type="text" id="engineUrl" required placeholder="https://example.com/search?q={searchTerm}">
+                    <small class="help-text">Use {searchTerm} where the search query should go</small>
+                    <small class="error-text"></small>
+                </div>
+                <div class="input-group">
+                    <label for="engineIcon">Icon URL (optional):</label>
+                    <input type="text" id="engineIcon" placeholder="https://example.com/favicon.ico">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="save-btn">Add</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </template>
+
+    <template id="confirmDialogTemplate">
+        <div class="edit-dialog-content confirm-dialog">
+            <h3>Confirm</h3>
+            <p class="confirm-message"></p>
+            <div class="button-group">
+                <button type="button" class="confirm-btn">Confirm</button>
+                <button type="button" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="storageManagerTemplate">
+        <div class="edit-dialog-content storage-manager">
+            <h3>Storage Management</h3>
+            <div class="storage-info">
+                <p class="storage-total"></p>
+                <div class="storage-items"></div>
+            </div>
+            <div class="button-group">
+                <button class="clear-all-btn">Clear All Data</button>
+                <button class="cancel-btn">Close</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="searchEngineSelectorTemplate">
+        <div class="edit-dialog-content search-engine-selector">
+            <h3>Select Search Engine</h3>
+            <div class="search-engine-grid">
+                <div class="search-engine-item add-engine">
+                    <div class="icon-wrapper">
+                        <span class="plus-icon">+</span>
+                    </div>
+                    <span>Add Custom</span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="searchEngineItemTemplate">
+        <div class="search-engine-item" data-engine="">
+            <div class="icon-wrapper">
+                <img src="" alt="">
+            </div>
+            <span></span>
+        </div>
+    </template>
+
+    <template id="customSearchEngineItemTemplate">
+        <div class="search-engine-item" data-engine="">
+            <div class="icon-wrapper">
+                <img src="" alt="">
+            </div>
+            <span></span>
+            <div class="quick-link-menu">
+                <div class="menu-items">
+                    <button class="edit-btn">Edit</button>
+                    <button class="delete-btn">Delete</button>
+                </div>
+                <span class="menu-dots">⋮</span>
+            </div>
+        </div>
+    </template>
+
     <script src="script.js"></script>
 </body>
 </html> 

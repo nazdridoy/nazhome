@@ -773,7 +773,8 @@ input[type="search"]:focus {
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.2s;
-    position: relative;  /* Add this to contain the menu */
+    position: relative;  /* Keep this for menu positioning */
+    min-height: 90px;   /* Add minimum height to maintain grid alignment */
 }
 
 .search-engine-item:hover {
@@ -802,10 +803,13 @@ input[type="search"]:focus {
     object-fit: contain;
 }
 
-.search-engine-item span {
+.search-engine-item span:not(.menu-dots):not(.plus-icon) {
     color: white;
     font-size: 0.9rem;
     text-align: center;
+    display: block;
+    margin-top: 0.5rem;
+    z-index: 1;  /* Ensure text stays above menu */
 }
 
 .search-engine-item.add-engine .plus-icon {
@@ -819,7 +823,7 @@ input[type="search"]:focus {
     cursor: pointer;
 }
 
-/* Add styles for search engine menu dots */
+/* Update menu positioning */
 .search-engine-item .quick-link-menu {
     position: absolute;
     top: 0;
@@ -827,20 +831,21 @@ input[type="search"]:focus {
     z-index: 10;
 }
 
-.search-engine-item .menu-dots {
-    font-size: 24px;
+/* Ensure the name is always visible */
+.search-engine-item span:not(.menu-dots):not(.plus-icon) {
     color: white;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 50%;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s;
-    margin: 4px;
+    font-size: 0.9rem;
+    text-align: center;
+    display: block;
+    margin-top: 0.5rem;
+    z-index: 1;  /* Ensure text stays above menu */
+}
+
+/* Update menu dots to not interfere with layout */
+.search-engine-item .menu-dots {
+    position: absolute;
+    top: 4px;
+    right: 4px;
 }
 
 /* Show dots on hover */
