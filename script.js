@@ -441,7 +441,18 @@ function handleDrop(e) {
     loadBookmarks();
 }
 
-// Update the loadBookmarks function to add drag and drop functionality
+// Add these functions for bookmark UI settings
+function getBookmarkSettings() {
+    return {
+        hideAddButton: safeGet('hideAddButton') || false
+    };
+}
+
+function saveBookmarkSettings(settings) {
+    return safeSet('hideAddButton', settings.hideAddButton);
+}
+
+// Update the loadBookmarks function to respect the hide setting
 function loadBookmarks() {
     const bookmarks = safeGet('bookmarks') || [];
     const grid = document.getElementById('quickLinks');
@@ -608,6 +619,13 @@ function loadBookmarks() {
         <span>Add Link</span>
     `;
 
+    // Check if add button should be hidden
+    const settings = getBookmarkSettings();
+    if (!settings.hideAddButton) {
+        grid.appendChild(addButton);
+    }
+
+    // Add handler for the "+" button
     addButton.addEventListener('click', (e) => {
         e.preventDefault();
         const dialog = createAddDialog();
@@ -697,8 +715,6 @@ function loadBookmarks() {
             }
         };
     });
-
-    grid.appendChild(addButton);
 }
 
 // Update the getDefaultBookmarks function
@@ -1835,6 +1851,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('weatherCity').value = location.city;
     populateCountryDropdown(); // Replace the static country selection with dynamic population
     initializeCalendar();
+    initializeBookmarkSettings();
 });
 
 // Add this function to fetch countries
@@ -2394,4 +2411,19 @@ function parseFormattedNumber(str) {
         return `${base}e${exponent}`;
     }
     return str;
-} 
+}
+
+// Add this near your other initialization code
+function initializeBookmarkSettings() {
+    const settings = getBookmarkSettings();
+    document.getElementById('hideAddButton').checked = settings.hideAddButton;
+}
+
+// Add this event listener with your other initialization code
+document.getElementById('hideAddButton').addEventListener('change', function(e) {
+    const settings = getBookmarkSettings();
+    settings.hideAddButton = e.target.checked;
+    if (saveBookmarkSettings(settings)) {
+        loadBookmarks();
+    }
+}); 
