@@ -1789,9 +1789,13 @@ async function updateWeather() {
 
         const data = await response.json();
         
+        const cityElement = document.querySelector('#weather .city');
         const tempElement = document.querySelector('#weather .temp');
         const descElement = document.querySelector('#weather .description');
         const iconElement = document.querySelector('#weather .weather-icon');
+        
+        // Add city name
+        cityElement.textContent = data.name;
         
         // Round temperature to nearest whole number
         const temp = Math.round(data.main.temp);

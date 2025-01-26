@@ -1048,6 +1048,15 @@ input[type="search"]:focus {
     text-transform: capitalize;
     opacity: 0.8;
     letter-spacing: 0.5px;
+    line-height: 1;
+}
+
+.weather-content .city {
+    font-size: 0.65rem;
+    opacity: 0.6;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    font-weight: 400;
 }
 
 /* Add media query for smaller screens */
@@ -1073,12 +1082,12 @@ input[type="search"]:focus {
         height: 35px;
     }
     
-    .weather-content .temp {
-        font-size: 1.2rem;
-    }
-
     .weather-content .description {
         font-size: 0.7rem;
+    }
+
+    .weather-content .city {
+        font-size: 0.65rem;
     }
 }
 
