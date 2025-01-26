@@ -1662,5 +1662,44 @@ document.getElementById('updateWeatherLocation').addEventListener('click', funct
 document.addEventListener('DOMContentLoaded', function() {
     const location = loadWeatherLocation();
     document.getElementById('weatherCity').value = location.city;
-    document.getElementById('weatherCountry').value = location.country;
+    populateCountryDropdown(); // Replace the static country selection with dynamic population
+});
+
+// Add this function to fetch countries
+async function populateCountryDropdown() {
+    const select = document.getElementById('weatherCountry');
+    const savedCountry = localStorage.getItem('weatherCountry') || 'BD';
+    
+    try {
+        const response = await fetch('https://restcountries.com/v3.1/all');
+        if (!response.ok) throw new Error('Failed to fetch countries');
+        
+        const countries = await response.json();
+        
+        // Sort countries by name
+        countries.sort((a, b) => a.name.common.localeCompare(b.name.common));
+        
+        // Clear existing options
+        select.innerHTML = '';
+        
+        // Add countries to dropdown
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.cca2; // ISO 3166-1 alpha-2 code
+            option.textContent = country.name.common;
+            option.selected = country.cca2 === savedCountry;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error fetching countries:', error);
+        // Fallback to Bangladesh if fetch fails
+        select.innerHTML = `<option value="BD">Bangladesh</option>`;
+    }
+}
+
+// Update the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+    const location = loadWeatherLocation();
+    document.getElementById('weatherCity').value = location.city;
+    populateCountryDropdown(); // Replace the static country selection with dynamic population
 }); 
