@@ -380,8 +380,6 @@ function sanitizeHTML(str) {
 // Add these functions for drag and drop functionality
 function handleDragStart(e) {
     e.target.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', e.target.dataset.index);
-    e.dataTransfer.effectAllowed = 'move';
 }
 
 function handleDragEnd(e) {
@@ -452,8 +450,47 @@ function saveBookmarkSettings(settings) {
     return safeSet('hideAddButton', settings.hideAddButton);
 }
 
-// Update the loadBookmarks function to respect the hide setting
-function loadBookmarks() {
+// Add these functions for favicon management
+let alternativeIcons = null;
+
+async function fetchAlternativeIcons() {
+    if (alternativeIcons !== null) return alternativeIcons;
+    
+    try {
+        const response = await fetch('https://gist.githubusercontent.com/nazdridoy/01ff4927589f27977eff4620f1220a1c/raw/alternativeIcons.txt');
+        if (!response.ok) throw new Error('Failed to fetch alternative icons');
+        const data = await response.json();
+        alternativeIcons = data;
+        return data;
+    } catch (error) {
+        console.error('Error fetching alternative icons:', error);
+        return {};
+    }
+}
+
+async function resolveFavicon(url, userIcon = '') {
+    // 1. Use user-provided icon if available
+    if (userIcon) return userIcon;
+
+    try {
+        const domain = new URL(url).hostname;
+        
+        // 2. Check alternative icons list
+        const alternatives = await fetchAlternativeIcons();
+        if (alternatives[domain]) {
+            return alternatives[domain];
+        }
+
+        // 3. Try DuckDuckGo's favicon service
+        return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+    } catch (error) {
+        console.error('Error resolving favicon:', error);
+        return `https://www.google.com/s2/favicons?domain=${url}&sz=32`; // Fallback to Google
+    }
+}
+
+// Update the loadBookmarks function to use the new favicon resolution
+async function loadBookmarks() {
     const bookmarks = safeGet('bookmarks') || [];
     const grid = document.getElementById('quickLinks');
     grid.innerHTML = '';
@@ -462,7 +499,8 @@ function loadBookmarks() {
     grid.addEventListener('dragover', handleDragOver);
     grid.addEventListener('drop', handleDrop);
 
-    bookmarks.forEach((bookmark, index) => {
+    // Use Promise.all to wait for all bookmarks to be processed
+    await Promise.all(bookmarks.map(async (bookmark, index) => {
         const link = document.createElement('a');
         link.href = bookmark.url;
         link.className = 'quick-link';
@@ -473,13 +511,13 @@ function loadBookmarks() {
         link.addEventListener('dragstart', handleDragStart);
         link.addEventListener('dragend', handleDragEnd);
         
-        const hostname = new URL(bookmark.url).hostname;
-        const faviconUrl = bookmark.iconUrl || getBestIcon(bookmark.url);
-        
-        // Sanitize user-provided content
-        const sanitizedName = sanitizeHTML(bookmark.name);
-        
-        const content = `
+        // Create the initial HTML with placeholder icon
+        link.innerHTML = `
+            <div class="icon-wrapper">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23555'/%3E%3C/svg%3E" 
+                     alt="${bookmark.name}">
+            </div>
+            <span>${bookmark.name}</span>
             <div class="quick-link-menu">
                 <div class="menu-items">
                     <button class="edit-btn">Edit</button>
@@ -487,14 +525,20 @@ function loadBookmarks() {
                 </div>
                 <span class="menu-dots">⋮</span>
             </div>
-            <div class="icon-wrapper">
-                <img src="${faviconUrl}" 
-                     alt="${sanitizedName}"
-                     onerror="if(this.src !== '${DEFAULT_FALLBACK_ICON}') this.src='https://www.google.com/s2/favicons?domain=${hostname}&sz=64'; else this.onerror=null;">
-            </div>
-            <span>${sanitizedName}</span>
         `;
-        link.innerHTML = content;
+        
+        // Add to grid immediately with placeholder
+        grid.appendChild(link);
+
+        // Resolve favicon using the new flow
+        const iconUrl = await resolveFavicon(bookmark.url, bookmark.icon);
+        
+        // Update the icon once resolved
+        const iconImg = link.querySelector('.icon-wrapper img');
+        iconImg.src = iconUrl;
+        iconImg.onerror = () => {
+            iconImg.src = `https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=32`;
+        };
 
         // Update menu click handling
         const menuDots = link.querySelector('.menu-dots');
@@ -525,14 +569,19 @@ function loadBookmarks() {
         // Edit button handler
         link.querySelector('.edit-btn').addEventListener('click', (e) => {
             e.preventDefault();
-            const dialog = createEditDialog(bookmark.name, bookmark.url, bookmark.iconUrl);
+            const dialog = createEditDialog(bookmark.name, bookmark.url, bookmark.icon);
             
             const editForm = dialog.querySelector('#editForm');
             const nameInput = dialog.querySelector('#editName');
             const urlInput = dialog.querySelector('#editUrl');
             const iconInput = dialog.querySelector('#editIcon');
             
-            // Handle form submission
+            // Set initial values
+            nameInput.value = bookmark.name;
+            urlInput.value = bookmark.url;
+            iconInput.value = bookmark.icon || '';
+            
+            // Update the edit form submission handler
             editForm.onsubmit = (e) => {
                 e.preventDefault();
                 const nameValidation = validateInput(nameInput, { maxLength: 50 });
@@ -556,7 +605,7 @@ function loadBookmarks() {
                 bookmarks[index] = {
                     name: sanitizeHTML(nameValidation.value),
                     url: urlValidation.value,
-                    iconUrl: iconUrl || null
+                    icon: iconUrl || null  // Changed from iconUrl to icon to match our new schema
                 };
                 
                 if (!safeSet('bookmarks', bookmarks)) return;
@@ -603,9 +652,7 @@ function loadBookmarks() {
                 loadBookmarks();
             });
         });
-
-        grid.appendChild(link);
-    });
+    }));
 
     // Add the "+" button (not draggable)
     const addButton = document.createElement('a');
@@ -651,7 +698,7 @@ function loadBookmarks() {
             }
         });
 
-        // Handle form submission
+        // Update the add form submission handler
         addForm.onsubmit = (e) => {
             e.preventDefault();
             const nameValidation = validateInput(nameInput, { maxLength: 50 });
@@ -672,31 +719,14 @@ function loadBookmarks() {
                 return;
             }
             
-            const bookmarks = safeGet('bookmarks') || [];
-            
-            // Check total bookmarks limit
-            if (bookmarks.length >= 100) {
-                alert('Maximum number of bookmarks reached (100)');
-                return;
-            }
-
-            // Check for duplicates
-            const isDuplicate = bookmarks.some(bookmark => 
-                bookmark.url === urlValidation.value || 
-                bookmark.name === nameValidation.value
-            );
-            
-            if (isDuplicate) {
-                alert('This bookmark already exists!');
-                return;
-            }
-            
-            // Add sanitized values
-            bookmarks.push({
+            const bookmark = {
                 name: sanitizeHTML(nameValidation.value),
                 url: urlValidation.value,
-                iconUrl: iconUrl || null
-            });
+                icon: iconUrl || null  // Changed from iconUrl to icon to match our new schema
+            };
+
+            const bookmarks = safeGet('bookmarks') || [];
+            bookmarks.push(bookmark);
             
             if (!safeSet('bookmarks', bookmarks)) return;
             loadBookmarks();
@@ -737,8 +767,8 @@ function addDefaultBookmarks() {
     const deletedDefaults = safeGet('deletedDefaults') || [];
     
     if (bookmarks.length === 0) {
-        if (!safeSet('bookmarks', getDefaultBookmarks())) return;
-        loadBookmarks();
+        const defaultBookmarks = getDefaultBookmarks();
+        if (!safeSet('bookmarks', defaultBookmarks)) return;
         return;
     }
     
@@ -753,7 +783,6 @@ function addDefaultBookmarks() {
         // Add missing defaults to the existing bookmarks
         const updatedBookmarks = [...bookmarks, ...missingDefaults];
         if (!safeSet('bookmarks', updatedBookmarks)) return;
-        loadBookmarks();
     }
 }
 
@@ -805,13 +834,38 @@ function updateSearchEngineLogo() {
 }
 
 // Initialize everything
-loadBookmarks();
-addDefaultBookmarks();
-loadCustomEngines();
-loadLastSelectedEngine();
-initializeBackground();
-updateDateTime();
-document.querySelector('input[type="search"]').value = '';
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize bookmarks first
+    addDefaultBookmarks();
+
+    // Initialize time widget first
+    initializeTimeWidget();
+    
+    // Initialize weather widget
+    initializeWeatherWidget();
+    
+    // Only load weather location and update weather if widget is visible
+    const weatherSettings = getWeatherSettings();
+    if (weatherSettings.showWeather) {
+        const location = loadWeatherLocation();
+        document.getElementById('weatherCity').value = location.city;
+        populateCountryDropdown();
+        updateWeather();
+    } else {
+        // Still populate the dropdown for settings panel
+        populateCountryDropdown();
+    }
+    
+    // Initialize other components
+    initializeCalendar();
+    initializeBookmarkSettings();
+    initializeBackground();
+    loadCustomEngines();
+    loadLastSelectedEngine();
+    updateDateTime();
+    document.querySelector('input[type="search"]').value = '';
+    loadBookmarks(); // Load bookmarks after all initializations
+});
 
 // Add this function at the top of your script
 function createEditDialog(name, url, iconUrl = '') {
@@ -1079,7 +1133,7 @@ function getDefaultSearchIcon(url) {
         return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
     } catch {
         // Fallback to a generic search icon
-        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
+        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/></svg>';
     }
 }
 
@@ -1602,9 +1656,9 @@ function exportUserData() {
             calendarWidget: localStorage.getItem('calendarWidget') === 'true',
             calculatorWidget: localStorage.getItem('calculatorWidget') === 'true'
         },
-        weather: {
-            city: localStorage.getItem('weatherCity') || 'Dhaka',
-            country: localStorage.getItem('weatherCountry') || 'BD'
+            weather: {
+                city: localStorage.getItem('weatherCity') || 'Dhaka',
+                country: localStorage.getItem('weatherCountry') || 'BD'
         }
     };
 
@@ -1637,7 +1691,7 @@ async function importUserData(file) {
         
         // Import custom search engines
         if (data.customSearchEngines && typeof data.customSearchEngines === 'object') {
-            safeSet('customSearchEngines', data.customSearchEngines);
+                safeSet('customSearchEngines', data.customSearchEngines);
         }
         
         // Import settings
@@ -1674,10 +1728,10 @@ async function importUserData(file) {
 
         // Reload the page to apply all settings
         window.location.reload();
-    } catch (error) {
+        } catch (error) {
         console.error('Failed to import data:', error);
         alert('Failed to import data. Please check if the file is valid.');
-    }
+        }
 }
 
 // Add event listeners for the new buttons
@@ -1776,31 +1830,6 @@ document.getElementById('updateWeatherLocation').addEventListener('click', funct
         saveWeatherLocation(city, country);
         updateWeather();
     }
-});
-
-// Add this to your initialization code
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize time widget first
-    initializeTimeWidget();
-    
-    // Initialize weather widget
-    initializeWeatherWidget();
-    
-    // Only load weather location and update weather if widget is visible
-    const weatherSettings = getWeatherSettings();
-    if (weatherSettings.showWeather) {
-        const location = loadWeatherLocation();
-        document.getElementById('weatherCity').value = location.city;
-        populateCountryDropdown();
-        updateWeather();
-    } else {
-        // Still populate the dropdown for settings panel
-        populateCountryDropdown();
-    }
-    
-    // Initialize other components
-    initializeCalendar();
-    initializeBookmarkSettings();
 });
 
 // Add this function to fetch countries
@@ -2360,7 +2389,7 @@ function parseFormattedNumber(str) {
         return `${base}e${exponent}`;
     }
     return str;
-}
+} 
 
 // Add this near your other initialization code
 function initializeBookmarkSettings() {
