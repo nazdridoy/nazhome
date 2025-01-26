@@ -1838,13 +1838,14 @@ async function populateCountryDropdown() {
     const savedCountry = localStorage.getItem('weatherCountry') || 'BD';
     
     try {
-        const response = await fetch('https://restcountries.com/v3.1/all');
+        const response = await fetch('http://api.geonames.org/countryInfoJSON?username=nazhome');
         if (!response.ok) throw new Error('Failed to fetch countries');
         
-        const countries = await response.json();
+        const data = await response.json();
+        const countries = data.geonames;
         
         // Sort countries by name
-        countries.sort((a, b) => a.name.common.localeCompare(b.name.common));
+        countries.sort((a, b) => a.countryName.localeCompare(b.countryName));
         
         // Clear existing options
         select.innerHTML = '';
@@ -1852,9 +1853,9 @@ async function populateCountryDropdown() {
         // Add countries to dropdown
         countries.forEach(country => {
             const option = document.createElement('option');
-            option.value = country.cca2; // ISO 3166-1 alpha-2 code
-            option.textContent = country.name.common;
-            option.selected = country.cca2 === savedCountry;
+            option.value = country.countryCode; // ISO 2-letter country code
+            option.textContent = country.countryName;
+            option.selected = country.countryCode === savedCountry;
             select.appendChild(option);
         });
     } catch (error) {
