@@ -1475,4 +1475,107 @@ setInterval(async () => {
             rotateBackground();
         }
     }
-}, 3600000); // Every hour 
+}, 3600000); // Every hour
+
+// Add these functions for data export/import
+function exportUserData() {
+    const data = {
+        version: 1,  // for future compatibility
+        timestamp: Date.now(),
+        bookmarks: safeGet('bookmarks') || [],
+        customSearchEngines: safeGet('customSearchEngines') || {},
+        settings: {
+            allowLocalUrls: safeGet('allowLocalUrls') || false,
+            lastSelectedEngine: localStorage.getItem('lastSelectedEngine') || 'google',
+            deletedDefaults: safeGet('deletedDefaults') || []
+        }
+    };
+
+    // Create and download the file
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `homepage-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function importUserData(file) {
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Validate the data structure
+            if (!data.version || !data.timestamp) {
+                throw new Error('Invalid backup file format');
+            }
+
+            // Show confirmation dialog with details
+            const timestamp = new Date(data.timestamp).toLocaleString();
+            const message = `Import data from ${timestamp}?\n\nThis will replace your current:\n` +
+                          `- ${data.bookmarks.length} bookmarks\n` +
+                          `- ${Object.keys(data.customSearchEngines).length} custom search engines\n` +
+                          `\nExisting data will be backed up and can be restored.`;
+
+            createConfirmDialog(message, () => {
+                // Backup current data first
+                const currentData = {
+                    version: 1,
+                    timestamp: Date.now(),
+                    bookmarks: safeGet('bookmarks') || [],
+                    customSearchEngines: safeGet('customSearchEngines') || {},
+                    settings: {
+                        allowLocalUrls: safeGet('allowLocalUrls') || false,
+                        lastSelectedEngine: localStorage.getItem('lastSelectedEngine') || 'google',
+                        deletedDefaults: safeGet('deletedDefaults') || []
+                    }
+                };
+                
+                safeSet('dataBackup', currentData);
+
+                // Import new data
+                safeSet('bookmarks', data.bookmarks);
+                safeSet('customSearchEngines', data.customSearchEngines);
+                safeSet('allowLocalUrls', data.settings.allowLocalUrls);
+                safeSet('deletedDefaults', data.settings.deletedDefaults);
+                localStorage.setItem('lastSelectedEngine', data.settings.lastSelectedEngine);
+
+                // Refresh the UI
+                loadBookmarks();
+                loadCustomEngines();
+                handleEngineSelection(data.settings.lastSelectedEngine);
+                document.getElementById('allowLocalUrls').checked = data.settings.allowLocalUrls;
+
+                // Show success message
+                createConfirmDialog('Data imported successfully! Reload the page to see all changes.', 
+                    () => location.reload(), 
+                    'Reload'
+                );
+            }, 'Import');
+
+        } catch (error) {
+            console.error('Import error:', error);
+            alert('Error importing data: ' + error.message);
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+// Add event listeners for the new buttons
+document.getElementById('exportData').addEventListener('click', exportUserData);
+
+document.getElementById('importData').addEventListener('click', function() {
+    document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+        importUserData(e.target.files[0]);
+    }
+}); 
