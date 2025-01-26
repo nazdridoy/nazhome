@@ -2519,4 +2519,40 @@ document.getElementById('timeWidget').addEventListener('change', function(e) {
         timeWidget.style.opacity = e.target.checked ? '1' : '0';
         timeWidget.style.visibility = e.target.checked ? 'visible' : 'hidden';
     }
+});
+
+// Add keyboard shortcuts for widget toggles
+document.addEventListener('keydown', function(e) {
+    // Only handle if Alt key is pressed
+    if (!e.altKey) return;
+    
+    switch (e.key.toLowerCase()) {
+        case 't': // Alt + T for Time
+            e.preventDefault();
+            const timeToggle = document.getElementById('timeWidget');
+            timeToggle.checked = !timeToggle.checked;
+            timeToggle.dispatchEvent(new Event('change'));
+            break;
+            
+        case 'c': // Alt + C for Calendar
+            e.preventDefault();
+            const calendarToggle = document.getElementById('calendarWidget');
+            calendarToggle.checked = !calendarToggle.checked;
+            calendarToggle.dispatchEvent(new Event('change'));
+            break;
+            
+        case 'w': // Alt + W for Weather
+            e.preventDefault();
+            const weatherToggle = document.getElementById('weatherWidget');
+            weatherToggle.checked = !weatherToggle.checked;
+            weatherToggle.dispatchEvent(new Event('change'));
+            break;
+            
+        case 'l': // Alt + L for Calculator
+            e.preventDefault();
+            const calcToggle = document.getElementById('calculatorWidget');
+            calcToggle.checked = !calcToggle.checked;
+            calcToggle.dispatchEvent(new Event('change'));
+            break;
+    }
 }); 
