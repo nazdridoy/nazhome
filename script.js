@@ -1588,7 +1588,7 @@ async function updateWeather() {
     
     try {
         const response = await fetch(
-            'https://api.openweathermap.org/data/2.5/weather?q=Dhaka&units=metric&appid=6d055e39ee237af35ca066f35474e9df'
+            'https://api.openweathermap.org/data/2.5/weather?q=Dhaka,BD&units=metric&appid=6d055e39ee237af35ca066f35474e9df'
         );
         
         if (!response.ok) {
