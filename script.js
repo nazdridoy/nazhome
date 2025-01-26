@@ -1769,9 +1769,12 @@ document.getElementById('importFile').addEventListener('change', function(e) {
 
 // Update the updateWeather function
 async function updateWeather() {
+    const settings = getWeatherSettings();
+    if (!settings.showWeather) return;
+
     const weatherContainer = document.getElementById('weather');
     weatherContainer.style.opacity = '0';
-    weatherContainer.style.display = 'none'; // Hide initially
+    weatherContainer.style.display = 'none';
     
     const location = loadWeatherLocation();
     
@@ -1818,7 +1821,7 @@ async function updateWeather() {
 setInterval(updateWeather, 30 * 60 * 1000);
 
 // Initial weather update
-updateWeather();
+// updateWeather();
 
 // Function to save weather location
 function saveWeatherLocation(city, country) {
@@ -1847,9 +1850,22 @@ document.getElementById('updateWeatherLocation').addEventListener('click', funct
 
 // Add this to your initialization code
 document.addEventListener('DOMContentLoaded', function() {
-    const location = loadWeatherLocation();
-    document.getElementById('weatherCity').value = location.city;
-    populateCountryDropdown(); // Replace the static country selection with dynamic population
+    // Initialize weather widget first
+    initializeWeatherWidget();
+    
+    // Only load weather location and update weather if widget is visible
+    const weatherSettings = getWeatherSettings();
+    if (weatherSettings.showWeather) {
+        const location = loadWeatherLocation();
+        document.getElementById('weatherCity').value = location.city;
+        populateCountryDropdown();
+        updateWeather();
+    } else {
+        // Still populate the dropdown for settings panel
+        populateCountryDropdown();
+    }
+    
+    // Initialize other components
     initializeCalendar();
     initializeBookmarkSettings();
 });
@@ -2425,5 +2441,39 @@ document.getElementById('hideAddButton').addEventListener('change', function(e) 
     settings.hideAddButton = e.target.checked;
     if (saveBookmarkSettings(settings)) {
         loadBookmarks();
+    }
+});
+
+// Add these functions for weather widget management
+function getWeatherSettings() {
+    return {
+        showWeather: safeGet('weatherWidget') !== false  // Default to true
+    };
+}
+
+function saveWeatherSettings(settings) {
+    return safeSet('weatherWidget', settings.showWeather);
+}
+
+// Add this to your initialization code
+function initializeWeatherWidget() {
+    const settings = getWeatherSettings();
+    const weatherWidget = document.getElementById('weather');
+    const weatherToggle = document.getElementById('weatherWidget');
+    
+    weatherToggle.checked = settings.showWeather;
+    weatherWidget.style.display = settings.showWeather ? 'block' : 'none';
+}
+
+// Add this event listener
+document.getElementById('weatherWidget').addEventListener('change', function(e) {
+    const settings = getWeatherSettings();
+    settings.showWeather = e.target.checked;
+    if (saveWeatherSettings(settings)) {
+        const weatherWidget = document.getElementById('weather');
+        weatherWidget.style.display = e.target.checked ? 'block' : 'none';
+        if (e.target.checked) {
+            updateWeather(); // Refresh weather data when showing
+        }
     }
 }); 
