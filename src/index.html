@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NazHome</title>
+    <!-- Favicon configuration for various platforms -->
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
     <link rel="manifest" href="/favicons/site.webmanifest">
 </head>
 <body>
+    <!-- Widget Components -->
+    <!-- DateTime Widget - Displays current time and date -->
     <div id="datetime"></div>
+
+    <!-- Calendar Widget - Interactive monthly calendar -->
     <div id="calendar-widget" style="display: none;">
         <div class="calendar-header">
             <button class="calendar-nav" id="prevMonth">&lt;</button>
@@ -22,6 +27,8 @@
             <div class="calendar-dates"></div>
         </div>
     </div>
+
+    <!-- Calculator Widget - Supports both basic and scientific calculations -->
     <div id="calculator-widget" style="display: none;">
         <div class="calculator-header">
             <span>Calculator</span>
@@ -85,6 +92,8 @@
             <button class="calc-btn equals">=</button>
         </div>
     </div>
+
+    <!-- Weather Widget - Shows current weather conditions -->
     <div id="weather">
         <div class="weather-content">
             <div class="weather-main">
@@ -98,7 +107,9 @@
         </div>
     </div>
     
+    <!-- Main Content Area -->
     <div class="main-content">
+        <!-- Search Bar with configurable search engine -->
         <div class="search-container">
             <form id="searchForm">
                 <div class="search-engine-wrapper">
@@ -108,9 +119,11 @@
             </form>
         </div>
 
+        <!-- Quick Links Grid - Displays user's bookmarks -->
         <div class="grid-container" id="quickLinks"></div>
     </div>
 
+    <!-- Settings Panel - Contains all user configuration options -->
     <div class="settings-panel" style="display: none;">
         <div class="settings-header">
             <h3>Settings</h3>
@@ -203,6 +216,7 @@
         </div>
     </div>
 
+    <!-- Global UI Controls -->
     <button id="settingsToggle">⚙</button>
     <button id="aboutButtonCorner" class="corner-about-btn" title="About NazHome">
         <img src="/favicons/favicon-32x32.png" alt="NazHome" class="corner-about-icon">
@@ -211,7 +225,10 @@
         <div class="orbit-5"></div>
     </button>
 
-    <!-- HTML Templates -->
+    <!-- Dialog Templates -->
+    <!-- Each template defines the structure for various modal dialogs used throughout the application -->
+    
+    <!-- Template: Edit Bookmark Dialog -->
     <template id="editDialogTemplate">
         <div class="edit-dialog-content">
             <h3>Edit Bookmark</h3>
@@ -237,6 +254,7 @@
         </div>
     </template>
 
+    <!-- Template: Add New Bookmark Dialog -->
     <template id="addDialogTemplate">
         <div class="edit-dialog-content">
             <h3>Add New Bookmark</h3>
@@ -262,6 +280,7 @@
         </div>
     </template>
 
+    <!-- Template: Custom Search Engine Configuration Dialog -->
     <template id="searchEngineDialogTemplate">
         <div class="edit-dialog-content">
             <h3>Add Custom Search Engine</h3>
@@ -288,6 +307,7 @@
         </div>
     </template>
 
+    <!-- Template: Generic Confirmation Dialog -->
     <template id="confirmDialogTemplate">
         <div class="edit-dialog-content confirm-dialog">
             <h3>Confirm</h3>
@@ -299,6 +319,7 @@
         </div>
     </template>
 
+    <!-- Template: Storage Management Dialog -->
     <template id="storageManagerTemplate">
         <div class="edit-dialog-content storage-manager">
             <h3>Storage Management</h3>
@@ -313,6 +334,7 @@
         </div>
     </template>
 
+    <!-- Template: Search Engine Selection Dialog -->
     <template id="searchEngineSelectorTemplate">
         <div class="edit-dialog-content search-engine-selector">
             <h3>Select Search Engine</h3>
@@ -327,6 +349,7 @@
         </div>
     </template>
 
+    <!-- Template: Search Engine Item -->
     <template id="searchEngineItemTemplate">
         <div class="search-engine-item" data-engine="">
             <div class="icon-wrapper">
@@ -336,6 +359,7 @@
         </div>
     </template>
 
+    <!-- Template: Custom Search Engine Item with Edit/Delete Options -->
     <template id="customSearchEngineItemTemplate">
         <div class="search-engine-item" data-engine="">
             <div class="icon-wrapper">
@@ -352,6 +376,7 @@
         </div>
     </template>
 
+    <!-- Template: About Dialog -->
     <template id="aboutDialogTemplate">
         <div class="edit-dialog-content">
             <div class="about-header">
@@ -385,6 +410,7 @@
         </div>
     </template>
 
+    <!-- Main Application Script -->
     <script type="module" src="./script.js"></script>
 </body>
 </html> 
