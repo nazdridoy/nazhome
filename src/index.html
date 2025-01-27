@@ -4,18 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NazHome</title>
-    <!-- Favicon configuration for various platforms -->
+    <!-- Favicons for cross-platform compatibility and PWA support -->
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
     <link rel="manifest" href="/favicons/site.webmanifest">
 </head>
 <body>
-    <!-- Widget Components -->
-    <!-- DateTime Widget - Displays current time and date -->
+    <!-- Core Widgets Section -->
+    <!-- Each widget is a self-contained component that can be toggled via settings -->
+    
+    <!-- DateTime Widget: Core component for displaying time
+         - Updates in real-time
+         - Formats can be customized in script.js -->
     <div id="datetime"></div>
 
-    <!-- Calendar Widget - Interactive monthly calendar -->
+    <!-- Calendar Widget: Interactive calendar component 
+         - Supports month navigation
+         - Highlights current date
+         - Grid-based date display -->
     <div id="calendar-widget" style="display: none;">
         <div class="calendar-header">
             <button class="calendar-nav" id="prevMonth">&lt;</button>
@@ -28,7 +35,10 @@
         </div>
     </div>
 
-    <!-- Calculator Widget - Supports both basic and scientific calculations -->
+    <!-- Calculator Widget: Dual-mode calculator
+         - Supports basic and scientific calculations
+         - Real-time expression evaluation
+         - Keyboard input support -->
     <div id="calculator-widget" style="display: none;">
         <div class="calculator-header">
             <span>Calculator</span>
@@ -93,7 +103,10 @@
         </div>
     </div>
 
-    <!-- Weather Widget - Shows current weather conditions -->
+    <!-- Weather Widget: Dynamic weather display
+         - Fetches real-time weather data
+         - Configurable location
+         - Displays temperature, conditions, and location -->
     <div id="weather">
         <div class="weather-content">
             <div class="weather-main">
@@ -107,9 +120,12 @@
         </div>
     </div>
     
-    <!-- Main Content Area -->
+    <!-- Main Application Interface -->
     <div class="main-content">
-        <!-- Search Bar with configurable search engine -->
+        <!-- Search Component: Multi-engine search functionality
+             - Supports custom search engines
+             - Configurable via settings
+             - Keyboard shortcuts enabled -->
         <div class="search-container">
             <form id="searchForm">
                 <div class="search-engine-wrapper">
@@ -119,11 +135,18 @@
             </form>
         </div>
 
-        <!-- Quick Links Grid - Displays user's bookmarks -->
+        <!-- Quick Links Grid: Dynamic bookmark management
+             - Supports drag-and-drop (implemented in script.js)
+             - Local storage persistence
+             - Custom icons and names -->
         <div class="grid-container" id="quickLinks"></div>
     </div>
 
-    <!-- Settings Panel - Contains all user configuration options -->
+    <!-- Settings Panel: Application configuration hub
+         - Widget toggles
+         - Data management
+         - Import/Export functionality
+         - Storage management -->
     <div class="settings-panel" style="display: none;">
         <div class="settings-header">
             <h3>Settings</h3>
@@ -216,7 +239,7 @@
         </div>
     </div>
 
-    <!-- Global UI Controls -->
+    <!-- Global Controls -->
     <button id="settingsToggle">⚙</button>
     <button id="aboutButtonCorner" class="corner-about-btn" title="About NazHome">
         <img src="/favicons/favicon-32x32.png" alt="NazHome" class="corner-about-icon">
@@ -225,10 +248,12 @@
         <div class="orbit-5"></div>
     </button>
 
-    <!-- Dialog Templates -->
-    <!-- Each template defines the structure for various modal dialogs used throughout the application -->
+    <!-- Template Definitions -->
+    <!-- These templates are used to dynamically generate UI components
+         All dialogs use a consistent styling and behavior pattern -->
     
-    <!-- Template: Edit Bookmark Dialog -->
+    <!-- Edit Dialog: Used for modifying existing bookmarks
+         Handles: name, URL, and custom icon configuration -->
     <template id="editDialogTemplate">
         <div class="edit-dialog-content">
             <h3>Edit Bookmark</h3>
@@ -254,7 +279,8 @@
         </div>
     </template>
 
-    <!-- Template: Add New Bookmark Dialog -->
+    <!-- Add Dialog: New bookmark creation interface
+         Similar to edit dialog but with cleared fields -->
     <template id="addDialogTemplate">
         <div class="edit-dialog-content">
             <h3>Add New Bookmark</h3>
@@ -280,7 +306,8 @@
         </div>
     </template>
 
-    <!-- Template: Custom Search Engine Configuration Dialog -->
+    <!-- Search Engine Dialog: Custom search engine configuration
+         Supports: name, search URL pattern, and custom icons -->
     <template id="searchEngineDialogTemplate">
         <div class="edit-dialog-content">
             <h3>Add Custom Search Engine</h3>
@@ -307,7 +334,8 @@
         </div>
     </template>
 
-    <!-- Template: Generic Confirmation Dialog -->
+    <!-- Confirmation Dialog: Generic confirmation interface
+         Used for destructive actions and important decisions -->
     <template id="confirmDialogTemplate">
         <div class="edit-dialog-content confirm-dialog">
             <h3>Confirm</h3>
@@ -319,7 +347,8 @@
         </div>
     </template>
 
-    <!-- Template: Storage Management Dialog -->
+    <!-- Storage Manager: Data management interface
+         Provides storage usage info and data clearing options -->
     <template id="storageManagerTemplate">
         <div class="edit-dialog-content storage-manager">
             <h3>Storage Management</h3>
@@ -334,7 +363,8 @@
         </div>
     </template>
 
-    <!-- Template: Search Engine Selection Dialog -->
+    <!-- Search Engine Selection: Engine choice interface
+         Supports both built-in and custom search engines -->
     <template id="searchEngineSelectorTemplate">
         <div class="edit-dialog-content search-engine-selector">
             <h3>Select Search Engine</h3>
@@ -349,7 +379,8 @@
         </div>
     </template>
 
-    <!-- Template: Search Engine Item -->
+    <!-- Search Engine Templates: Base templates for search engines
+         Used for both default and custom engine rendering -->
     <template id="searchEngineItemTemplate">
         <div class="search-engine-item" data-engine="">
             <div class="icon-wrapper">
@@ -359,7 +390,8 @@
         </div>
     </template>
 
-    <!-- Template: Custom Search Engine Item with Edit/Delete Options -->
+    <!-- Custom Search Engine Item: Extended template with management options
+         Adds edit/delete functionality for custom engines -->
     <template id="customSearchEngineItemTemplate">
         <div class="search-engine-item" data-engine="">
             <div class="icon-wrapper">
@@ -376,7 +408,8 @@
         </div>
     </template>
 
-    <!-- Template: About Dialog -->
+    <!-- About Dialog: Application information and credits
+         Contains: version info, description, and developer details -->
     <template id="aboutDialogTemplate">
         <div class="edit-dialog-content">
             <div class="about-header">
@@ -410,7 +443,7 @@
         </div>
     </template>
 
-    <!-- Main Application Script -->
+    <!-- Main application logic -->
     <script type="module" src="./script.js"></script>
 </body>
 </html> 
