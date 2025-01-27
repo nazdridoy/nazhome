@@ -2601,4 +2601,66 @@ document.addEventListener('keydown', function(e) {
             calcToggle.dispatchEvent(new Event('change'));
             break;
     }
-}); 
+});
+
+/* Add these styles to make the settings panel scrollable */
+const settingsContent = document.querySelector('.settings-content');
+if (settingsContent) {
+    settingsContent.style.maxHeight = 'calc(80vh - 4rem)'; // 80% of viewport height minus header
+    settingsContent.style.overflowY = 'auto';
+    settingsContent.style.paddingRight = '0.5rem'; // Add some padding for the scrollbar
+} 
+
+// Add click handlers for setting items
+document.querySelectorAll('.setting-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        // Don't trigger if clicking on inputs, select, or update button
+        if (e.target.closest('.weather-location') || 
+            e.target.closest('.update-btn') || 
+            e.target.closest('.widgets-grid')) {
+            return;
+        }
+
+        // Find and click the button inside this setting item
+        const button = item.querySelector('button');
+        if (button) {
+            button.click();
+        }
+    });
+});
+
+// Update scroll handler to check each link's position
+function handleQuickLinksVisibility() {
+    const searchContainer = document.querySelector('.search-container');
+    const links = document.querySelectorAll('.grid-container a');
+    
+    if (!searchContainer || !links.length) return;
+    
+    const searchBottom = searchContainer.getBoundingClientRect().bottom;
+    
+    links.forEach(link => {
+        const linkTop = link.getBoundingClientRect().top;
+        if (linkTop < searchBottom) {
+            link.style.opacity = '0';
+            link.style.pointerEvents = 'none';
+        } else {
+            link.style.opacity = '1';
+            link.style.pointerEvents = 'auto';
+        }
+    });
+}
+
+// Keep the existing throttled scroll listener
+let ticking = false;
+window.addEventListener('scroll', () => {
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            handleQuickLinksVisibility();
+            ticking = false;
+        });
+        ticking = true;
+    }
+});
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
