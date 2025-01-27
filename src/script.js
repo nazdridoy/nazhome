@@ -463,7 +463,7 @@ async function fetchAlternativeIcons() {
     
     try {
         // Store the promise so concurrent calls can use it
-        alternativeIconsPromise = fetch('https://gist.githubusercontent.com/nazdridoy/01ff4927589f27977eff4620f1220a1c/raw/alternativeIcons.txt')
+        alternativeIconsPromise = fetch('https://cdn.jsdelivr.net/gh/nazdridoy/nazhome@maintainAltIcons/alternativeIcons.json')
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch alternative icons');
                 return response.json();
@@ -2664,3 +2664,42 @@ window.addEventListener('scroll', () => {
 
 // Call on page load
 document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
+
+// Your existing JavaScript code
+
+// Import './styles.css';
+import './styles.css';
+
+// Add this with other dialog functions
+function showAboutDialog() {
+    // Close the settings panel first
+    const settingsPanel = document.querySelector('.settings-panel');
+    if (settingsPanel) {
+        settingsPanel.style.display = 'none';
+    }
+
+    const dialog = document.createElement('div');
+    dialog.className = 'edit-dialog';
+    const template = document.getElementById('aboutDialogTemplate');
+    dialog.appendChild(template.content.cloneNode(true));
+    
+    // Add close handler
+    dialog.querySelector('.cancel-btn').addEventListener('click', () => {
+        dialog.remove();
+    });
+
+    // Close when clicking outside
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            dialog.remove();
+        }
+    });
+
+    document.body.appendChild(dialog);
+}
+
+// Add event listener in the DOMContentLoaded section
+document.getElementById('aboutButton').addEventListener('click', showAboutDialog);
+
+// Add event listener in the DOMContentLoaded section
+document.getElementById('aboutButtonCorner').addEventListener('click', showAboutDialog);

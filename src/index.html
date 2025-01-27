@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NazHome</title>
-    <link rel="stylesheet" href="styles.css">
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
@@ -197,10 +196,20 @@
                 <small class="help-text">Restore previously exported data</small>
                 <input type="file" id="importFile" accept=".json" style="display: none;">
             </div>
+            <div class="setting-item">
+                <button id="aboutButton">About</button>
+                <small class="help-text">Show application information and version</small>
+            </div>
         </div>
     </div>
 
     <button id="settingsToggle">⚙</button>
+    <button id="aboutButtonCorner" class="corner-about-btn" title="About NazHome">
+        <img src="/favicons/favicon-32x32.png" alt="NazHome" class="corner-about-icon">
+        <div class="orbit-3"></div>
+        <div class="orbit-4"></div>
+        <div class="orbit-5"></div>
+    </button>
 
     <!-- HTML Templates -->
     <template id="editDialogTemplate">
@@ -343,6 +352,39 @@
         </div>
     </template>
 
-    <script src="script.js"></script>
+    <template id="aboutDialogTemplate">
+        <div class="edit-dialog-content">
+            <div class="about-header">
+                <h3>NazHome</h3>
+                <span class="version-tag">v1.0.0</span>
+            </div>
+            <div class="about-content">
+                <img src="/favicons/android-chrome-192x192.png" alt="Logo" class="about-logo">
+                <div class="about-text">
+                    <p class="about-tagline">Your stylish gateway to the web</p>
+                    <p class="about-description">A minimalistic startpage that combines elegance with functionality, featuring customizable widgets, dynamic backgrounds, and a clean interface.</p>
+                    <div class="about-developer">
+                        <p>Developed with ❤️ by</p>
+                        <a href="https://github.com/nazdridoy" target="_blank" rel="noopener" class="developer-link">
+                            <span>@nazDridoy</span>
+                        </a>
+                    </div>
+                    <div class="about-links">
+                        <a href="https://github.com/nazdridoy/nazhome" target="_blank" rel="noopener" class="github-link">
+                            <svg class="github-icon" viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                            </svg>
+                            View on GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button type="button" class="cancel-btn">Close</button>
+            </div>
+        </div>
+    </template>
+
+    <script type="module" src="./script.js"></script>
 </body>
 </html> 

@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
-import html from 'vite-plugin-html'
+import { createHtmlPlugin } from 'vite-plugin-html'
 
 export default defineConfig({
-  publicDir: 'public',
+  root: './src',
+  publicDir: '../public',
   build: {
     minify: 'terser',
     terserOptions: {
@@ -19,17 +20,13 @@ export default defineConfig({
     }
   },
   plugins: [
-    html({
+    createHtmlPlugin({
       minify: true
     })
   ],
   css: {
     postcss: {
       plugins: [
-        require('postcss-purgecss')({
-          content: ['./**/*.html'],
-          defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || []
-        })
       ]
     }
   }
