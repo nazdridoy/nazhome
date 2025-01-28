@@ -22,7 +22,28 @@ document.getElementById('searchForm').onsubmit = function(e) {
     
     // Check if the input is a valid URL
     if (isValidBrowserUrl(query)) {
-        window.location.href = query.trim();
+        // If URL already has a protocol, use it as is
+        if (query.includes('://')) {
+            window.location.href = query.trim();
+            return;
+        }
+
+        // For localhost, always use http://
+        if (query.startsWith('localhost')) {
+            window.location.href = `http://${query.trim()}`;
+            return;
+        }
+
+        // For other URLs without protocol, try https:// first, then fallback to http://
+        const url = query.trim();
+        fetch(`https://${url}`, { mode: 'no-cors' })
+            .then(() => {
+                window.location.href = `https://${url}`;
+            })
+            .catch(() => {
+                // If https fails, try http
+                window.location.href = `http://${url}`;
+            });
         return;
     }
     
@@ -2797,6 +2818,7 @@ function showAboutDialog() {
 
 /**
  * Checks if a string is a valid URL that a browser would accept
+ * Handles both explicit and implicit protocols
  * @param {string} str - String to test
  * @returns {boolean} True if string is a valid URL
  */
@@ -2805,7 +2827,30 @@ function isValidBrowserUrl(str) {
         // Trim whitespace
         str = str.trim();
         
-        // Create URL object (throws error if invalid)
+        // Handle localhost with port
+        if (/^localhost(:\d+)?(\/.*)?$/.test(str)) {
+            return true;
+        }
+        
+        // If no protocol specified, try to detect if it's a valid domain pattern
+        if (!str.includes('://')) {
+            // Match common domain patterns like:
+            // - www.example.com
+            // - example.com
+            // - sub.example.com
+            // - example.com/path
+            // - example.com:8080
+            const domainPattern = /^([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(:\d+)?(\/[^<>"]*)?$/;
+            
+            if (domainPattern.test(str)) {
+                return true;
+            }
+            
+            // If it doesn't match domain pattern, it's not a valid URL
+            return false;
+        }
+        
+        // For URLs with explicit protocols
         const url = new URL(str);
         
         // Check if it has a valid protocol
@@ -2814,9 +2859,7 @@ function isValidBrowserUrl(str) {
             return false;
         }
         
-        // Check if there's no spaces or invalid characters in the rest of the URL
-        // This helps catch cases like "http://example.com test" which URL constructor accepts
-        // but browsers wouldn't treat as a valid URL
+        // Check for invalid characters in the rest of the URL
         const urlWithoutProtocol = str.substring(url.protocol.length).trim();
         if (urlWithoutProtocol.includes(' ') || /[<>"]/.test(urlWithoutProtocol)) {
             return false;
