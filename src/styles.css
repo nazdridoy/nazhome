@@ -1,4 +1,7 @@
-/* Reset and base styles */
+/* Base Configuration
+   - Resets default browser styles
+   - Sets up base theme colors and fonts
+   - Configures viewport and background behavior */
 * {
     margin: 0;
     padding: 0;
@@ -28,7 +31,11 @@ body::after {
     z-index: -1;
 }
 
-/* DateTime styles */
+/* DateTime Widget Styling
+   - Fixed positioning at top center
+   - Responsive font scaling
+   - Drop shadow effects for readability
+   - Handles both time and date display formats */
 #datetime {
     color: white;
     text-align: center;
@@ -66,7 +73,10 @@ body::after {
     margin-bottom: 1rem;
 }
 
-/* Main content styles */
+/* Main Content Layout
+   - Centers content vertically and horizontally
+   - Manages spacing between components
+   - Handles responsive padding */
 .main-content {
     flex: 1;
     display: flex;
@@ -77,7 +87,11 @@ body::after {
     padding: 0 2rem;
 }
 
-/* Search styles */
+/* Search Component
+   - Fixed positioning for consistent access
+   - Glassmorphic UI effects
+   - Handles search engine selector and input field
+   - Includes hover and focus states */
 .search-container {
     width: min(90%, 600px);
     position: fixed;
@@ -209,7 +223,11 @@ input[type="search"]:focus {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
-/* Update Quick links grid styles */
+/* Quick Links Grid
+   - Responsive grid layout (7 columns on desktop, 3 on mobile)
+   - Handles bookmark icons and labels
+   - Includes hover animations and menu positioning
+   - Manages spacing and alignment */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(7, minmax(90px, 1fr)); /* Fixed 7 columns for wide screens */
@@ -272,7 +290,11 @@ input[type="search"]:focus {
     }
 }
 
-/* Settings panel styles */
+/* Settings Panel
+   - Slide-out panel with backdrop blur
+   - Manages widget toggles and configuration options
+   - Handles form inputs and buttons
+   - Includes scrollable content area */
 .settings-panel {
     position: fixed;
     top: 4rem;
@@ -1060,7 +1082,11 @@ input[type="search"]:focus {
     background: rgba(220, 53, 69, 1);
 }
 
-/* Weather styles */
+/* Weather Widget
+   - Compact weather display with icon
+   - Handles temperature and condition formatting
+   - Includes location display
+   - Responsive layout adjustments */
 #weather {
     color: white;
     position: fixed;
@@ -1236,7 +1262,11 @@ input[type="search"]:focus {
     cursor: default;
 }
 
-/* Calendar Widget Styles */
+/* Calendar Widget
+   - Monthly calendar grid layout
+   - Handles date selection and navigation
+   - Highlights current date
+   - Manages day/date display */
 #calendar-widget {
     position: fixed;
     top: 1rem;
@@ -1343,7 +1373,11 @@ input[type="search"]:focus {
     font-size: 0.9rem;
 }
 
-/* Calculator Widget Styles */
+/* Calculator Widget
+   - Dual-mode calculator layout (basic/scientific)
+   - Custom button styling and grid layout
+   - Handles expression input and result display
+   - Includes mode toggle and operation buttons */
 #calculator-widget {
     position: fixed;
     top: 1rem;
@@ -1541,7 +1575,11 @@ input[type="search"]:focus {
     transform: translateY(10px);
 }
 
-/* About Dialog Styles */
+/* About Dialog and Corner Button
+   - Animated logo with orbital effects
+   - Project information layout
+   - Social links and credits
+   - Corner button positioning */
 .about-header {
     display: flex;
     align-items: center;
@@ -1664,7 +1702,11 @@ input[type="search"]:focus {
     opacity: 0.9;
 }
 
-/* Corner About Button Styles */
+/* Corner About Button
+   - Animated logo with orbital effects
+   - Project information layout
+   - Social links and credits
+   - Corner button positioning */
 .corner-about-btn {
     position: fixed;
     bottom: 20px;
@@ -1884,5 +1926,29 @@ input[type="search"]:focus {
     }
     100% {
         transform: translate(-50%, -50%) rotateX(-15deg) rotateY(45deg) rotateZ(360deg);
+    }
+}
+
+/* Responsive Design
+   - Mobile-first breakpoints
+   - Adjusts layouts for different screen sizes
+   - Handles widget positioning
+   - Manages grid columns and spacing */
+@media (max-width: 768px) {
+    .corner-about-btn {
+        bottom: 16px;
+        right: 16px;
+    }
+}
+
+@media (max-width: 1024px) {
+    #datetime {
+        width: auto;
+    }
+
+    #weather {
+        top: 1rem;
+        left: auto;
+        right: 4rem;
     }
 } 
