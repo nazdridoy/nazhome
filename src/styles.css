@@ -492,14 +492,6 @@ input[type="search"]:focus {
     margin-top: 0.2rem;
 }
 
-/* Remove old styles */
-.settings-btn,
-.toggle-wrapper,
-.settings-option,
-.toggle-label {
-    display: none;
-}
-
 /* Update the menu styles */
 .quick-link-menu {
     position: absolute;
@@ -791,45 +783,6 @@ input[type="search"]:focus {
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.6);
     margin-top: 0.2rem;
-}
-
-/* Update search engine context menu styles */
-.search-engine-menu {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);  /* Match quicklink menu background */
-    border-radius: 8px;
-    padding: 8px;  /* Match quicklink menu padding */
-    display: flex;
-    flex-direction: column;
-    gap: 4px;  /* Match quicklink menu gap */
-    min-width: 120px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    border: none;  /* Remove border to match quicklink menu */
-}
-
-.search-engine-menu button {
-    background: none;
-    border: none;
-    color: white;
-    padding: 8px 12px;
-    font-size: 14px;
-    cursor: pointer;
-    text-align: left;
-    white-space: nowrap;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-    width: 100%;
-}
-
-.search-engine-menu button:hover {
-    background: rgba(255, 255, 255, 0.2);  /* Match quicklink menu hover */
-}
-
-/* Remove the backdrop filter since quicklink menu doesn't have it */
-.search-engine-menu {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
 }
 
 /* Add styles for the confirm dialog */

@@ -109,19 +109,6 @@ async function imageToBase64(url) {
 }
 
 /**
- * Preloads an image by creating a new Image object and returning a promise
- * that resolves when the image loads or rejects if there's an error
- */
-async function preloadImage(url) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(url);
-        img.onerror = reject;
-        img.src = url;
-    });
-}
-
-/**
  * Fetches a random background image from Picsum Photos API and converts it to base64
  * Returns null if the fetch or conversion fails
  */
