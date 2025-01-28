@@ -2,6 +2,8 @@
 
 A minimalistic startpage that combines elegance with functionality, featuring customizable widgets, dynamic backgrounds, and a clean interface.
 
+![001](https://github.com/user-attachments/assets/26f29482-25d1-4f4e-978b-a6dd0e36f002)
+
 ## Features
 
 - 🎯 **Smart Search**
