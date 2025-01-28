@@ -1,5 +1,5 @@
 /**
- * NazHome - A customizable browser homepage with widgets and bookmarks
+ * nazHome - A customizable browser homepage with widgets and bookmarks
  * https://github.com/nazdridoy/nazhome
  * 
  * Core search engine configuration
