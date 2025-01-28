@@ -1,12 +1,19 @@
-// Search engines configuration
+/**
+ * NazHome - A customizable browser homepage with widgets and bookmarks
+ * https://github.com/nazdridoy/nazhome
+ * 
+ * Core search engine configuration
+ */
 const searchEngines = {
     google: 'https://www.google.com/search?q=',
     ddg: 'https://duckduckgo.com/?q=',
     brave: 'https://search.brave.com/search?q=',
     yandex: 'https://yandex.com/search/?text='
 };
-
-// Search functionality
+/**
+ * Search form handler - Processes search queries and redirects to appropriate search engine
+ * Supports both built-in engines and custom user-defined search engines
+ */
 document.getElementById('searchForm').onsubmit = function(e) {
     e.preventDefault();
     const query = document.querySelector('input[type="search"]').value.trim();
@@ -14,7 +21,6 @@ document.getElementById('searchForm').onsubmit = function(e) {
     
     const engine = document.getElementById('searchEngine').dataset.engine;
     
-    // Check if it's a custom engine
     const customEngines = JSON.parse(localStorage.getItem('customSearchEngines') || '{}');
     if (customEngines[engine]) {
         const searchUrl = customEngines[engine].url.replace('{searchTerm}', encodeURIComponent(query));
@@ -24,7 +30,11 @@ document.getElementById('searchForm').onsubmit = function(e) {
     }
 };
 
-// Date/time display
+/**
+ * Updates the date/time display in the UI
+ * Formats time as 12-hour with minutes
+ * Formats date as full weekday, month and day
+ */
 function updateDateTime() {
     const now = new Date();
     
@@ -51,18 +61,20 @@ function updateDateTime() {
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
-// Add these functions for background image management
+/**
+ * Background image caching system
+ * Stores and retrieves background images from localStorage
+ * Each cached image includes timestamp for rotation management
+ */
 function getBackgroundCache() {
     return JSON.parse(localStorage.getItem('backgroundCache') || '[]');
 }
 
 function setBackgroundCache(cache) {
     const cacheWithTimestamps = cache.map(item => {
-        // If item is already in the new format, keep it as is
         if (typeof item === 'object' && item.image) {
             return item;
         }
-        // Convert old format (just image string) to new format
         return {
             image: item,
             timestamp: Date.now()
@@ -71,6 +83,12 @@ function setBackgroundCache(cache) {
     localStorage.setItem('backgroundCache', JSON.stringify(cacheWithTimestamps));
 }
 
+/**
+ * Converts image URL to base64 string for caching
+ * Handles fetch errors gracefully by returning null
+ * @param {string} url - URL of image to convert
+ * @returns {Promise<string|null>} Base64 encoded image or null if conversion fails
+ */
 async function imageToBase64(url) {
     try {
         const response = await fetch(url);
@@ -86,11 +104,14 @@ async function imageToBase64(url) {
         });
     } catch (error) {
         console.error('Failed to convert image to base64:', error);
-        // Return a default image or null instead of silently failing
         return null;
     }
 }
 
+/**
+ * Preloads an image by creating a new Image object and returning a promise
+ * that resolves when the image loads or rejects if there's an error
+ */
 async function preloadImage(url) {
     return new Promise((resolve, reject) => {
         const img = new Image();
@@ -100,6 +121,10 @@ async function preloadImage(url) {
     });
 }
 
+/**
+ * Fetches a random background image from Picsum Photos API and converts it to base64
+ * Returns null if the fetch or conversion fails
+ */
 async function fetchNewBackgroundImage() {
     const timestamp = Date.now();
     const url = `https://picsum.photos/1920/1080?random=${timestamp}`;
@@ -117,37 +142,48 @@ async function fetchNewBackgroundImage() {
     }
 }
 
+/**
+ * Updates the background image cache by fetching a new image and maintaining
+ * a rolling cache of the 3 most recent images
+ */
 async function updateBackgroundCache() {
     const cache = getBackgroundCache();
     const newImage = await fetchNewBackgroundImage();
     
     if (newImage) {
-        // Keep the three most recent images
         cache.push(newImage);
-        while (cache.length > 3) {  // Changed from 4 to 3
-            cache.shift(); // Remove oldest image
+        while (cache.length > 3) {
+            cache.shift();
         }
         setBackgroundCache(cache);
     }
 }
 
-// Add a function to rotate through cached backgrounds
+/**
+ * Rotates through cached background images, updating timestamps
+ * to maintain proper rotation order
+ */
 function rotateBackground() {
     const cache = getBackgroundCache();
     if (cache.length <= 1) return; // Nothing to rotate if only one or no images
     
-    // Sort by timestamp to ensure proper rotation
     const sortedCache = [...cache].sort((a, b) => a.timestamp - b.timestamp);
     const rotatedCache = [...sortedCache.slice(1), {
         ...sortedCache[0],
-        timestamp: Date.now() // Update timestamp when rotated
+        timestamp: Date.now()
     }];
     
     setBackgroundCache(rotatedCache);
     document.body.style.backgroundImage = `url('${rotatedCache[0].image}')`;
 }
 
-// Update loadBackground function to prioritize filling the cache
+/**
+ * Main background loading function that handles:
+ * - Initial background display from cache
+ * - Cache filling for new installations
+ * - Cache updates and rotation for existing installations
+ * - Delayed background updates to prevent overwhelming the browser
+ */
 function loadBackground() {
     const cache = getBackgroundCache();
     
@@ -160,7 +196,6 @@ function loadBackground() {
         window.addEventListener('load', () => {
             setTimeout(async () => {
                 if (cache.length < 3) {
-                    // Still filling up cache
                     const newImage = await fetchNewBackgroundImage();
                     if (newImage) {
                         setBackgroundCache([...cache, {
@@ -216,7 +251,9 @@ function loadBackground() {
     }
 }
 
-// Update the initialization
+/**
+ * Sets initial background styling properties
+ */
 function initializeBackground() {
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center';
@@ -225,7 +262,11 @@ function initializeBackground() {
     loadBackground();
 }
 
-// Update getBestIcon function to use DuckDuckGo's favicon service
+/**
+ * Gets the best available favicon URL for a given website URL
+ * Uses DuckDuckGo's favicon service for external URLs
+ * Falls back to a default icon for local/internal URLs
+ */
 function getBestIcon(url) {
     try {
         const urlObj = new URL(url);
@@ -241,7 +282,6 @@ function getBestIcon(url) {
             return DEFAULT_FALLBACK_ICON;
         }
         
-        // Use DuckDuckGo's favicon service
         return `https://icons.duckduckgo.com/ip3/${urlObj.hostname}.ico`;
         
     } catch (error) {
@@ -250,7 +290,6 @@ function getBestIcon(url) {
     }
 }
 
-// Add this constant for the default fallback icon
 const DEFAULT_FALLBACK_ICON = 'data:image/svg+xml,' + encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
         <rect width="100" height="100" rx="20" fill="#555"/>
@@ -259,7 +298,9 @@ const DEFAULT_FALLBACK_ICON = 'data:image/svg+xml,' + encodeURIComponent(`
     </svg>
 `);
 
-// Add these validation helpers
+/**
+ * Validates a bookmark object has all required properties and correct types
+ */
 function isValidBookmark(bookmark) {
     try {
         return (
@@ -268,24 +309,30 @@ function isValidBookmark(bookmark) {
             typeof bookmark.name === 'string' &&
             typeof bookmark.url === 'string' &&
             bookmark.name.length > 0 &&
-            bookmark.name.length < 100 && // reasonable length limit
-            (!bookmark.iconUrl || typeof bookmark.iconUrl === 'string') && // optional icon URL
-            new URL(bookmark.url) // validates URL format
+            bookmark.name.length < 100 &&
+            (!bookmark.iconUrl || typeof bookmark.iconUrl === 'string') &&
+            new URL(bookmark.url)
         );
     } catch {
         return false;
     }
 }
 
+/**
+ * Validates an array of bookmarks against size limits and individual bookmark validity
+ */
 function isValidBookmarksArray(bookmarks) {
     return (
         Array.isArray(bookmarks) &&
-        bookmarks.length <= 100 && // reasonable limit
+        bookmarks.length <= 100 && 
         bookmarks.every(isValidBookmark)
     );
 }
 
-// Update safeGet to include validation
+/**
+ * Safely retrieves and validates data from localStorage
+ * Handles different data types and provides validation per key
+ */
 function safeGet(key, defaultValue = null) {
     try {
         const value = localStorage.getItem(key);
@@ -293,14 +340,12 @@ function safeGet(key, defaultValue = null) {
         
         const parsed = JSON.parse(value);
         
-        // Validate based on key type
         switch(key) {
             case 'bookmarks':
                 return isValidBookmarksArray(parsed) ? parsed : defaultValue;
             case 'deletedDefaults':
                 return Array.isArray(parsed) ? parsed.filter(url => typeof url === 'string') : defaultValue;
             case 'customSearchEngines':
-                // Add validation for custom search engines if needed
                 return typeof parsed === 'object' ? parsed : defaultValue;
             default:
                 return parsed;
@@ -311,7 +356,10 @@ function safeGet(key, defaultValue = null) {
     }
 }
 
-// Add these storage management functions
+/**
+ * Calculates storage usage statistics for localStorage
+ * Returns total size, per-item sizes, and percentage used
+ */
 function getStorageInfo() {
     let total = 0;
     let items = {};
@@ -319,7 +367,7 @@ function getStorageInfo() {
     try {
         for (let key in localStorage) {
             if (localStorage.hasOwnProperty(key)) {
-                const size = localStorage[key].length * 2; // in bytes
+                const size = localStorage[key].length * 2;
                 total += size;
                 items[key] = (size / 1024).toFixed(2) + ' KB';
             }
@@ -328,7 +376,7 @@ function getStorageInfo() {
         return {
             total: (total / 1024).toFixed(2) + ' KB',
             items: items,
-            percentUsed: ((total / 5242880) * 100).toFixed(1) + '%' // 5MB limit
+            percentUsed: ((total / 5242880) * 100).toFixed(1) + '%'
         };
     } catch (error) {
         console.error('Error calculating storage:', error);
@@ -336,7 +384,10 @@ function getStorageInfo() {
     }
 }
 
-// Update safeSet with better error handling
+/**
+ * Safely writes data to localStorage with quota handling
+ * Shows storage manager if quota is exceeded
+ */
 function safeSet(key, value) {
     try {
         localStorage.setItem(key, JSON.stringify(value));
@@ -344,7 +395,6 @@ function safeSet(key, value) {
     } catch (error) {
         console.error('LocalStorage write error:', error);
         
-        // Check if it's a quota error
         if (error.name === 'QuotaExceededError' || error.code === 22) {
             const storageInfo = getStorageInfo();
             const message = `Storage is full (${storageInfo?.percentUsed} used).\n\n` +
@@ -370,14 +420,15 @@ function safeRemove(key) {
     }
 }
 
-// Add this sanitization helper at the top
 function sanitizeHTML(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
 }
 
-// Add these functions for drag and drop functionality
+/**
+ * Drag and drop handlers for bookmark reordering
+ */
 function handleDragStart(e) {
     e.target.classList.add('dragging');
 }
@@ -386,6 +437,10 @@ function handleDragEnd(e) {
     e.target.classList.remove('dragging');
 }
 
+/**
+ * Handles drag and drop reordering of bookmarks
+ * Calculates insertion position based on mouse coordinates
+ */
 function handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -439,7 +494,6 @@ function handleDrop(e) {
     loadBookmarks();
 }
 
-// Add these functions for bookmark UI settings
 function getBookmarkSettings() {
     return {
         hideAddButton: safeGet('hideAddButton') || false
@@ -450,9 +504,11 @@ function saveBookmarkSettings(settings) {
     return safeSet('hideAddButton', settings.hideAddButton);
 }
 
-// Update these functions for favicon management
+/**
+ * Favicon management system with caching and fallbacks
+ */
 let alternativeIcons = null;
-let alternativeIconsPromise = null;  // Add this to store the fetch promise
+let alternativeIconsPromise = null;
 
 async function fetchAlternativeIcons() {
     // Return cached result if available
@@ -487,6 +543,13 @@ async function fetchAlternativeIcons() {
     }
 }
 
+/**
+ * Multi-stage favicon resolution with fallbacks:
+ * 1. User provided icon
+ * 2. Alternative icons list
+ * 3. DuckDuckGo favicon service
+ * 4. Google favicon service
+ */
 async function resolveFavicon(url, userIcon = '') {
     // 1. Use user-provided icon if available
     if (userIcon) return userIcon;
@@ -504,11 +567,14 @@ async function resolveFavicon(url, userIcon = '') {
         return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
     } catch (error) {
         console.error('Error resolving favicon:', error);
-        return `https://www.google.com/s2/favicons?domain=${url}&sz=32`; // Fallback to Google
+        // 4. Fallback to Google
+        return `https://www.google.com/s2/favicons?domain=${url}&sz=32`;
     }
 }
 
-// Add this helper function to check for duplicate bookmarks
+/**
+ * Checks for duplicate bookmarks by normalizing and comparing URLs
+ */
 function isDuplicateBookmark(url, bookmarks) {
     // Normalize URLs for comparison by removing trailing slashes and protocol
     const normalizeUrl = (u) => {
@@ -524,7 +590,11 @@ function isDuplicateBookmark(url, bookmarks) {
     return bookmarks.some(bookmark => normalizeUrl(bookmark.url) === normalizedNew);
 }
 
-// Update the loadBookmarks function with fade-in animation
+/**
+ * Loads and displays bookmarks in the grid with fade-in animation.
+ * Handles bookmark CRUD operations, drag-and-drop reordering, and icon loading.
+ * Each bookmark has edit/delete options in a context menu.
+ */
 async function loadBookmarks() {
     const bookmarks = safeGet('bookmarks') || [];
     const grid = document.getElementById('quickLinks');
@@ -538,7 +608,7 @@ async function loadBookmarks() {
     const bookmarkPromises = bookmarks.map(async (bookmark, index) => {
         const link = document.createElement('a');
         link.href = bookmark.url;
-        link.className = 'quick-link invisible'; // Add invisible class
+        link.className = 'quick-link invisible';
         link.draggable = true;
         link.dataset.index = index;
         
@@ -568,7 +638,7 @@ async function loadBookmarks() {
         try {
             const iconPromise = resolveFavicon(bookmark.url, bookmark.icon);
             const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Icon load timeout')), 3000); // 3 second timeout
+                setTimeout(() => reject(new Error('Icon load timeout')), 3000);
             });
 
             const iconUrl = await Promise.race([iconPromise, timeoutPromise]);
@@ -647,7 +717,7 @@ async function loadBookmarks() {
                 bookmarks[index] = {
                     name: sanitizeHTML(nameValidation.value),
                     url: urlValidation.value,
-                    icon: iconUrl || null  // Changed from iconUrl to icon to match our new schema
+                    icon: iconUrl || null
                 };
                 
                 if (!safeSet('bookmarks', bookmarks)) return;
@@ -704,7 +774,7 @@ async function loadBookmarks() {
     // Add the "+" button
     const addButton = document.createElement('a');
     addButton.href = '#';
-    addButton.className = 'add-bookmark invisible'; // Add invisible class
+    addButton.className = 'add-bookmark invisible';
     addButton.draggable = false;
     addButton.innerHTML = `
         <div class="add-button">
@@ -809,7 +879,9 @@ async function loadBookmarks() {
     });
 }
 
-// Update the getDefaultBookmarks function
+/**
+ * Default bookmarks that are added for new users
+ */
 function getDefaultBookmarks() {
     return [
         { name: 'Google', url: 'https://www.google.com' },
@@ -818,12 +890,16 @@ function getDefaultBookmarks() {
     ];
 }
 
-// Add this function to track deleted default bookmarks
+/**
+ * Retrieves list of default bookmarks that user has deleted
+ */
 function getDeletedDefaults() {
     return safeGet('deletedDefaults') || [];
 }
 
-// Update the addDefaultBookmarks function
+/**
+ * Adds default bookmarks for new users while preserving any user-deleted defaults
+ */
 function addDefaultBookmarks() {
     const bookmarks = safeGet('bookmarks') || [];
     const deletedDefaults = safeGet('deletedDefaults') || [];
@@ -848,7 +924,10 @@ function addDefaultBookmarks() {
     }
 }
 
-// Settings panel functionality
+/**
+ * Settings Panel Event Handlers
+ * Manages visibility of the settings panel and handles click-outside behavior
+ */
 document.getElementById('settingsToggle').addEventListener('click', function() {
     const panel = document.querySelector('.settings-panel');
     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -864,12 +943,14 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Search engine logo management
+/**
+ * Updates the search engine logo based on the selected engine
+ * Handles both default engines and custom user-defined engines
+ */
 function updateSearchEngineLogo() {
     const button = document.getElementById('searchEngine');
     const engine = button.dataset.engine;
     
-    // Check if it's a default engine
     const defaultIcons = {
         'google': 'https://www.google.com/favicon.ico',
         'ddg': 'https://duckduckgo.com/favicon.ico',
@@ -895,18 +976,15 @@ function updateSearchEngineLogo() {
     }
 }
 
-// Initialize everything
+/**
+ * Main initialization function that runs on DOMContentLoaded
+ * Sets up all components and widgets in the correct order
+ */
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize bookmarks first
     addDefaultBookmarks();
-
-    // Initialize time widget first
     initializeTimeWidget();
-    
-    // Initialize weather widget
     initializeWeatherWidget();
     
-    // Only load weather location and update weather if widget is visible
     const weatherSettings = getWeatherSettings();
     if (weatherSettings.showWeather) {
         const location = loadWeatherLocation();
@@ -914,11 +992,9 @@ document.addEventListener('DOMContentLoaded', function() {
         populateCountryDropdown();
         updateWeather();
     } else {
-        // Still populate the dropdown for settings panel
         populateCountryDropdown();
     }
     
-    // Initialize other components
     initializeCalendar();
     initializeBookmarkSettings();
     initializeBackground();
@@ -926,10 +1002,12 @@ document.addEventListener('DOMContentLoaded', function() {
     loadLastSelectedEngine();
     updateDateTime();
     document.querySelector('input[type="search"]').value = '';
-    loadBookmarks(); // Load bookmarks after all initializations
+    loadBookmarks();
 });
 
-// Add this function at the top of your script
+/**
+ * Creates a dialog for editing existing bookmarks
+ */
 function createEditDialog(name, url, iconUrl = '') {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
@@ -937,7 +1015,6 @@ function createEditDialog(name, url, iconUrl = '') {
     const template = document.getElementById('editDialogTemplate');
     dialog.appendChild(template.content.cloneNode(true));
     
-    // Set initial values
     dialog.querySelector('#editName').value = name;
     dialog.querySelector('#editUrl').value = url;
     dialog.querySelector('#editIcon').value = iconUrl || '';
@@ -946,6 +1023,9 @@ function createEditDialog(name, url, iconUrl = '') {
     return dialog;
 }
 
+/**
+ * Creates a dialog for adding new bookmarks
+ */
 function createAddDialog() {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
@@ -957,13 +1037,14 @@ function createAddDialog() {
     return dialog;
 }
 
-// Add this after your other initialization code
+/**
+ * Handles first-time user experience by showing animation on search engine
+ */
 function checkFirstVisit() {
     if (!localStorage.getItem('hasVisited')) {
         document.getElementById('searchEngine').parentElement.classList.add('first-visit');
         localStorage.setItem('hasVisited', 'true');
         
-        // Remove the class after animation
         setTimeout(() => {
             document.getElementById('searchEngine').parentElement.classList.remove('first-visit');
         }, 2000);
@@ -972,7 +1053,9 @@ function checkFirstVisit() {
 
 checkFirstVisit();
 
-// Add this function to handle custom search engines
+/**
+ * Creates dialog for adding/editing custom search engines
+ */
 function createSearchEngineDialog(isEdit = false, engineData = null) {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
@@ -980,13 +1063,11 @@ function createSearchEngineDialog(isEdit = false, engineData = null) {
     const template = document.getElementById('searchEngineDialogTemplate');
     dialog.appendChild(template.content.cloneNode(true));
     
-    // Update the title if editing
     if (isEdit) {
         dialog.querySelector('h3').textContent = 'Edit Search Engine';
         dialog.querySelector('.save-btn').textContent = 'Save';
     }
     
-    // Set initial values
     if (engineData) {
         dialog.querySelector('#engineName').value = engineData.name;
         dialog.querySelector('#engineUrl').value = engineData.url;
@@ -997,12 +1078,13 @@ function createSearchEngineDialog(isEdit = false, engineData = null) {
     return dialog;
 }
 
-// Add this function to save the last selected engine
+/**
+ * Local storage management for search engine preferences
+ */
 function saveLastSelectedEngine(engineKey) {
     localStorage.setItem('lastSelectedEngine', engineKey);
 }
 
-// Add this function to load the last selected engine
 function loadLastSelectedEngine() {
     const lastEngine = localStorage.getItem('lastSelectedEngine');
     if (lastEngine) {
@@ -1015,12 +1097,14 @@ function loadLastSelectedEngine() {
     }
 }
 
-// Update the search engine selector handler
+/**
+ * Creates and manages the search engine selector UI
+ * Handles both default and custom search engines with their respective actions
+ */
 function createSearchEngineSelector() {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
     
-    // Clone the main template
     const template = document.getElementById('searchEngineSelectorTemplate');
     dialog.appendChild(template.content.cloneNode(true));
     
@@ -1037,7 +1121,6 @@ function createSearchEngineSelector() {
     const customTemplate = document.getElementById('customSearchEngineItemTemplate');
     const addButton = grid.querySelector('.add-engine');
     
-    // Add default engines
     defaultEngines.forEach(engine => {
         const item = defaultTemplate.content.cloneNode(true).querySelector('.search-engine-item');
         item.dataset.engine = engine.key;
@@ -1046,7 +1129,6 @@ function createSearchEngineSelector() {
         img.alt = engine.name;
         item.querySelector('span').textContent = engine.name;
         
-        // Add click handler for selection
         item.addEventListener('click', () => {
             handleEngineSelection(engine.key);
             dialog.remove();
@@ -1132,7 +1214,9 @@ function createSearchEngineSelector() {
     return dialog;
 }
 
-// Add function to show edit dialog
+/**
+ * Shows dialog for editing existing search engines
+ */
 function showEditEngineDialog(engineKey, engineData) {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
@@ -1180,7 +1264,9 @@ function showEditEngineDialog(engineKey, engineData) {
     });
 }
 
-// Update the engine selection in the selector
+/**
+ * Updates the selected search engine and persists the selection
+ */
 function handleEngineSelection(engineKey) {
     const button = document.getElementById('searchEngine');
     button.dataset.engine = engineKey;
@@ -1188,7 +1274,9 @@ function handleEngineSelection(engineKey) {
     saveLastSelectedEngine(engineKey);
 }
 
-// Update the getDefaultSearchIcon function to use URL
+/**
+ * Retrieves favicon for a given search engine URL
+ */
 function getDefaultSearchIcon(url) {
     try {
         const hostname = new URL(url).hostname;
@@ -1199,7 +1287,6 @@ function getDefaultSearchIcon(url) {
     }
 }
 
-// Update the search engine change handler to include menu options
 function createSearchEngineOption(engine, name, isCustom = false) {
     const option = document.createElement('option');
     option.value = engine;
@@ -1210,25 +1297,27 @@ function createSearchEngineOption(engine, name, isCustom = false) {
     return option;
 }
 
-// Add this function to load custom engines
+/**
+ * Loads and initializes custom search engines from localStorage
+ */
 function loadCustomEngines() {
     const button = document.getElementById('searchEngine');
     const customEngines = JSON.parse(localStorage.getItem('customSearchEngines') || '{}');
     
-    // If current engine is a custom one, update its icon
     const currentEngine = button.dataset.engine;
     if (customEngines[currentEngine]) {
         updateSearchEngineLogo();
     }
 }
 
-// Add context menu for custom engines
+/**
+ * Context menu handler for custom search engines
+ */
 document.getElementById('searchEngine').addEventListener('contextmenu', function(e) {
     const customEngines = JSON.parse(localStorage.getItem('customSearchEngines') || '{}');
     if (customEngines[this.value]) {
         e.preventDefault();
         
-        // Remove existing menu if any
         document.querySelectorAll('.search-engine-menu').forEach(menu => menu.remove());
         
         // Create menu
@@ -1253,12 +1342,10 @@ document.getElementById('searchEngine').addEventListener('contextmenu', function
             
             const form = dialog.querySelector('#searchEngineForm');
             
-            // Add cancel button handler
             dialog.querySelector('.cancel-btn').onclick = () => {
                 dialog.remove();
             };
 
-            // Add click outside handler
             dialog.onclick = (e) => {
                 if (e.target === dialog) {
                     dialog.remove();
@@ -1302,7 +1389,9 @@ document.getElementById('searchEngine').addEventListener('contextmenu', function
     }
 });
 
-// Add this function to get a search engine's icon
+/**
+ * Retrieves favicon URLs for a search engine in order of preference
+ */
 function getSearchEngineIcon(engineUrl, engineName) {
     try {
         const url = new URL(engineUrl);
@@ -1319,7 +1408,9 @@ function getSearchEngineIcon(engineUrl, engineName) {
     }
 }
 
-// Helper function to try loading icons sequentially
+/**
+ * Attempts to load icons sequentially until a valid one is found
+ */
 function tryNextIcon(select, iconUrls, index = 0) {
     if (index >= iconUrls.length) return;
     
@@ -1333,7 +1424,9 @@ function tryNextIcon(select, iconUrls, index = 0) {
     img.src = iconUrls[index];
 }
 
-// Update the createConfirmDialog function to properly handle events
+/**
+ * Creates a confirmation dialog with customizable message and action
+ */
 function createConfirmDialog(message, onConfirm, confirmText = 'Delete') {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
@@ -1341,13 +1434,11 @@ function createConfirmDialog(message, onConfirm, confirmText = 'Delete') {
     const template = document.getElementById('confirmDialogTemplate');
     dialog.appendChild(template.content.cloneNode(true));
     
-    // Update content
     dialog.querySelector('.confirm-message').textContent = message;
     const confirmBtn = dialog.querySelector('.confirm-btn');
     confirmBtn.textContent = confirmText;
     confirmBtn.className = `confirm-btn ${confirmText.toLowerCase()}-btn`;
     
-    // Add event handlers
     confirmBtn.addEventListener('click', () => {
         onConfirm();
         dialog.remove();
@@ -1357,7 +1448,6 @@ function createConfirmDialog(message, onConfirm, confirmText = 'Delete') {
         dialog.remove();
     });
 
-    // Close dialog when clicking outside
     dialog.addEventListener('click', (e) => {
         if (e.target === dialog) {
             dialog.remove();
@@ -1368,24 +1458,23 @@ function createConfirmDialog(message, onConfirm, confirmText = 'Delete') {
     return dialog;
 }
 
-// Update the restore defaults call to use "Restore" as the button text
 document.getElementById('restoreDefaults').onclick = () => {
     createConfirmDialog('Restore all default bookmarks?', restoreDefaultBookmarks, 'Restore');
 };
 
-// Add click handler for the search engine button
 document.getElementById('searchEngine').addEventListener('click', function(e) {
     e.preventDefault();
     createSearchEngineSelector();
 });
 
-// Set default search engine if none is selected
 if (!document.getElementById('searchEngine').dataset.engine) {
     document.getElementById('searchEngine').dataset.engine = 'google';
     updateSearchEngineLogo();
 }
 
-// Update the showAddEngineDialog function to properly handle form submission
+/**
+ * Shows dialog for adding new search engines with validation
+ */
 function showAddEngineDialog() {
     const dialog = document.createElement('div');
     dialog.className = 'edit-dialog';
@@ -1395,7 +1484,6 @@ function showAddEngineDialog() {
 
     document.body.appendChild(dialog);
 
-    // Get form elements
     const form = dialog.querySelector('#searchEngineForm');
     const nameInput = dialog.querySelector('#engineName');
     const urlInput = dialog.querySelector('#engineUrl');
@@ -1447,13 +1535,15 @@ function showAddEngineDialog() {
         createSearchEngineSelector();
     });
 
-    // Handle cancel button
+
+
+    // XXXXXXX
+
     dialog.querySelector('.cancel-btn').addEventListener('click', () => {
         dialog.remove();
         createSearchEngineSelector();
     });
 
-    // Close dialog when clicking outside
     dialog.addEventListener('click', (e) => {
         if (e.target === dialog) {
             dialog.remove();
