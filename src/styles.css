@@ -1,7 +1,9 @@
-/* Base Configuration
-   - Resets default browser styles
+/* Core Layout & Theme Configuration
+   --------------------------------
    - Sets up base theme colors and fonts
-   - Configures viewport and background behavior */
+   - Configures responsive viewport behavior
+   - Establishes z-index stacking context
+   - Handles backdrop effects and overlays */
 * {
     margin: 0;
     padding: 0;
@@ -31,7 +33,8 @@ body::after {
     z-index: -1;
 }
 
-/* DateTime Widget Styling
+/* DateTime Widget
+   ----------------
    - Fixed positioning at top center
    - Responsive font scaling
    - Drop shadow effects for readability
@@ -87,7 +90,8 @@ body::after {
     padding: 0 2rem;
 }
 
-/* Search Component
+/* Search System
+   ------------
    - Fixed positioning for consistent access
    - Glassmorphic UI effects
    - Handles search engine selector and input field
@@ -224,6 +228,7 @@ input[type="search"]:focus {
 }
 
 /* Quick Links Grid
+   ---------------
    - Responsive grid layout (7 columns on desktop, 3 on mobile)
    - Handles bookmark icons and labels
    - Includes hover animations and menu positioning
@@ -290,7 +295,8 @@ input[type="search"]:focus {
     }
 }
 
-/* Settings Panel
+/* Settings Interface
+   -----------------
    - Slide-out panel with backdrop blur
    - Manages widget toggles and configuration options
    - Handles form inputs and buttons
@@ -1083,6 +1089,7 @@ input[type="search"]:focus {
 }
 
 /* Weather Widget
+   ----------------
    - Compact weather display with icon
    - Handles temperature and condition formatting
    - Includes location display
@@ -1262,11 +1269,13 @@ input[type="search"]:focus {
     cursor: default;
 }
 
-/* Calendar Widget
-   - Monthly calendar grid layout
-   - Handles date selection and navigation
-   - Highlights current date
-   - Manages day/date display */
+/* Calendar Interface
+   -----------------
+   - Monthly grid layout with navigation
+   - Date highlighting and selection
+   - Current day indication
+   - Responsive grid sizing
+   - Keyboard navigation support */
 #calendar-widget {
     position: fixed;
     top: 1rem;
@@ -1374,6 +1383,7 @@ input[type="search"]:focus {
 }
 
 /* Calculator Widget
+   -------------------
    - Dual-mode calculator layout (basic/scientific)
    - Custom button styling and grid layout
    - Handles expression input and result display
@@ -1575,7 +1585,8 @@ input[type="search"]:focus {
     transform: translateY(10px);
 }
 
-/* About Dialog and Corner Button
+/* About Section & Corner Button
+   ---------------------------
    - Animated logo with orbital effects
    - Project information layout
    - Social links and credits
@@ -1930,6 +1941,7 @@ input[type="search"]:focus {
 }
 
 /* Responsive Design
+   ----------------
    - Mobile-first breakpoints
    - Adjusts layouts for different screen sizes
    - Handles widget positioning
