@@ -2795,18 +2795,6 @@ function showAboutDialog() {
     document.body.appendChild(dialog);
 }
 
-// Add event listener in the DOMContentLoaded section
-document.getElementById('aboutButton').addEventListener('click', showAboutDialog);
-
-// Add event listener in the DOMContentLoaded section
-document.getElementById('aboutButtonCorner').addEventListener('click', showAboutDialog);
-
-
-// Call on page load
-document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
-
-import './styles.css';
-
 /**
  * Checks if a string is a valid URL that a browser would accept
  * @param {string} str - String to test
@@ -2839,3 +2827,15 @@ function isValidBrowserUrl(str) {
         return false;
     }
 }
+
+// Add event listener in the DOMContentLoaded section
+document.getElementById('aboutButton').addEventListener('click', showAboutDialog);
+
+// Add event listener in the DOMContentLoaded section
+document.getElementById('aboutButtonCorner').addEventListener('click', showAboutDialog);
+
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
+
+import './styles.css';
