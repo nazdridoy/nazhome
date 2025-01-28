@@ -1524,10 +1524,6 @@ function showAddEngineDialog() {
         createSearchEngineSelector();
     });
 
-
-
-    // XXXXXXX
-
     dialog.querySelector('.cancel-btn').addEventListener('click', () => {
         dialog.remove();
         createSearchEngineSelector();
@@ -1542,11 +1538,13 @@ function showAddEngineDialog() {
 
     return dialog;
 }
-
-// Add function to validate search engine URL
+/**
+ * Validates a search engine URL to ensure it meets security and functionality requirements
+ * @param {string} url - The URL to validate
+ * @returns {Object} Validation result with valid boolean and optional error message
+ */
 function validateSearchEngineUrl(url) {
     try {
-        // Check if it's a valid URL
         new URL(url);
         
         // Check if it contains the {searchTerm} placeholder
@@ -1568,14 +1566,12 @@ function validateSearchEngineUrl(url) {
     }
 }
 
-// Update the settings panel close button handler
 document.getElementById('closeSettings').addEventListener('click', function() {
     document.querySelector('.settings-panel').style.display = 'none';
 });
 
-// Add this function to restore default bookmarks
+// function to restore default bookmarks
 function restoreDefaultBookmarks() {
-    // Clear deleted defaults
     safeRemove('deletedDefaults');
     
     // Get current custom bookmarks
@@ -1595,7 +1591,12 @@ function isLocalUrlAllowed() {
     return safeGet('allowLocalUrls') || false;
 }
 
-// Update the validateInput function
+/**
+ * Validates user input with configurable rules and security checks
+ * @param {HTMLInputElement} input - Input element to validate
+ * @param {Object} options - Validation options (maxLength, minLength, type, optional)
+ * @returns {Object} Validation result with valid boolean and value/error
+ */
 function validateInput(input, options = {}) {
     const {
         maxLength = 100,
@@ -1606,12 +1607,10 @@ function validateInput(input, options = {}) {
 
     const value = input.value.trim();
     
-    // Allow empty value if optional
     if (!value && optional) {
         return { valid: true, value: '' };
     }
     
-    // Basic security checks
     if (!value || typeof value !== 'string') {
         return {
             valid: false,
@@ -1627,7 +1626,6 @@ function validateInput(input, options = {}) {
         };
     }
 
-    // Check minimum length
     if (value.length < minLength) {
         return {
             valid: false,
@@ -1692,15 +1690,17 @@ function validateInput(input, options = {}) {
     return { valid: true, value: value };
 }
 
-// Update the event listener for the local URLs toggle
+// event listener for the local URLs toggle
 document.getElementById('allowLocalUrls').addEventListener('change', function(e) {
     safeSet('allowLocalUrls', e.target.checked);
 });
 
-// Initialize the toggle state
 document.getElementById('allowLocalUrls').checked = isLocalUrlAllowed();
 
-// Update the showStorageManager function to properly handle events
+/**
+ * Creates and displays the storage management dialog
+ * Allows users to view and clear stored data
+ */
 function showStorageManager() {
     const existingDialog = document.querySelector('.storage-manager')?.closest('.edit-dialog');
     if (existingDialog) {
@@ -1729,13 +1729,12 @@ function showStorageManager() {
         itemsContainer.appendChild(item);
     });
 
-    // Add event handlers
     dialog.querySelectorAll('.clear-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const key = btn.dataset.key;
             createConfirmDialog(`Clear ${key}?`, () => {
                 localStorage.removeItem(key);
-                showStorageManager(); // Refresh the dialog
+                showStorageManager();
             });
         });
     });
@@ -1751,7 +1750,6 @@ function showStorageManager() {
         dialog.remove();
     });
     
-    // Close dialog when clicking outside
     dialog.addEventListener('click', (e) => {
         if (e.target === dialog) {
             dialog.remove();
@@ -1762,7 +1760,7 @@ function showStorageManager() {
     return dialog;
 }
 
-// Add event listener for the manage storage button
+// event listener for the manage storage button
 document.getElementById('manageStorage').addEventListener('click', function() {
     showStorageManager();
 });
@@ -1773,16 +1771,17 @@ setInterval(async () => {
     if (!online) {
         rotateBackground();
     } else {
-        // Try to fetch new image if online
         const newImage = await fetchNewBackgroundImage();
         if (!newImage) {
-            // If fetch fails, rotate through cache
             rotateBackground();
         }
     }
-}, 3600000); // Every hour 
+}, 3600000);
 
-// Add these functions for data export/import
+/**
+ * Exports user data including bookmarks, settings, and preferences
+ * Downloads a JSON file with timestamp in filename
+ */
 function exportUserData() {
     const data = {
         bookmarks: safeGet('bookmarks') || [],
@@ -1814,27 +1813,27 @@ function exportUserData() {
     URL.revokeObjectURL(url);
 }
 
+/**
+ * Imports user data from a JSON file and applies settings
+ * @param {File} file - The JSON file containing user data
+ */
 async function importUserData(file) {
     try {
         const text = await file.text();
         const data = JSON.parse(text);
         
-        // Import bookmarks
         if (Array.isArray(data.bookmarks)) {
             safeSet('bookmarks', data.bookmarks);
         }
         
-        // Import deleted defaults
         if (Array.isArray(data.deletedDefaults)) {
             safeSet('deletedDefaults', data.deletedDefaults);
         }
         
-        // Import custom search engines
         if (data.customSearchEngines && typeof data.customSearchEngines === 'object') {
                 safeSet('customSearchEngines', data.customSearchEngines);
         }
         
-        // Import settings
         if (data.settings) {
             if (typeof data.settings.hideAddButton === 'boolean') {
                 safeSet('hideAddButton', data.settings.hideAddButton);
@@ -1856,7 +1855,6 @@ async function importUserData(file) {
             }
         }
         
-        // Import weather settings
         if (data.weather) {
             if (data.weather.city) {
                 localStorage.setItem('weatherCity', data.weather.city);
@@ -1874,7 +1872,6 @@ async function importUserData(file) {
         }
 }
 
-// Add event listeners for the new buttons
 document.getElementById('exportData').addEventListener('click', exportUserData);
 
 document.getElementById('importData').addEventListener('click', function() {
@@ -1887,7 +1884,10 @@ document.getElementById('importFile').addEventListener('change', function(e) {
     }
 });
 
-// Update the updateWeather function
+/**
+ * Updates weather widget with current conditions
+ * Fetches data from OpenWeatherMap API
+ */
 async function updateWeather() {
     const settings = getWeatherSettings();
     const weatherContainer = document.getElementById('weather');
@@ -1923,7 +1923,6 @@ async function updateWeather() {
             icon: weatherContainer.querySelector('.weather-icon')
         };
         
-        // Verify all elements exist
         if (!Object.values(elements).every(el => el)) {
             throw new Error('Missing weather widget elements');
         }
@@ -1935,7 +1934,6 @@ async function updateWeather() {
         elements.icon.alt = data.weather[0].description;
 
         weatherContainer.style.display = 'block';
-        // Force reflow
         weatherContainer.offsetHeight;
         weatherContainer.style.opacity = '1';
 
@@ -1949,10 +1947,6 @@ async function updateWeather() {
 // Update weather every 30 minutes
 setInterval(updateWeather, 30 * 60 * 1000);
 
-// Initial weather update
-// updateWeather();
-
-// Function to save weather location
 function saveWeatherLocation(city, country) {
     localStorage.setItem('weatherCity', city);
     localStorage.setItem('weatherCountry', country);
@@ -1977,7 +1971,9 @@ document.getElementById('updateWeatherLocation').addEventListener('click', funct
     }
 });
 
-// Add this function to fetch countries
+/**
+ * Fetches country list from GeoNames API and populates country dropdown
+ */
 async function populateCountryDropdown() {
     const select = document.getElementById('weatherCountry');
     const savedCountry = localStorage.getItem('weatherCountry') || 'BD';
@@ -1992,7 +1988,6 @@ async function populateCountryDropdown() {
         // Sort countries by name
         countries.sort((a, b) => a.countryName.localeCompare(b.countryName));
         
-        // Clear existing options
         select.innerHTML = '';
         
         // Add countries to dropdown
@@ -2010,7 +2005,11 @@ async function populateCountryDropdown() {
     }
 }
 
-// Calendar Widget functionality
+/**
+ * Calendar Widget Module
+ * Provides a dynamic calendar interface with month navigation and today's date highlighting.
+ * State is persisted in localStorage.
+ */
 let currentDate = new Date();
 
 function initializeCalendar() {
@@ -2100,10 +2099,19 @@ document.getElementById('nextMonth').addEventListener('click', () => {
     updateCalendar();
 });
 
-// Initialize calendar on page load
 document.addEventListener('DOMContentLoaded', initializeCalendar);
 
-// Calculator Widget functionality
+/**
+ * Calculator Widget Module
+ * Provides basic and scientific calculator functionality with keyboard support.
+ * Features include:
+ * - Basic arithmetic operations
+ * - Scientific functions (sin, cos, tan, log, ln)
+ * - Support for π and exponents
+ * - Expression parsing
+ * - Keyboard shortcuts
+ * - Persistent mode storage
+ */
 function initializeCalculator() {
     const savedState = localStorage.getItem('calculatorWidget') === 'true';
     document.getElementById('calculatorWidget').checked = savedState;
@@ -2119,14 +2127,12 @@ class Calculator {
         this.isScientific = false;
         this.pendingFunction = null;
         this.pendingValue = '';
-        this.lastAnswer = '0';  // Add this line to store the last answer
+        this.lastAnswer = '0';
         this.expressionInput = document.querySelector('.expression-input');
         
-        // Initialize mode from localStorage
         this.isScientific = localStorage.getItem('calculatorMode') === 'scientific';
         this.updateMode();
 
-        // Add input handler
         this.expressionInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -2381,7 +2387,7 @@ class Calculator {
         this.lastAnswer = '0';
         this.pendingFunction = null;
         this.pendingValue = '';
-        this.expressionInput.value = '';  // Add this line to clear the input field
+        this.expressionInput.value = '';
         this.updateDisplay();
     }
 
@@ -2434,7 +2440,7 @@ class Calculator {
                 return `Math.${func}((${arg}) * Math.PI / 180)`;
             });
 
-            // For debugging
+            // For debugging, please create an issue on github and paste the parsed expression here
             console.log('Parsed expression:', parsed);
 
             // Compute the result
@@ -2536,7 +2542,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Add this helper function to format large numbers
+/**
+ * Helper function to format large numbers using scientific notation
+ * Converts numbers to a format like "1.23×10⁴" for better readability
+ */
 function formatNumber(num) {
     const str = num.toString();
     if (str.includes('e+') || str.includes('e-')) {
@@ -2548,7 +2557,10 @@ function formatNumber(num) {
     return str;
 }
 
-// Add this helper function to parse formatted numbers
+/**
+ * Helper function to parse formatted numbers back to standard notation
+ * Converts numbers like "1.23×10⁴" back to "1.23e4"
+ */
 function parseFormattedNumber(str) {
     if (str.includes('×10')) {
         const [base, exp] = str.split('×10');
@@ -2558,13 +2570,11 @@ function parseFormattedNumber(str) {
     return str;
 } 
 
-// Add this near your other initialization code
 function initializeBookmarkSettings() {
     const settings = getBookmarkSettings();
     document.getElementById('hideAddButton').checked = settings.hideAddButton;
 }
 
-// Add this event listener with your other initialization code
 document.getElementById('hideAddButton').addEventListener('change', function(e) {
     const settings = getBookmarkSettings();
     settings.hideAddButton = e.target.checked;
@@ -2573,10 +2583,13 @@ document.getElementById('hideAddButton').addEventListener('change', function(e) 
     }
 });
 
-// Add these functions for weather widget management
+/**
+ * Weather Widget Management Functions
+ * Handles weather widget visibility and persistence
+ */
 function getWeatherSettings() {
     return {
-        showWeather: safeGet('weatherWidget') !== false  // Default to true
+        showWeather: safeGet('weatherWidget') !== false
     };
 }
 
@@ -2584,7 +2597,6 @@ function saveWeatherSettings(settings) {
     return safeSet('weatherWidget', settings.showWeather);
 }
 
-// Add this to your initialization code
 function initializeWeatherWidget() {
     const settings = getWeatherSettings();
     const weatherWidget = document.getElementById('weather');
@@ -2597,7 +2609,6 @@ function initializeWeatherWidget() {
     weatherWidget.style.display = settings.showWeather ? 'block' : 'none';
 }
 
-// Add this event listener
 document.getElementById('weatherWidget').addEventListener('change', function(e) {
     const settings = getWeatherSettings();
     settings.showWeather = e.target.checked;
@@ -2605,15 +2616,18 @@ document.getElementById('weatherWidget').addEventListener('change', function(e) 
         const weatherWidget = document.getElementById('weather');
         weatherWidget.style.display = e.target.checked ? 'block' : 'none';
         if (e.target.checked) {
-            updateWeather(); // Refresh weather data when showing
+            updateWeather();
         }
     }
 });
 
-// Add these functions for time widget management
+/**
+ * Time Widget Management Functions
+ * Handles time widget visibility and persistence
+ */
 function getTimeSettings() {
     return {
-        showTime: safeGet('timeWidget') !== false  // Default to true
+        showTime: safeGet('timeWidget') !== false
     };
 }
 
@@ -2621,7 +2635,6 @@ function saveTimeSettings(settings) {
     return safeSet('timeWidget', settings.showTime);
 }
 
-// Update the initializeTimeWidget function
 function initializeTimeWidget() {
     const settings = getTimeSettings();
     const timeWidget = document.getElementById('datetime');
@@ -2630,23 +2643,26 @@ function initializeTimeWidget() {
     timeToggle.checked = settings.showTime;
     timeWidget.style.opacity = settings.showTime ? '1' : '0';
     timeWidget.style.visibility = settings.showTime ? 'visible' : 'hidden';
-    // Remove display: none to maintain layout
     timeWidget.style.display = 'flex';
 }
 
-// Update the time widget event listener
 document.getElementById('timeWidget').addEventListener('change', function(e) {
     const settings = getTimeSettings();
     settings.showTime = e.target.checked;
     if (saveTimeSettings(settings)) {
         const timeWidget = document.getElementById('datetime');
-        // Use opacity and visibility instead of display
         timeWidget.style.opacity = e.target.checked ? '1' : '0';
         timeWidget.style.visibility = e.target.checked ? 'visible' : 'hidden';
     }
 });
 
-// Add keyboard shortcuts for widget toggles
+/**
+ * Keyboard Shortcuts
+ * Alt + T: Toggle Time Widget
+ * Alt + C: Toggle Calendar Widget
+ * Alt + W: Toggle Weather Widget
+ * Alt + L: Toggle Calculator Widget
+ */
 document.addEventListener('keydown', function(e) {
     // Only handle if Alt key is pressed
     if (!e.altKey) return;
@@ -2682,12 +2698,12 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-/* Add these styles to make the settings panel scrollable */
+/* styles to make the settings panel scrollable */
 const settingsContent = document.querySelector('.settings-content');
 if (settingsContent) {
-    settingsContent.style.maxHeight = 'calc(80vh - 4rem)'; // 80% of viewport height minus header
+    settingsContent.style.maxHeight = 'calc(80vh - 4rem)';
     settingsContent.style.overflowY = 'auto';
-    settingsContent.style.paddingRight = '0.5rem'; // Add some padding for the scrollbar
+    settingsContent.style.paddingRight = '0.5rem';
 } 
 
 // Add click handlers for setting items
@@ -2700,7 +2716,6 @@ document.querySelectorAll('.setting-item').forEach(item => {
             return;
         }
 
-        // Find and click the button inside this setting item
         const button = item.querySelector('button');
         if (button) {
             button.click();
@@ -2708,7 +2723,10 @@ document.querySelectorAll('.setting-item').forEach(item => {
     });
 });
 
-// Update scroll handler to check each link's position
+/**
+ * Handles visibility of quick links based on scroll position
+ * Hides links that would overlap with the search container
+ */
 function handleQuickLinksVisibility() {
     const searchContainer = document.querySelector('.search-container');
     const links = document.querySelectorAll('.grid-container a');
@@ -2729,7 +2747,6 @@ function handleQuickLinksVisibility() {
     });
 }
 
-// Keep the existing throttled scroll listener
 let ticking = false;
 window.addEventListener('scroll', () => {
     if (!ticking) {
@@ -2741,15 +2758,10 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Call on page load
-document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
-
-// Your existing JavaScript code
-
-// Import './styles.css';
-import './styles.css';
-
-// Add this with other dialog functions
+/**
+ * Creates and displays the About dialog
+ * Shows information about the application and its features
+ */
 function showAboutDialog() {
     // Close the settings panel first
     const settingsPanel = document.querySelector('.settings-panel');
@@ -2762,12 +2774,10 @@ function showAboutDialog() {
     const template = document.getElementById('aboutDialogTemplate');
     dialog.appendChild(template.content.cloneNode(true));
     
-    // Add close handler
     dialog.querySelector('.cancel-btn').addEventListener('click', () => {
         dialog.remove();
     });
 
-    // Close when clicking outside
     dialog.addEventListener('click', (e) => {
         if (e.target === dialog) {
             dialog.remove();
@@ -2782,3 +2792,9 @@ document.getElementById('aboutButton').addEventListener('click', showAboutDialog
 
 // Add event listener in the DOMContentLoaded section
 document.getElementById('aboutButtonCorner').addEventListener('click', showAboutDialog);
+
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
+
+import './styles.css';
