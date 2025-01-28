@@ -10,6 +10,7 @@ A minimalistic startpage that combines elegance with functionality, featuring cu
   - Multiple built-in search engines (Google, DuckDuckGo, Brave, Yandex)
   - Support for custom search engines
   - Quick engine switching
+  - Direct URL navigation (automatically detects and navigates to valid URLs)
 
 - 🔖 **Bookmark Management**
   - Drag-and-drop organization

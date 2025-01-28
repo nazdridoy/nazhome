@@ -13,12 +13,20 @@ const searchEngines = {
 /**
  * Search form handler - Processes search queries and redirects to appropriate search engine
  * Supports both built-in engines and custom user-defined search engines
+ * If input is a valid URL, navigates directly to it
  */
 document.getElementById('searchForm').onsubmit = function(e) {
     e.preventDefault();
-    const query = document.querySelector('input[type="search"]').value.trim();
+    const query = document.querySelector('input[type="search"]').value;
     if (!query) return;
     
+    // Check if the input is a valid URL
+    if (isValidBrowserUrl(query)) {
+        window.location.href = query.trim();
+        return;
+    }
+    
+    // If not a URL, perform search
     const engine = document.getElementById('searchEngine').dataset.engine;
     
     const customEngines = JSON.parse(localStorage.getItem('customSearchEngines') || '{}');
@@ -2798,3 +2806,36 @@ document.getElementById('aboutButtonCorner').addEventListener('click', showAbout
 document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
 
 import './styles.css';
+
+/**
+ * Checks if a string is a valid URL that a browser would accept
+ * @param {string} str - String to test
+ * @returns {boolean} True if string is a valid URL
+ */
+function isValidBrowserUrl(str) {
+    try {
+        // Trim whitespace
+        str = str.trim();
+        
+        // Create URL object (throws error if invalid)
+        const url = new URL(str);
+        
+        // Check if it has a valid protocol
+        const validProtocols = ['http:', 'https:', 'ftp:', 'file:'];
+        if (!validProtocols.includes(url.protocol)) {
+            return false;
+        }
+        
+        // Check if there's no spaces or invalid characters in the rest of the URL
+        // This helps catch cases like "http://example.com test" which URL constructor accepts
+        // but browsers wouldn't treat as a valid URL
+        const urlWithoutProtocol = str.substring(url.protocol.length).trim();
+        if (urlWithoutProtocol.includes(' ') || /[<>"]/.test(urlWithoutProtocol)) {
+            return false;
+        }
+        
+        return true;
+    } catch {
+        return false;
+    }
+}
