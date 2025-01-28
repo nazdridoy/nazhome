@@ -34,23 +34,31 @@ A minimalistic startpage that combines elegance with functionality, featuring cu
   - Theme customization options
   - Background rotation control
 
+## Preview
 
 <div align="center">
   <table>
-    <tr>Preview</tr>
     <tr>
-      <td>
+      <th colspan="2">Preview</th>
+    </tr>
+    <tr>
+      <td colspan="2" align="center">
+        <img src="https://raw.githubusercontent.com/nazdridoy/nazhome/main/Previews/collage/preview.gif"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
         <img src="https://raw.githubusercontent.com/nazdridoy/nazhome/main/Previews/collage/1.png"/>
       </td>
-      <td>
+      <td align="center">
         <img src="https://raw.githubusercontent.com/nazdridoy/nazhome/main/Previews/collage/cal-calc.png"/>
       </td>
     </tr>
     <tr>
-      <td>
+      <td align="center">
         <img src="https://raw.githubusercontent.com/nazdridoy/nazhome/main/Previews/collage/serch.png"/>
       </td>
-      <td>
+      <td align="center">
         <img src="https://raw.githubusercontent.com/nazdridoy/nazhome/main/Previews/collage/About.png"/>
       </td>
     </tr>
