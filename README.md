@@ -33,6 +33,28 @@ A minimalistic startpage that combines elegance with functionality, featuring cu
   - Background rotation control
 
 
+<div align="center">
+  <table>
+    <tr>Preview</tr>
+    <tr>
+      <td>
+        <img src="https://raw.githubusercontent.com/nazdridoy/nazhome/main/Previews/collage/1.png"/>
+      </td>
+      <td>
+        <img src="https://raw.githubusercontent.com/nazdridoy/nazhome/main/Previews/collage/cal-calc.png"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="https://raw.githubusercontent.com/nazdridoy/nazhome/main/Previews/collage/serch.png"/>
+      </td>
+      <td>
+        <img src="https://raw.githubusercontent.com/nazdridoy/nazhome/main/Previews/collage/About.png"/>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ## Technologies Used
 
 - Vanilla JavaScript (ES6+)
