@@ -745,15 +745,44 @@ input[type="search"]:focus {
     font-weight: 300;
 }
 
-/* Add a subtle pulse animation on first visit */
+/* Update the first-visit animation styles */
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% { 
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    50% { 
+        transform: scale(1.02);
+        box-shadow: 0 8px 24px rgba(33, 150, 243, 0.3);
+        background: rgba(32, 33, 36, 1);
+        border-color: rgba(33, 150, 243, 0.3);
+    }
+    100% { 
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
 }
 
-.first-visit #searchEngine {
-    animation: pulse 2s ease-in-out;
+/* Apply animation to the search form */
+#searchForm.first-visit {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Add a subtle glow to the search engine button during first visit */
+#searchForm.first-visit #searchEngine {
+    animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.2);
+    }
+    100% {
+        filter: brightness(1);
+    }
 }
 
 /* Add these styles for the help text */

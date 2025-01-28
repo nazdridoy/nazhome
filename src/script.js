@@ -1042,12 +1042,14 @@ function createAddDialog() {
  */
 function checkFirstVisit() {
     if (!localStorage.getItem('hasVisited')) {
-        document.getElementById('searchEngine').parentElement.classList.add('first-visit');
+        // Add animation class to the search form instead of just the button
+        document.getElementById('searchForm').classList.add('first-visit');
         localStorage.setItem('hasVisited', 'true');
         
+        // Remove the animation class after animation completes
         setTimeout(() => {
-            document.getElementById('searchEngine').parentElement.classList.remove('first-visit');
-        }, 2000);
+            document.getElementById('searchForm').classList.remove('first-visit');
+        }, 4000); // Increased from 2000ms to 4000ms
     }
 }
 
