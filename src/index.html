@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nazHome</title>
     <!-- Favicons for cross-platform compatibility and PWA support -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
+    <!-- Primary SVG favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicons/nazhome.svg">
+    <!-- Fallback for iOS devices -->
+    <link rel="apple-touch-icon" href="/favicons/nazhome.svg">
+    <!-- Fallback for browsers that don't support SVG favicons -->
+    <link rel="alternate icon" type="image/png" href="/favicons/favicon.ico">
     <link rel="manifest" href="/favicons/site.webmanifest">
 </head>
 <body>
@@ -242,7 +245,7 @@
     <!-- Global Controls -->
     <button id="settingsToggle">⚙</button>
     <button id="aboutButtonCorner" class="corner-about-btn" title="About nazHome">
-        <img src="/favicons/favicon-32x32.png" alt="nazHome" class="corner-about-icon">
+        <img src="/favicons/nazhome.svg" alt="nazHome" class="corner-about-icon">
         <div class="orbit-3"></div>
         <div class="orbit-4"></div>
         <div class="orbit-5"></div>
@@ -417,7 +420,7 @@
                 <span class="version-tag">v1.0.1</span>
             </div>
             <div class="about-content">
-                <img src="/favicons/android-chrome-192x192.png" alt="Logo" class="about-logo">
+                <img src="/favicons/nazhome.svg" alt="Logo" class="about-logo">
                 <div class="about-text">
                     <p class="about-tagline">Your stylish gateway to the web</p>
                     <p class="about-description">A minimalistic startpage that combines elegance with functionality, featuring customizable widgets, dynamic backgrounds, and a clean interface.</p>
