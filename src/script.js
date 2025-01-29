@@ -2791,6 +2791,31 @@ window.addEventListener('scroll', () => {
  * Creates and displays the About dialog
  * Shows information about the application and its features
  */
+async function fetchLatestVersion() {
+    try {
+        const response = await fetch('https://api.github.com/repos/nazdridoy/nazhome/releases/latest');
+        if (!response.ok) throw new Error('Failed to fetch version');
+        
+        const data = await response.json();
+        if (!data.tag_name) throw new Error('No version tag found');
+
+        // Update all version tags in the document
+        const versionTags = document.getElementsByClassName('version-tag');
+        Array.from(versionTags).forEach(tag => {
+            tag.textContent = data.tag_name;
+            tag.style.display = 'inline'; // Show the version tag
+        });
+    } catch (error) {
+        console.warn('Failed to fetch version:', error);
+        // Don't show version tag if fetch fails
+        const versionTags = document.getElementsByClassName('version-tag');
+        Array.from(versionTags).forEach(tag => {
+            tag.style.display = 'none';
+        });
+    }
+}
+
+// Call this function when showing the about dialog
 function showAboutDialog() {
     // Close the settings panel first
     const settingsPanel = document.querySelector('.settings-panel');
@@ -2802,6 +2827,9 @@ function showAboutDialog() {
     dialog.className = 'edit-dialog';
     const template = document.getElementById('aboutDialogTemplate');
     dialog.appendChild(template.content.cloneNode(true));
+    
+    // Fetch version when dialog is shown
+    fetchLatestVersion();
     
     dialog.querySelector('.cancel-btn').addEventListener('click', () => {
         dialog.remove();
