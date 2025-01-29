@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="frame-src https://nazhome.pages.dev">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <title>nazHome</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        iframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .error-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <iframe src="https://nazhome.pages.dev" frameborder="0" onerror="handleError()"></iframe>
+    <div class="error-message">
+        Unable to load nazHome. Click <a href="https://nazhome.pages.dev" target="_blank">here</a> to open directly.
+    </div>
+    <script>
+        function handleError() {
+            document.querySelector('iframe').style.display = 'none';
+            document.querySelector('.error-message').style.display = 'block';
+        }
+    </script>
+</body>
+</html> 
