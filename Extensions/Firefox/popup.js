@@ -8,29 +8,21 @@ async function fetchLatestVersion() {
         // Update version tag if found
         const versionTag = document.querySelector('.version-tag');
         if (versionTag && data.tag_name) {
-            // Remove 'v' prefix if present
-            const version = data.tag_name.replace(/^v/, '');
-            versionTag.textContent = version;
+            versionTag.textContent = data.tag_name;
+            versionTag.style.display = 'block';
         }
     } catch (error) {
-        console.log('Error fetching version:', error);
-        // Keep default version from HTML if fetch fails
+        console.error('Failed to fetch version:', error);
     }
 }
 
 // Handle popup initialization
-document.addEventListener('DOMContentLoaded', function() {
-    // Fetch and update version
-    fetchLatestVersion();
+document.addEventListener('DOMContentLoaded', async () => {
+    // Handle the visit button click
+    document.getElementById('visitButton').addEventListener('click', () => {
+        window.open('https://nazhome.pages.dev', '_blank');
+    });
 
-    // Handle visit button click
-    const visitButton = document.getElementById('visitButton');
-
-    if (visitButton) {
-        visitButton.addEventListener('click', function() {
-            browser.tabs.create({
-                url: "https://nazhome.pages.dev"
-            });
-        });
-    }
+    // Fetch latest version from GitHub
+    await fetchLatestVersion();
 });
