@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>nazHome Settings</title>
+    <style>
+        body {
+            width: 300px;
+            padding: 15px;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: rgba(25, 25, 25, 0.95);
+            color: white;
+            margin: 0;
+        }
+
+        .popup-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .popup-header img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .popup-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #2196F3, #64B5F6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 600;
+        }
+
+        .version-tag {
+            background: rgba(33, 150, 243, 0.15);
+            color: #2196F3;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: auto;
+        }
+
+        .info {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+        }
+
+        .current-url {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.6rem;
+            border-radius: 6px;
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .current-url a {
+            color: #64B5F6;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .current-url a:hover {
+            text-decoration: underline;
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(33, 150, 243, 0.9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .button:hover {
+            background: rgba(33, 150, 243, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        .footer {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer a {
+            color: #64B5F6;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-header">
+        <img src="icons/icon48.png" alt="nazHome">
+        <h3>nazHome</h3>
+        <span class="version-tag">v1.0</span>
+    </div>
+    <div class="info">
+        This extension sets nazHome as your new tab page and homepage.
+        <div class="current-url">
+            <span>URL:</span>
+            <a href="https://nazhome.pages.dev" target="_blank">nazhome.pages.dev</a>
+        </div>
+    </div>
+    <button id="visitButton" class="button">Open nazHome</button>
+    <div class="footer">
+        <a href="https://github.com/nazdridoy/nazhome" target="_blank">View on GitHub</a>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html> 
