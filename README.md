@@ -4,7 +4,11 @@ A minimalistic startpage that combines elegance with functionality, featuring cu
 
 ![001](https://github.com/user-attachments/assets/26f29482-25d1-4f4e-978b-a6dd0e36f002)
 
+<div align="center">
+  
 [![Firefox](./Extensions/assets/BrowserSupport/firefox.svg)](https://addons.mozilla.org/en-GB/firefox/addon/nazhome)
+
+</div>
 
 ## Features
 
