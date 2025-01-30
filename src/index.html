@@ -456,6 +456,11 @@
         // Find closest anchor tag
         const link = e.target.closest('a');
         if (link) {
+            // Don't intercept links that should open in new tabs
+            if (link.target === '_blank' || link.hasAttribute('download') || e.ctrlKey || e.metaKey) {
+                return; // Let the default behavior handle these cases
+            }
+            
             e.preventDefault();
             
             // Check if we're in an iframe

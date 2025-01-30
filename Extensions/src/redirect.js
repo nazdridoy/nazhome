@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('message', (event) => {
         if (event.origin === 'https://nazhome.pages.dev') {
             if (event.data.type === 'navigation') {
-                // Open the URL in a new tab
-                window.open(event.data.url, '_blank');
+                // Navigate in the same tab instead of opening a new one
+                window.location.href = event.data.url;
             }
         }
     });
