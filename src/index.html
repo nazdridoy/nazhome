@@ -448,5 +448,29 @@
 
     <!-- Main application logic -->
     <script type="module" src="./script.js"></script>
+
+    <!-- Add this near the end of your body tag -->
+    <script>
+    // Intercept link clicks
+    document.addEventListener('click', (e) => {
+        // Find closest anchor tag
+        const link = e.target.closest('a');
+        if (link) {
+            e.preventDefault();
+            
+            // Check if we're in an iframe
+            if (window !== window.top) {
+                // Send message to parent frame
+                window.parent.postMessage({
+                    type: 'navigation',
+                    url: link.href
+                }, '*');
+            } else {
+                // Normal navigation if not in iframe
+                window.location.href = link.href;
+            }
+        }
+    });
+    </script>
 </body>
 </html> 
