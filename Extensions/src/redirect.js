@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('message', (event) => {
         if (event.origin === 'https://nazhome.pages.dev') {
             if (event.data.type === 'navigation') {
-                // Navigate in the same tab instead of opening a new one
+                // Navigate to the URL directly instead of trying to load in iframe
                 window.location.href = event.data.url;
             }
         }

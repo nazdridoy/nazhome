@@ -2910,3 +2910,9 @@ document.getElementById('aboutButtonCorner').addEventListener('click', showAbout
 document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
 
 import './styles.css';
+
+// Expose the search handler for the iframe navigation
+window.handleSearch = function(engine, query) {
+    // Your existing search URL generation logic here
+    return generateSearchUrl(engine, query);
+};
