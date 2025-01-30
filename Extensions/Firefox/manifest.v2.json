@@ -1,5 +1,5 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "nazHome",
   "version": "1.0.0",
   "description": "Set nazHome as your homepage and new tab page",
@@ -16,7 +16,7 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "nazhome@nazdridoy.github.io",
-      "strict_min_version": "109.0"
+      "strict_min_version": "79.0"
     }
   },
   "chrome_settings_overrides": {
@@ -25,7 +25,7 @@
   "chrome_url_overrides": {
     "newtab": "redirect.html"
   },
-  "action": {
+  "browser_action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -34,7 +34,5 @@
       "96": "icons/icon96.png"
     }
   },
-  "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'none'; frame-src https://nazhome.pages.dev"
-  }
+  "content_security_policy": "script-src 'self'; object-src 'none'; frame-src https://nazhome.pages.dev"
 } 

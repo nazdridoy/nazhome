@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="frame-src https://nazhome.pages.dev">
+    <meta http-equiv="Content-Security-Policy" content="frame-src https://nazhome.pages.dev; script-src 'self'">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <title>nazHome</title>
     <style>
@@ -33,15 +33,10 @@
     </style>
 </head>
 <body>
-    <iframe src="https://nazhome.pages.dev" frameborder="0" onerror="handleError()"></iframe>
+    <iframe src="https://nazhome.pages.dev" frameborder="0"></iframe>
     <div class="error-message">
         Unable to load nazHome. Click <a href="https://nazhome.pages.dev" target="_blank">here</a> to open directly.
     </div>
-    <script>
-        function handleError() {
-            document.querySelector('iframe').style.display = 'none';
-            document.querySelector('.error-message').style.display = 'block';
-        }
-    </script>
+    <script src="redirect.js"></script>
 </body>
 </html> 
