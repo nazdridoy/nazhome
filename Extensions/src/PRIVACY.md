@@ -1,4 +1,4 @@
-# Privacy Policy for nazHome Chrome Extension
+# Privacy Policy for nazHome Extension
 
 ## Data Collection
 The nazHome extension does not collect, store, or transmit any personal user data.

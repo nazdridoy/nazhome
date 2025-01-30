@@ -1,6 +1,6 @@
-# nazHome Chrome Extension
+# nazHome Extension
 
-This extension sets nazHome as your new tab page and homepage in Chrome.
+This extension sets nazHome as your new tab page and homepage in Browser.
 
 ## Features
 - Sets nazHome as the default homepage
@@ -8,7 +8,7 @@ This extension sets nazHome as your new tab page and homepage in Chrome.
 - Simple settings popup with quick access
 
 ## Installation
-1. Install from Chrome Web Store
+1. Install from Web extension Store
 2. The extension will automatically configure your homepage and new tab page
 
 ## Privacy
@@ -30,4 +30,14 @@ This program is licensed under the GNU Affero General Public License v3.0 (AGPL-
 You can find the full license text at:
 https://github.com/nazdridoy/nazhome/blob/main/LICENSE
 
-Copyright (C) 2024 nazdridoy 
+Copyright (C) 2024 nazdridoy
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details. 
