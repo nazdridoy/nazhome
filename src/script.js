@@ -1019,6 +1019,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateDateTime();
     document.querySelector('input[type="search"]').value = '';
     loadBookmarks();
+    initializeIframeNavigation();
 });
 
 /**
@@ -2909,10 +2910,77 @@ document.getElementById('aboutButtonCorner').addEventListener('click', showAbout
 // Call on page load
 document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
 
-import './styles.css';
+// Handle iframe navigation for links and search
+function initializeIframeNavigation() {
+    // Handle link clicks
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link) {
+            // Don't intercept links that should open in new tabs
+            if (link.target === '_blank' || link.hasAttribute('download') || e.ctrlKey || e.metaKey) {
+                return;
+            }
+            
+            e.preventDefault();
+            
+            // Check if we're in an iframe
+            if (window !== window.top) {
+                // Send message to parent frame
+                window.parent.postMessage({
+                    type: 'navigation',
+                    url: link.href
+                }, '*');
+            } else {
+                // Normal navigation if not in iframe
+                window.location.href = link.href;
+            }
+        }
+    });
 
-// Expose the search handler for the iframe navigation
-window.handleSearch = function(engine, query) {
-    // Your existing search URL generation logic here
-    return generateSearchUrl(engine, query);
-};
+    // Handle search form submission
+    const searchForm = document.getElementById('searchForm');
+    const originalHandler = searchForm.onsubmit;
+    
+    searchForm.onsubmit = function(e) {
+        e.preventDefault();
+        const query = this.querySelector('input[type="search"]').value;
+        if (!query) return;
+        
+        // Check if we're in an iframe
+        if (window !== window.top) {
+            // Get the search URL using the original logic
+            const engine = document.getElementById('searchEngine').dataset.engine;
+            let searchUrl;
+            
+            // Check for custom search engines
+            const customEngines = JSON.parse(localStorage.getItem('customSearchEngines') || '{}');
+            if (customEngines[engine]) {
+                searchUrl = customEngines[engine].url.replace('{searchTerm}', encodeURIComponent(query));
+            } else {
+                // Use default search engines
+                const searchEngines = {
+                    google: 'https://www.google.com/search?q=',
+                    ddg: 'https://duckduckgo.com/?q=',
+                    brave: 'https://search.brave.com/search?q=',
+                    yandex: 'https://yandex.com/search/?text='
+                };
+                searchUrl = searchEngines[engine] + encodeURIComponent(query);
+            }
+            
+            // Send message to parent frame
+            window.parent.postMessage({
+                type: 'navigation',
+                url: searchUrl
+            }, '*');
+        } else {
+            // If not in iframe, use the original handler
+            originalHandler.call(this, e);
+        }
+    };
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeIframeNavigation();
+});
+
+import './styles.css';
