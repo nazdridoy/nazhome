@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "nazHome",
+    "description": "The name of the extension"
+  },
+  "extensionDescription": {
+    "message": "A minimalistic startpage with smart search, widgets, and dynamic backgrounds for your homepage and new tab page.",
+    "description": "The description of the extension"
+  }
+} 
