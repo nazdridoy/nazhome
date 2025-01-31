@@ -2,7 +2,6 @@
   Content-Security-Policy: frame-ancestors 'self' chrome-extension: moz-extension:
   X-Content-Type-Options: nosniff
   Cache-Control: public, max-age=3600
-  Clear-Site-Data: "cache"
 
 /favicons/*
   Cache-Control: public, max-age=31536000, immutable 
