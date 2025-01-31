@@ -3078,10 +3078,6 @@ function initializeExport() {
     });
 }
 
-import './styles.css';
-
-// Remove the hardcoded APP_VERSION constant
-
 async function checkVersion() {
     try {
         // First try to get the latest tag
@@ -3116,3 +3112,5 @@ async function checkVersion() {
 
 // Call this when app initializes
 checkVersion();
+
+import './styles.css';
