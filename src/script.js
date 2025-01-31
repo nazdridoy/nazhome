@@ -3078,11 +3078,12 @@ function initializeExport() {
     });
 }
 
+// Replace the checkVersion function with this improved version
 async function checkVersion() {
     try {
-        // First try to get the latest tag
+        // First try to get the latest tag from GitHub
         const tagsResponse = await fetch('https://api.github.com/repos/nazdridoy/nazhome/tags', {
-            cache: 'no-store'
+            cache: 'no-store'  // Prevent caching of the tags request
         });
         if (!tagsResponse.ok) throw new Error('Failed to fetch tags');
         
@@ -3091,26 +3092,38 @@ async function checkVersion() {
         
         // Get the most recent tag
         const latestVersion = tags[0].name;
-        const currentVersion = localStorage.getItem('appVersion');
+        
+        // Get current version from localStorage, defaulting to '0' if not set
+        const currentVersion = localStorage.getItem('appVersion') || '0';
+        
+        console.log('Version check:', { current: currentVersion, latest: latestVersion });
         
         if (currentVersion !== latestVersion) {
-            // Clear cache and reload
+            console.log('New version detected, clearing cache...');
+            
+            // Clear localStorage version first
             localStorage.setItem('appVersion', latestVersion);
+            
+            // Clear browser cache if available
             if ('caches' in window) {
-                await caches.keys().then(cacheNames => {
-                    return Promise.all(
-                        cacheNames.map(cacheName => caches.delete(cacheName))
-                    );
-                });
+                const cacheKeys = await caches.keys();
+                await Promise.all(
+                    cacheKeys.map(key => caches.delete(key))
+                );
             }
+            
+            // Force reload from server
             window.location.reload(true);
+        } else {
+            console.log('Application is up to date');
         }
     } catch (error) {
         console.warn('Version check failed:', error);
+        // Don't clear cache or reload on error to prevent disruption
     }
 }
 
-// Call this when app initializes
-checkVersion();
+// Add this line to ensure version is checked when the app loads
+document.addEventListener('DOMContentLoaded', checkVersion);
 
 import './styles.css';
