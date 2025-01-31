@@ -102,7 +102,7 @@ body::after {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 10;
+    z-index: 50;
 }
 
 #searchForm {
@@ -1383,7 +1383,7 @@ input[type="search"]:focus {
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
                 0 2px 8px rgba(0, 0, 0, 0.2);
-    z-index: 5;
+    z-index: 100;
     width: 320px;
 }
 
