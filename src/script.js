@@ -2937,9 +2937,19 @@ function initializeIframeNavigation() {
             if (link.classList.contains('quick-link')) {
                 const clickedOnIcon = e.target.closest('.icon-wrapper');
                 const clickedOnName = e.target.tagName === 'SPAN' && !e.target.closest('.menu-dots');
+                
                 // Only navigate if clicking on the icon or name
                 if (clickedOnIcon || clickedOnName) {
                     e.preventDefault();
+                    
+                    // Check if it's a file:// URL
+                    if (link.href.startsWith('file://')) {
+                        // Show error message or handle file URL
+                        const message = 'File URLs cannot be opened directly due to browser security restrictions. Please use the browser\'s Open File feature instead.';
+                        alert(message);
+                        return;
+                    }
+                    
                     // Check if we're in an iframe
                     if (window !== window.top) {
                         // Send message to parent frame
