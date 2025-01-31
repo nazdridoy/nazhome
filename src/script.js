@@ -1020,6 +1020,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('input[type="search"]').value = '';
     loadBookmarks();
     initializeIframeNavigation();
+    initializeExport();
 });
 
 /**
@@ -2995,8 +2996,59 @@ function initializeIframeNavigation() {
     };
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    initializeIframeNavigation();
-});
+// Add this function to handle data export
+function initializeExport() {
+    // Remove any existing event listener first
+    const exportButton = document.getElementById('exportData');
+    const newExportButton = exportButton.cloneNode(true);
+    exportButton.parentNode.replaceChild(newExportButton, exportButton);
+    
+    // Add our new event listener
+    newExportButton.addEventListener('click', () => {
+        // Collect all data to export
+        const data = {
+            bookmarks: safeGet('bookmarks') || [],
+            customSearchEngines: safeGet('customSearchEngines') || {},
+            settings: {
+                hideAddButton: safeGet('hideAddButton') || false,
+                timeWidget: safeGet('timeWidget') !== false,
+                weatherWidget: safeGet('weatherWidget') !== false,
+                calculatorWidget: safeGet('calculatorWidget') || false,
+                calendarWidget: safeGet('calendarWidget') || false,
+                // Add other settings as needed
+            }
+        };
+
+        // Get current date and time for filename
+        const now = new Date();
+        const date = now.toISOString().split('T')[0];
+        const time = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+        const filename = `nazHome_${date}_${time}.json`;
+
+        // Convert to JSON string
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+
+        // Check if we're in an iframe
+        if (window !== window.top) {
+            // Send the data to parent frame for download
+            window.parent.postMessage({
+                type: 'download',
+                filename: filename,
+                content: jsonString
+            }, '*');
+        } else {
+            // Normal download if not in iframe
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    });
+}
 
 import './styles.css';
