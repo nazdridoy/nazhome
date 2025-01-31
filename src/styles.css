@@ -1140,35 +1140,113 @@ input[type="search"]:focus {
     font-weight: 400;
 }
 
-/* Add media query for smaller screens */
+/* Update DateTime Widget media query */
 @media (max-width: 1024px) {
     #datetime {
         width: auto;
     }
 
-    #weather {
-        top: 1rem;
-        left: auto;
-        right: 4rem;
+    /* Only change layout if viewport width is small enough to cause overlap */
+    @media (max-width: 600px) {
+        #datetime {
+            gap: 0.3rem;
+        }
+
+        #datetime .date {
+            margin-bottom: 0.3rem;
+        }
+
+        #weather {
+            position: static;
+            transform: none;
+            padding: 0;
+            background: none;
+            border: none;
+            box-shadow: none;
+            margin-top: 3rem;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+
+        .weather-content {
+            justify-content: center;
+            max-width: 200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .weather-main {
+            gap: 0.3rem;
+        }
+
+        .weather-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .weather-content .temp {
+            font-size: 0.9rem;
+            line-height: 1.1;
+        }
+
+        .weather-content .description {
+            display: none;
+        }
+
+        .weather-content .city {
+            display: block;
+            font-size: 0.7rem;
+            opacity: 0.8;
+            text-transform: none;
+            margin-top: 1px;
+        }
+
+        /* Move weather widget into datetime container */
+        #datetime {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #weather {
+            width: 100%;
+            opacity: 0.8;
+            margin-top: 4rem;
+        }
     }
 }
 
+/* Add even smaller screen adjustments */
 @media (max-width: 768px) {
+    #datetime {
+        font-size: 1.8rem;
+    }
+
+    #datetime .time {
+        font-size: 2.5rem;
+    }
+
+    #datetime .date {
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
     #weather {
-        padding: 0.3rem 0.6rem;
+        left: calc(50% - 160px);
+        padding: 0.2rem 0.5rem;
     }
     
     .weather-icon {
-        width: 35px;
-        height: 35px;
+        width: 30px;
+        height: 30px;
     }
     
-    .weather-content .description {
-        font-size: 0.7rem;
-    }
-
-    .weather-content .city {
-        font-size: 0.65rem;
+    .weather-content .temp {
+        font-size: 1.2rem;
     }
 }
 
