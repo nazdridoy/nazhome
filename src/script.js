@@ -2914,6 +2914,17 @@ document.addEventListener('DOMContentLoaded', handleQuickLinksVisibility);
 function initializeIframeNavigation() {
     // Handle link clicks
     document.addEventListener('click', (e) => {
+        // Don't intercept if clicking on any UI controls
+        if (e.target.closest('.menu-items') ||
+            e.target.closest('.menu-dots') ||
+            e.target.closest('.edit-dialog') ||
+            e.target.closest('.settings-panel') ||
+            e.target.closest('.about-dialog') ||
+            e.target.closest('.quick-link-menu') ||
+            e.target.closest('.add-bookmark')) {
+            return;
+        }
+
         const link = e.target.closest('a');
         if (link) {
             // Don't intercept links that should open in new tabs
@@ -2921,18 +2932,25 @@ function initializeIframeNavigation() {
                 return;
             }
             
-            e.preventDefault();
-            
-            // Check if we're in an iframe
-            if (window !== window.top) {
-                // Send message to parent frame
-                window.parent.postMessage({
-                    type: 'navigation',
-                    url: link.href
-                }, '*');
-            } else {
-                // Normal navigation if not in iframe
-                window.location.href = link.href;
+            // Only intercept quick links when clicking on their main area
+            if (link.classList.contains('quick-link')) {
+                const clickedOnIcon = e.target.closest('.icon-wrapper');
+                const clickedOnName = e.target.tagName === 'SPAN' && !e.target.closest('.menu-dots');
+                // Only navigate if clicking on the icon or name
+                if (clickedOnIcon || clickedOnName) {
+                    e.preventDefault();
+                    // Check if we're in an iframe
+                    if (window !== window.top) {
+                        // Send message to parent frame
+                        window.parent.postMessage({
+                            type: 'navigation',
+                            url: link.href
+                        }, '*');
+                    } else {
+                        // Normal navigation if not in iframe
+                        window.location.href = link.href;
+                    }
+                }
             }
         }
     });
@@ -2945,13 +2963,11 @@ function initializeIframeNavigation() {
         e.preventDefault();
         const query = this.querySelector('input[type="search"]').value;
         if (!query) return;
-        
         // Check if we're in an iframe
         if (window !== window.top) {
             // Get the search URL using the original logic
             const engine = document.getElementById('searchEngine').dataset.engine;
             let searchUrl;
-            
             // Check for custom search engines
             const customEngines = JSON.parse(localStorage.getItem('customSearchEngines') || '{}');
             if (customEngines[engine]) {
