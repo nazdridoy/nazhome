@@ -2,8 +2,8 @@
   "name": "nazhome",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node scripts/dev-version.js && vite",
+    "build": "node scripts/dev-version.js && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
