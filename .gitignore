@@ -41,3 +41,6 @@ testBuild/
 
 # Debug
 debug.log 
+
+# Development version file
+public/version.dev.json

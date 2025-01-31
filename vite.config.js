@@ -31,5 +31,10 @@ export default defineConfig({
       plugins: [
       ]
     }
+  },
+  define: {
+    __VERSION_FILE__: JSON.stringify(
+      process.env.NODE_ENV === 'development' ? '/version.dev.json' : '/version.json'
+    )
   }
 }) 
