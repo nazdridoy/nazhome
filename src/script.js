@@ -3079,3 +3079,40 @@ function initializeExport() {
 }
 
 import './styles.css';
+
+// Remove the hardcoded APP_VERSION constant
+
+async function checkVersion() {
+    try {
+        // First try to get the latest tag
+        const tagsResponse = await fetch('https://api.github.com/repos/nazdridoy/nazhome/tags', {
+            cache: 'no-store'
+        });
+        if (!tagsResponse.ok) throw new Error('Failed to fetch tags');
+        
+        const tags = await tagsResponse.json();
+        if (!tags || !tags.length) throw new Error('No tags found');
+        
+        // Get the most recent tag
+        const latestVersion = tags[0].name;
+        const currentVersion = localStorage.getItem('appVersion');
+        
+        if (currentVersion !== latestVersion) {
+            // Clear cache and reload
+            localStorage.setItem('appVersion', latestVersion);
+            if ('caches' in window) {
+                await caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                });
+            }
+            window.location.reload(true);
+        }
+    } catch (error) {
+        console.warn('Version check failed:', error);
+    }
+}
+
+// Call this when app initializes
+checkVersion();
