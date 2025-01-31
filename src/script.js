@@ -2808,16 +2808,20 @@ window.addEventListener('scroll', () => {
  */
 async function fetchLatestVersion() {
     try {
-        const response = await fetch('https://api.github.com/repos/nazdridoy/nazhome/releases/latest');
-        if (!response.ok) throw new Error('Failed to fetch version');
+        // First try to get the latest tag
+        const tagsResponse = await fetch('https://api.github.com/repos/nazdridoy/nazhome/tags');
+        if (!tagsResponse.ok) throw new Error('Failed to fetch tags');
         
-        const data = await response.json();
-        if (!data.tag_name) throw new Error('No version tag found');
-
+        const tags = await tagsResponse.json();
+        if (!tags || !tags.length) throw new Error('No tags found');
+        
+        // Get the most recent tag
+        const latestTag = tags[0].name;
+        
         // Update all version tags in the document
         const versionTags = document.getElementsByClassName('version-tag');
         Array.from(versionTags).forEach(tag => {
-            tag.textContent = data.tag_name;
+            tag.textContent = latestTag;
             tag.style.display = 'inline'; // Show the version tag
         });
     } catch (error) {
