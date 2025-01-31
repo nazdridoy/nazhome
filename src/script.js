@@ -287,7 +287,7 @@ function getBestIcon(url) {
     try {
         const urlObj = new URL(url);
         
-        // Return default icon for local/file URLs
+        // Check for local URLs
         if (urlObj.protocol === 'file:' || 
             urlObj.hostname === 'localhost' || 
             urlObj.hostname.match(/^127\./) ||
@@ -571,7 +571,20 @@ async function resolveFavicon(url, userIcon = '') {
     if (userIcon) return userIcon;
 
     try {
-        const domain = new URL(url).hostname;
+        const urlObj = new URL(url);
+        
+        // Skip icon resolution for local URLs if no custom icon
+        if (urlObj.protocol === 'file:' || 
+            urlObj.hostname === 'localhost' || 
+            urlObj.hostname.match(/^127\./) ||
+            urlObj.hostname.match(/^192\.168\./) ||
+            urlObj.hostname.match(/^10\./) ||
+            urlObj.hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./) ||
+            urlObj.hostname.endsWith('.local')) {
+            return DEFAULT_FALLBACK_ICON;
+        }
+
+        const domain = urlObj.hostname;
         
         // 2. Check alternative icons list
         const alternatives = await fetchAlternativeIcons();
