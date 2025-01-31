@@ -2,8 +2,8 @@
   "name": "nazhome",
   "version": "1.0.0",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development node scripts/dev-version.js && vite",
-    "build": "cross-env NODE_ENV=production node scripts/dev-version.js && vite build",
+    "dev": "node scripts/dev-version.js --dev && vite",
+    "build": "node scripts/dev-version.js --prod && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
