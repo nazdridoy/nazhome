@@ -965,17 +965,21 @@ function addDefaultBookmarks() {
  * Settings Panel Event Handlers
  * Manages visibility of the settings panel and handles click-outside behavior
  */
-document.getElementById('settingsToggle').addEventListener('click', function() {
-    const panel = document.querySelector('.settings-panel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+document.getElementById('settingsButton').addEventListener('click', function() {
+    toggleSettings();
 });
 
+function toggleSettings() {
+    const settingsPanel = document.querySelector('.settings-panel');
+    const currentDisplay = window.getComputedStyle(settingsPanel).display;
+    settingsPanel.style.display = currentDisplay === 'none' ? 'block' : 'none';
+}
 // Close settings panel when clicking outside
 document.addEventListener('click', function(e) {
     const panel = document.querySelector('.settings-panel');
-    const settingsToggle = document.getElementById('settingsToggle');
+    const settingsButton = document.getElementById('settingsButton');
     
-    if (!panel.contains(e.target) && !settingsToggle.contains(e.target)) {
+    if (!panel.contains(e.target) && !settingsButton.contains(e.target)) {
         panel.style.display = 'none';
     }
 });
