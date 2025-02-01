@@ -3133,4 +3133,305 @@ async function checkVersion() {
 
 document.addEventListener('DOMContentLoaded', checkVersion);
 
+// Add these functions to your script.js
+
+function createVaultDialog() {
+    const template = document.getElementById('vaultDialogTemplate');
+    const dialog = template.content.cloneNode(true);
+    document.body.appendChild(dialog);
+
+    const vaultDialog = document.querySelector('.vault-dialog-content');
+    const urlInput = vaultDialog.querySelector('.vault-url-input');
+
+    // Handle URL input
+    urlInput.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            let url = urlInput.value.trim();
+            
+            if (!url) {
+                showToast('Please enter a URL', 'error');
+                return;
+            }
+
+            try {
+                // Remove any leading @ symbol
+                url = url.replace(/^@/, '');
+                
+                // Validate URL format
+                if (!url.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/)) {
+                    showToast('Invalid URL format. Example: example.com', 'error');
+                    return;
+                }
+
+                // Ensure URL has protocol
+                const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+                
+                // Test if URL is reachable
+                try {
+                    const response = await fetch(fullUrl, { mode: 'no-cors' });
+                } catch (error) {
+                    if (fullUrl.startsWith('file://')) {
+                        showToast('Local file URLs are not supported', 'error');
+                    } else if (error.message.includes('CORS')) {
+                        showToast('Website blocks external access. Try adding https://', 'warning');
+                    } else {
+                        showToast('Cannot reach this URL. Please check if the website exists.', 'error');
+                    }
+                    return;
+                }
+
+                // Create new vault link
+                const vaultLink = {
+                    url: fullUrl,
+                    name: new URL(fullUrl).hostname.replace('www.', ''),
+                    icon: getFaviconUrl(fullUrl),
+                    addedAt: Date.now()
+                };
+
+                // Check for duplicates
+                const vaultLinks = JSON.parse(localStorage.getItem('vaultLinks') || '[]');
+                const duplicate = vaultLinks.find(link => link.url === vaultLink.url);
+                if (duplicate) {
+                    showToast(`URL already exists in vault (added ${new Date(duplicate.addedAt).toLocaleDateString()})`, 'warning');
+                    return;
+                }
+
+                // Add to vault links
+                vaultLinks.push(vaultLink);
+                localStorage.setItem('vaultLinks', JSON.stringify(vaultLinks));
+
+                // Clear input and update display
+                urlInput.value = '';
+                updateVaultLinks();
+                showToast('Link added successfully', 'success');
+
+            } catch (error) {
+                if (error.message.includes('Invalid URL')) {
+                    showToast('Please enter a valid web URL (e.g., example.com)', 'error');
+                } else {
+                    showToast('Error adding link: ' + error.message, 'error');
+                }
+            }
+        }
+    });
+
+    return vaultDialog;
+}
+
+// Update the updateVaultLinks function
+function updateVaultLinks() {
+    const linksContainer = document.querySelector('.vault-links');
+    linksContainer.innerHTML = '';
+
+    const vaultLinks = JSON.parse(localStorage.getItem('vaultLinks') || '[]');
+    vaultLinks.sort((a, b) => b.addedAt - a.addedAt);
+
+    vaultLinks.forEach(link => {
+        const linkItem = document.createElement('div');
+        linkItem.className = 'vault-link-item';
+        
+        linkItem.innerHTML = `
+            <img src="${link.icon || getFaviconUrl(link.url)}" 
+                 alt="" 
+                 class="vault-link-icon"
+                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>'">
+            <span class="vault-link-url">${link.url}</span>
+            <div class="vault-link-actions">
+                <button class="vault-link-menu" title="More options">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="vault-link-dropdown">
+                    <button class="vault-link-edit">Edit</button>
+                    <button class="vault-link-delete">Delete</button>
+                </div>
+            </div>
+        `;
+
+        // Add click handler to open link
+        linkItem.addEventListener('click', (e) => {
+            if (!e.target.closest('.vault-link-actions')) {
+                window.open(link.url, '_blank');
+            }
+        });
+
+        // Add menu toggle handler
+        const menuBtn = linkItem.querySelector('.vault-link-menu');
+        const dropdown = linkItem.querySelector('.vault-link-dropdown');
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('show');
+        });
+
+        // Edit handler
+        const editBtn = linkItem.querySelector('.vault-link-edit');
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openVaultEditDialog(link);
+        });
+
+        // Delete handler
+        const deleteBtn = linkItem.querySelector('.vault-link-delete');
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteVaultLink(link);
+            updateVaultLinks();
+        });
+
+        linksContainer.appendChild(linkItem);
+    });
+}
+
+// Add function to handle vault link editing
+function openVaultEditDialog(link) {
+    const template = document.getElementById('vaultEditDialogTemplate');
+    const dialog = template.content.cloneNode(true);
+    document.body.appendChild(dialog);
+
+    const editOverlay = document.querySelector('.vault-edit-overlay');
+    const editDialog = document.querySelector('.vault-edit-dialog');
+    const form = document.getElementById('vaultEditForm');
+    const urlInput = document.getElementById('editUrl');
+    const iconInput = document.getElementById('editIcon');
+
+    // Populate form with current values
+    urlInput.value = link.url;
+    iconInput.value = link.icon || '';
+
+    // Handle form submission
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const updatedLink = {
+            ...link,
+            url: urlInput.value.trim(),
+            icon: iconInput.value.trim() || getFaviconUrl(urlInput.value.trim())
+        };
+
+        // Update in storage
+        const vaultLinks = JSON.parse(localStorage.getItem('vaultLinks') || '[]');
+        const index = vaultLinks.findIndex(l => l.url === link.url);
+        if (index !== -1) {
+            vaultLinks[index] = updatedLink;
+            localStorage.setItem('vaultLinks', JSON.stringify(vaultLinks));
+        }
+
+        // Close dialog and update display
+        editOverlay.remove();
+        updateVaultLinks();
+    });
+
+    // Handle cancel and click outside
+    const cancelBtn = editDialog.querySelector('.cancel-btn');
+    cancelBtn.addEventListener('click', () => {
+        editOverlay.remove();
+    });
+
+    editOverlay.addEventListener('click', (e) => {
+        if (e.target === editOverlay) {
+            editOverlay.remove();
+        }
+    });
+}
+
+// Function to delete a vault link
+function deleteVaultLink(link) {
+    const vaultLinks = JSON.parse(localStorage.getItem('vaultLinks') || '[]');
+    const updatedLinks = vaultLinks.filter(l => l.url !== link.url);
+    localStorage.setItem('vaultLinks', JSON.stringify(updatedLinks));
+}
+
+// Add these functions to handle vault dialog visibility
+function showVaultDialog() {
+    let vaultDialog = document.querySelector('.vault-dialog-content');
+    if (!vaultDialog) {
+        vaultDialog = createVaultDialog();
+    }
+    vaultDialog.style.display = 'flex';
+    updateVaultLinks();
+}
+
+function hideVaultDialog() {
+    const vaultDialog = document.querySelector('.vault-dialog-content');
+    if (vaultDialog) {
+        vaultDialog.style.display = 'none';
+    }
+}
+
+// Add click handler for the vault button
+document.getElementById('vaultButton').addEventListener('click', () => {
+    const vaultDialog = document.querySelector('.vault-dialog-content');
+    if (vaultDialog && vaultDialog.style.display === 'flex') {
+        hideVaultDialog();
+    } else {
+        showVaultDialog();
+    }
+});
+
+// Add click handler to close dialog when clicking outside
+document.addEventListener('click', (e) => {
+    const vaultDialog = document.querySelector('.vault-dialog-content');
+    const vaultButton = document.getElementById('vaultButton');
+    
+    if (vaultDialog && 
+        !vaultDialog.contains(e.target) && 
+        !vaultButton.contains(e.target)) {
+        hideVaultDialog();
+    }
+});
+
+// Add this helper function if not already present
+function getFaviconUrl(url) {
+    try {
+        const urlObj = new URL(url);
+        return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
+    } catch (e) {
+        return null;
+    }
+}
+
+// Add toast notification function
+function showToast(message, type = 'error') {
+    const toastContainer = document.querySelector('.toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon;
+    switch (type) {
+        case 'error':
+            icon = 'exclamation-circle';
+            break;
+        case 'warning':
+            icon = 'exclamation-triangle';
+            break;
+        case 'success':
+            icon = 'check-circle';
+            break;
+        default:
+            icon = 'info-circle';
+    }
+    
+    toast.innerHTML = `
+        <i class="fas fa-${icon}"></i>
+        <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Trigger reflow for animation
+    toast.offsetHeight;
+    toast.classList.add('show');
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 import './styles.css';

@@ -2107,4 +2107,382 @@ input[type="search"]:focus {
 
 .vault-icon {
     fill: currentColor;  /* This makes the SVG inherit the button text color */
-} 
+}
+
+/* Vault Dialog Styles */
+.vault-dialog-content {
+    background: rgba(32, 33, 36, 0.9);
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 360px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: fixed;
+    top: 4rem;
+    right: 1rem;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.vault-header {
+    padding: 1.2rem 1.2rem 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vault-header h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.vault-input-container {
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vault-url-input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.vault-url-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.vault-url-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+}
+
+/* Update the vault links scrollbar style */
+.vault-links {
+    padding: 0.8rem 1.2rem;
+    overflow-y: auto;
+    max-height: calc(80vh - 8rem);
+    padding-right: calc(1.2rem - 6px); /* Compensate for scrollbar width */
+    margin-right: 6px; /* Add margin equal to scrollbar width */
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Add WebKit scrollbar styles to match settings panel */
+.vault-links::-webkit-scrollbar {
+    width: 6px;
+}
+
+.vault-links::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vault-links::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.vault-links::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.vault-link-item {
+    display: flex;
+    align-items: center;
+    padding: 0.7rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.vault-link-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.vault-link-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 0.8rem;
+    object-fit: contain;
+    opacity: 0.9;
+}
+
+.vault-link-url {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+}
+
+.vault-link-actions {
+    margin-left: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.vault-link-item:hover .vault-link-actions {
+    opacity: 1;
+}
+
+.vault-link-menu {
+    padding: 0.4rem;
+    color: rgba(255, 255, 255, 0.6);
+    background: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vault-link-menu:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.vault-link-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(32, 33, 36, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.4rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 120px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.vault-link-dropdown.show {
+    display: flex;
+}
+
+.vault-link-dropdown button {
+    width: 100%;
+    padding: 0.5rem 0.8rem;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vault-link-dropdown button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.vault-link-edit {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vault-link-delete {
+    color: rgba(255, 82, 82, 0.8) !important;
+}
+
+.vault-link-delete:hover {
+    background: rgba(255, 82, 82, 0.1) !important;
+    color: rgba(255, 82, 82, 1) !important;
+}
+
+/* Vault Edit Dialog Styles */
+.vault-edit-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vault-edit-dialog {
+    background: rgba(32, 33, 36, 0.95);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 360px;
+    padding: 1.5rem;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.vault-edit-dialog h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.vault-edit-dialog .input-group {
+    margin-bottom: 1rem;
+}
+
+.vault-edit-dialog label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.vault-edit-dialog input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.vault-edit-dialog input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.vault-edit-dialog .help-text {
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.vault-edit-dialog .button-group {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+}
+
+.vault-edit-dialog .save-btn {
+    flex: 1;
+    padding: 0.6rem;
+    background: rgba(33, 150, 243, 0.9);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vault-edit-dialog .save-btn:hover {
+    background: rgba(33, 150, 243, 1);
+    transform: translateY(-1px);
+}
+
+.vault-edit-dialog .cancel-btn {
+    flex: 1;
+    padding: 0.6rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vault-edit-dialog .cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Toast Notification Styles */
+.toast-container {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+
+.toast {
+    background: rgba(32, 33, 36, 0.95);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.error {
+    border-left: 3px solid rgba(255, 82, 82, 0.8);
+}
+
+.toast.warning {
+    border-left: 3px solid rgba(255, 165, 0, 0.8);
+}
+
+.toast i {
+    font-size: 1.1rem;
+}
+
+.toast.error i {
+    color: rgba(255, 82, 82, 0.8);
+}
+
+.toast.warning i {
+    color: rgba(255, 165, 0, 0.8);
+}
+
+/* Add success state for toast */
+.toast.success {
+    border-left: 3px solid rgba(76, 175, 80, 0.8);
+}
+
+.toast.success i {
+    color: rgba(76, 175, 80, 0.8);
+}

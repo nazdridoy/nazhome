@@ -458,8 +458,54 @@
         </div>
     </template>
 
+    <!-- Update the vault window template -->
+    <template id="vaultDialogTemplate">
+        <div class="vault-dialog-content">
+            <div class="vault-header">
+                <h3>Quick Links Vault</h3>
+            </div>
+            <div class="vault-input-container">
+                <input type="url" 
+                       class="vault-url-input" 
+                       placeholder="Enter URL and press Enter"
+                       autocomplete="off"
+                       spellcheck="false">
+            </div>
+            <div class="vault-links">
+                <!-- Links will be populated here dynamically -->
+            </div>
+        </div>
+    </template>
+
+    <!-- Update the vault edit dialog template -->
+    <template id="vaultEditDialogTemplate">
+        <div class="vault-edit-overlay">
+            <div class="vault-edit-dialog">
+                <h3>Edit Link</h3>
+                <form id="vaultEditForm">
+                    <div class="input-group">
+                        <label for="editUrl">URL:</label>
+                        <input type="url" id="editUrl" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="editIcon">Icon URL (optional):</label>
+                        <input type="url" id="editIcon" placeholder="https://example.com/favicon.ico">
+                        <small class="help-text">Leave empty to use website's favicon</small>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="save-btn">Save</button>
+                        <button type="button" class="cancel-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
     <!-- Main application logic -->
     <script type="module" src="./script.js?v=v1.1.2" defer></script>
+
+    <!-- Add this near the end of body -->
+    <div class="toast-container"></div>
 
 </body>
 </html> 
