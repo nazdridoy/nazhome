@@ -86,7 +86,7 @@ body::after {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    gap: 2rem;
+    gap: 1rem;
     padding: 0 2rem;
 }
 
@@ -243,7 +243,7 @@ input[type="search"]:focus {
     margin: 0 auto;
     padding: 1rem;
     position: relative;
-    margin-top: calc(50vh + 60px);
+    margin-top: calc(50vh + 20px);
 }
 
 .grid-container a {
@@ -278,20 +278,7 @@ input[type="search"]:focus {
 /* Add media query for phone screens */
 @media (max-width: 768px) {
     .grid-container {
-        grid-template-columns: repeat(3, 1fr); /* 3 columns for phones */
-        gap: 1rem; /* Slightly reduce gap for smaller screens */
-        width: 95%; /* Use more screen width on phones */
-    }
-
-    /* Make icons slightly smaller on mobile */
-    .grid-container img {
-        width: 28px;
-        height: 28px;
-    }
-
-    /* Adjust text size for mobile */
-    .grid-container span {
-        font-size: 0.8rem;
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -1145,108 +1132,95 @@ input[type="search"]:focus {
     #datetime {
         width: auto;
     }
+}
 
-    /* Only change layout if viewport width is small enough to cause overlap */
-    @media (max-width: 600px) {
-        #datetime {
-            gap: 0.3rem;
-        }
+/* Update mobile layout styles */
+@media (max-width: 600px) {
+    #weather {
+        position: fixed;
+        top: 1rem;  /* Align with top */
+        left: 1rem;  /* Align with left */
+        right: auto;
+        transform: none;  /* Remove transform since we're using direct positioning */
+        width: auto;
+        max-width: 140px;
+        margin: 0;
+        z-index: 10;
+        background: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
+        padding: 0;
+    }
 
-        #datetime .date {
-            margin-bottom: 0.3rem;
-        }
+    .weather-content {
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 100px;
+        padding: 0.3rem 0.6rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        #weather {
-            position: static;
-            transform: none;
-            padding: 0;
-            background: none;
-            border: none;
-            box-shadow: none;
-            margin-top: 3rem;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-        }
+    .weather-main {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
 
-        .weather-content {
-            justify-content: center;
-            max-width: 200px;
-            margin: 0 auto;
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 12px;
-            padding: 0.3rem 0.6rem;
-        }
+    .weather-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;  /* Remove gap between temp and city */
+        line-height: 1;
+    }
 
-        .weather-main {
-            gap: 0.3rem;
-        }
+    .weather-icon {
+        width: 18px;
+        height: 18px;
+    }
 
-        .weather-icon {
-            width: 20px;
-            height: 20px;
-        }
+    .weather-content .temp {
+        font-size: 0.9rem;
+        font-weight: 500;
+        line-height: 1;
+    }
 
-        .weather-content .temp {
-            font-size: 0.9rem;
-            line-height: 1.1;
-        }
+    .weather-content .description {
+        display: none;
+    }
 
-        .weather-content .description {
-            display: none;
-        }
+    .weather-content .city {
+        display: block;
+        font-size: 0.6rem;
+        opacity: 0.7;
+        line-height: 1;
+        margin-top: -1px;  /* Slightly reduce space between temp and city */
+    }
 
-        .weather-content .city {
-            display: block;
-            font-size: 0.7rem;
-            opacity: 0.8;
-            text-transform: none;
-            margin-top: 1px;
-        }
+    /* Search container adjustments */
+    .search-container {
+        width: 85%;
+        top: 50%;
+    }
 
-        /* Move weather widget into datetime container */
-        #datetime {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #weather {
-            width: 100%;
-            opacity: 0.8;
-            margin-top: 4rem;
-        }
+    /* Grid container adjustments */
+    .grid-container {
+        margin-top: calc(50vh + 20px);
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        width: 85%;
     }
 }
 
-/* Add even smaller screen adjustments */
+/* Remove conflicting media queries */
 @media (max-width: 768px) {
-    #datetime {
-        font-size: 1.8rem;
-    }
-
-    #datetime .time {
-        font-size: 2.5rem;
-    }
-
-    #datetime .date {
-        font-size: 0.9rem;
-        letter-spacing: 1px;
-    }
-
-    #weather {
-        left: calc(50% - 160px);
-        padding: 0.2rem 0.5rem;
-    }
-    
-    .weather-icon {
-        width: 30px;
-        height: 30px;
-    }
-    
-    .weather-content .temp {
-        font-size: 1.2rem;
+    .grid-container {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -1836,7 +1810,7 @@ input[type="search"]:focus {
     box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
     border-radius: 50%;
     z-index: -1;
-    animation: electronOrbit2 8s linear infinite;
+    animation: electronOrbit2 8s linear infinite reverse;
     transform-style: preserve-3d;
     perspective: 800px;
 }
@@ -2022,5 +1996,39 @@ input[type="search"]:focus {
         top: 1rem;
         left: auto;
         right: 4rem;
+    }
+}
+
+/* Add media query for small screens with weather widget */
+@media (max-width: 600px) {
+    #weather {
+        position: fixed;
+        top: 1rem;  /* Align with top */
+        left: 1rem;  /* Align with left */
+        right: auto;
+        transform: none;  /* Remove transform since we're using direct positioning */
+        width: auto;
+        max-width: 140px;
+        margin: 0;
+        z-index: 10;
+        background: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
+        padding: 0;
+    }
+
+    /* Adjust grid container position when weather is visible */
+    body:has(#weather[style*="opacity: 1"]) .grid-container {
+        margin-top: calc(50vh + 40px);  /* Slightly reduced margin when weather is visible */
+    }
+
+    .weather-content {
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 12px;
+        padding: 0.3rem 0.6rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 } 
