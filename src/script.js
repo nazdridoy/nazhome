@@ -1839,6 +1839,7 @@ function exportUserData() {
         bookmarks: safeGet('bookmarks') || [],
         deletedDefaults: safeGet('deletedDefaults') || [],
         customSearchEngines: safeGet('customSearchEngines') || {},
+        vaultLinks: safeGet('vaultLinks') || [], // Add vaultLinks to export
         settings: {
             hideAddButton: safeGet('hideAddButton') || false,
             allowLocalUrls: localStorage.getItem('allowLocalUrls') === 'true',
@@ -1847,9 +1848,9 @@ function exportUserData() {
             calendarWidget: localStorage.getItem('calendarWidget') === 'true',
             calculatorWidget: localStorage.getItem('calculatorWidget') === 'true'
         },
-            weather: {
-                city: localStorage.getItem('weatherCity') || 'Dhaka',
-                country: localStorage.getItem('weatherCountry') || 'BD'
+        weather: {
+            city: localStorage.getItem('weatherCity') || 'Dhaka',
+            country: localStorage.getItem('weatherCountry') || 'BD'
         }
     };
 
@@ -1883,7 +1884,12 @@ async function importUserData(file) {
         }
         
         if (data.customSearchEngines && typeof data.customSearchEngines === 'object') {
-                safeSet('customSearchEngines', data.customSearchEngines);
+            safeSet('customSearchEngines', data.customSearchEngines);
+        }
+
+        // Add vaultLinks import
+        if (Array.isArray(data.vaultLinks)) {
+            safeSet('vaultLinks', data.vaultLinks);
         }
         
         if (data.settings) {
@@ -1918,10 +1924,10 @@ async function importUserData(file) {
 
         // Reload the page to apply all settings
         window.location.reload();
-        } catch (error) {
+    } catch (error) {
         console.error('Failed to import data:', error);
         alert('Failed to import data. Please check if the file is valid.');
-        }
+    }
 }
 
 document.getElementById('exportData').addEventListener('click', exportUserData);
@@ -3043,14 +3049,20 @@ function initializeExport() {
         // Collect all data to export
         const data = {
             bookmarks: safeGet('bookmarks') || [],
+            deletedDefaults: safeGet('deletedDefaults') || [],
             customSearchEngines: safeGet('customSearchEngines') || {},
+            vaultLinks: safeGet('vaultLinks') || [], // Add vaultLinks to export
             settings: {
                 hideAddButton: safeGet('hideAddButton') || false,
                 timeWidget: safeGet('timeWidget') !== false,
                 weatherWidget: safeGet('weatherWidget') !== false,
                 calculatorWidget: safeGet('calculatorWidget') || false,
                 calendarWidget: safeGet('calendarWidget') || false,
-                // Add other settings as needed
+                allowLocalUrls: localStorage.getItem('allowLocalUrls') === 'true'
+            },
+            weather: {
+                city: localStorage.getItem('weatherCity') || 'Dhaka',
+                country: localStorage.getItem('weatherCountry') || 'BD'
             }
         };
 
@@ -3135,6 +3147,69 @@ document.addEventListener('DOMContentLoaded', checkVersion);
 
 // Add these functions to your script.js
 
+// Shared validation and loading functions
+function validateAndNormalizeUrl(url) {
+    try {
+        // Remove leading/trailing whitespace and @ symbol
+        url = url.trim().replace(/^@/, '');
+
+        // Get settings
+        const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+        const allowLocalUrls = settings.allowLocalUrls || false;
+
+        // Handle local URLs (127.* and localhost)
+        if (url.match(/^(http:\/\/)?127\./i) || url.match(/^(http:\/\/)?localhost/i)) {
+            if (!allowLocalUrls) {
+                throw new Error('Local URLs are disabled. Enable them in settings first.');
+            }
+            return url.startsWith('http') ? url : `http://${url}`;
+        }
+
+        // Add protocol if missing
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+
+        // Validate URL format
+        new URL(url); // This will throw if invalid
+
+        // Block file:// URLs
+        if (url.startsWith('file://')) {
+            throw new Error('Local file URLs are not supported');
+        }
+
+        return url;
+    } catch (error) {
+        if (error instanceof TypeError) {
+            throw new Error('Invalid URL format. Example: example.com');
+        }
+        throw error;
+    }
+}
+
+// Shared function to load links from storage
+function loadLinks(storageKey) {
+    try {
+        const links = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        return Array.isArray(links) ? links : [];
+    } catch (error) {
+        console.error(`Error loading ${storageKey}:`, error);
+        return [];
+    }
+}
+
+// Shared function to save links to storage
+function saveLinks(links, storageKey) {
+    try {
+        localStorage.setItem(storageKey, JSON.stringify(links));
+        return true;
+    } catch (error) {
+        console.error(`Error saving ${storageKey}:`, error);
+        showToast('Failed to save links. Storage might be full.', 'error');
+        return false;
+    }
+}
+
 function createVaultDialog() {
     const template = document.getElementById('vaultDialogTemplate');
     const dialog = template.content.cloneNode(true);
@@ -3147,71 +3222,45 @@ function createVaultDialog() {
     urlInput.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            let url = urlInput.value.trim();
-            
-            if (!url) {
+            const inputUrl = urlInput.value;
+
+            if (!inputUrl.trim()) {
                 showToast('Please enter a URL', 'error');
                 return;
             }
 
             try {
-                // Remove any leading @ symbol
-                url = url.replace(/^@/, '');
+                const normalizedUrl = validateAndNormalizeUrl(inputUrl);
                 
-                // Validate URL format
-                if (!url.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/)) {
-                    showToast('Invalid URL format. Example: example.com', 'error');
-                    return;
-                }
-
-                // Ensure URL has protocol
-                const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-                
-                // Test if URL is reachable
-                try {
-                    const response = await fetch(fullUrl, { mode: 'no-cors' });
-                } catch (error) {
-                    if (fullUrl.startsWith('file://')) {
-                        showToast('Local file URLs are not supported', 'error');
-                    } else if (error.message.includes('CORS')) {
-                        showToast('Website blocks external access. Try adding https://', 'warning');
-                    } else {
-                        showToast('Cannot reach this URL. Please check if the website exists.', 'error');
-                    }
-                    return;
-                }
-
-                // Create new vault link
-                const vaultLink = {
-                    url: fullUrl,
-                    name: new URL(fullUrl).hostname.replace('www.', ''),
-                    icon: getFaviconUrl(fullUrl),
-                    addedAt: Date.now()
-                };
-
                 // Check for duplicates
-                const vaultLinks = JSON.parse(localStorage.getItem('vaultLinks') || '[]');
-                const duplicate = vaultLinks.find(link => link.url === vaultLink.url);
+                const vaultLinks = loadLinks('vaultLinks');
+                const duplicate = vaultLinks.find(link => 
+                    validateAndNormalizeUrl(link.url) === normalizedUrl
+                );
+
                 if (duplicate) {
                     showToast(`URL already exists in vault (added ${new Date(duplicate.addedAt).toLocaleDateString()})`, 'warning');
                     return;
                 }
 
-                // Add to vault links
-                vaultLinks.push(vaultLink);
-                localStorage.setItem('vaultLinks', JSON.stringify(vaultLinks));
+                // Create new vault link
+                const vaultLink = {
+                    url: normalizedUrl,
+                    name: new URL(normalizedUrl).hostname.replace('www.', ''),
+                    icon: getFaviconUrl(normalizedUrl),
+                    addedAt: Date.now()
+                };
 
-                // Clear input and update display
-                urlInput.value = '';
-                updateVaultLinks();
-                showToast('Link added successfully', 'success');
+                vaultLinks.push(vaultLink);
+                
+                if (saveLinks(vaultLinks, 'vaultLinks')) {
+                    urlInput.value = '';
+                    updateVaultLinks();
+                    showToast('Link added successfully', 'success');
+                }
 
             } catch (error) {
-                if (error.message.includes('Invalid URL')) {
-                    showToast('Please enter a valid web URL (e.g., example.com)', 'error');
-                } else {
-                    showToast('Error adding link: ' + error.message, 'error');
-                }
+                showToast(error.message, 'error');
             }
         }
     });
@@ -3224,7 +3273,7 @@ function updateVaultLinks() {
     const linksContainer = document.querySelector('.vault-links');
     linksContainer.innerHTML = '';
 
-    const vaultLinks = JSON.parse(localStorage.getItem('vaultLinks') || '[]');
+    const vaultLinks = loadLinks('vaultLinks');
     vaultLinks.sort((a, b) => b.addedAt - a.addedAt);
 
     vaultLinks.forEach(link => {
@@ -3304,26 +3353,44 @@ function openVaultEditDialog(link) {
     iconInput.value = link.icon || '';
 
     // Handle form submission
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const updatedLink = {
-            ...link,
-            url: urlInput.value.trim(),
-            icon: iconInput.value.trim() || getFaviconUrl(urlInput.value.trim())
-        };
+        try {
+            const normalizedUrl = validateAndNormalizeUrl(urlInput.value);
+            
+            // Check for duplicates (excluding current link)
+            const vaultLinks = loadLinks('vaultLinks');
+            const duplicate = vaultLinks.find(l => 
+                l.url !== link.url && 
+                validateAndNormalizeUrl(l.url) === normalizedUrl
+            );
 
-        // Update in storage
-        const vaultLinks = JSON.parse(localStorage.getItem('vaultLinks') || '[]');
-        const index = vaultLinks.findIndex(l => l.url === link.url);
-        if (index !== -1) {
-            vaultLinks[index] = updatedLink;
-            localStorage.setItem('vaultLinks', JSON.stringify(vaultLinks));
+            if (duplicate) {
+                showToast(`URL already exists in vault (added ${new Date(duplicate.addedAt).toLocaleDateString()})`, 'warning');
+                return;
+            }
+
+            const updatedLink = {
+                ...link,
+                url: normalizedUrl,
+                icon: iconInput.value.trim() || getFaviconUrl(normalizedUrl),
+                updatedAt: Date.now()
+            };
+
+            const index = vaultLinks.findIndex(l => l.url === link.url);
+            if (index !== -1) {
+                vaultLinks[index] = updatedLink;
+                if (saveLinks(vaultLinks, 'vaultLinks')) {
+                    editOverlay.remove();
+                    updateVaultLinks();
+                    showToast('Link updated successfully', 'success');
+                }
+            }
+
+        } catch (error) {
+            showToast(error.message, 'error');
         }
-
-        // Close dialog and update display
-        editOverlay.remove();
-        updateVaultLinks();
     });
 
     // Handle cancel and click outside
@@ -3341,9 +3408,9 @@ function openVaultEditDialog(link) {
 
 // Function to delete a vault link
 function deleteVaultLink(link) {
-    const vaultLinks = JSON.parse(localStorage.getItem('vaultLinks') || '[]');
+    const vaultLinks = loadLinks('vaultLinks');
     const updatedLinks = vaultLinks.filter(l => l.url !== link.url);
-    localStorage.setItem('vaultLinks', JSON.stringify(updatedLinks));
+    saveLinks(updatedLinks, 'vaultLinks');
 }
 
 // Add these functions to handle vault dialog visibility

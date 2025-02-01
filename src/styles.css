@@ -1075,7 +1075,7 @@ input[type="search"]:focus {
     color: white;
     position: fixed;
     top: 2.6rem;
-    left: calc(50% + 85px);
+    left: calc(50% + 110px); /* Updated from 85px to 120px to move it more to the right */
     transform: none;
     font-size: 0.9rem;
     opacity: 0;
