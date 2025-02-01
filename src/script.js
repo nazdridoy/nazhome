@@ -67,12 +67,20 @@ document.getElementById('searchForm').onsubmit = function(e) {
 function updateDateTime() {
     const now = new Date();
     
-    const timeOptions = { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-    };
-    const time = now.toLocaleTimeString('en-US', timeOptions);
+    // Get hours and minutes
+    const hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    
+    // Determine AM/PM
+    const period = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convert to 12-hour format
+    const displayHours = hours % 12 || 12;
+    
+    // Format time with separate spans for time and period
+    const timeHtml = `
+        <span class="time">${displayHours}:${minutes}<span class="period">${period}</span></span>
+    `;
     
     const dateOptions = { 
         weekday: 'long', 
@@ -82,7 +90,7 @@ function updateDateTime() {
     const date = now.toLocaleDateString('en-US', dateOptions);
     
     document.getElementById('datetime').innerHTML = `
-        <span class="time">${time}</span>
+        ${timeHtml}
         <span class="date">${date}</span>
     `;
 }

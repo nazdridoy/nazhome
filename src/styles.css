@@ -52,6 +52,7 @@ body::after {
     opacity: 0.95;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 0.5rem;
     filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
     z-index: 5;
@@ -64,16 +65,28 @@ body::after {
     text-shadow: 0 2px 15px rgba(0,0,0,0.4);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     line-height: 1;
+    position: relative;
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.3rem;
+    justify-content: center;
+}
+
+#datetime .time .period {
+    font-size: 1.2rem;
+    opacity: 0.8;
+    font-weight: 400;
+    margin-top: 0.8rem;
 }
 
 #datetime .date {
-    font-size: 1.3rem;
-    font-weight: 500;
+    font-size: 0.9rem;
+    font-weight: 400;
     text-transform: uppercase;
-    letter-spacing: 4px;
-    opacity: 0.9;
+    letter-spacing: 3px;
+    opacity: 0.75;
     text-shadow: 0 2px 15px rgba(0,0,0,0.4);
-    margin-bottom: 1rem;
+    margin-bottom: 0;
 }
 
 /* Main Content Layout
@@ -1057,26 +1070,21 @@ input[type="search"]:focus {
     background: rgba(220, 53, 69, 1);
 }
 
-/* Weather Widget
-   ----------------
-   - Compact weather display with icon
-   - Handles temperature and condition formatting
-   - Includes location display
-   - Responsive layout adjustments */
+/* Weather Widget - Desktop */
 #weather {
     color: white;
     position: fixed;
-    top: 2.8rem;
-    left: calc(50% + 150px);
+    top: 2.6rem;
+    left: calc(50% + 85px);
     transform: none;
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     opacity: 0;
     filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
     z-index: 5;
     background: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    padding: 0.4rem 0.8rem;
+    padding: 0.25rem 0.5rem;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: opacity 0.3s ease-in-out;
@@ -1100,19 +1108,19 @@ input[type="search"]:focus {
 }
 
 .weather-icon {
-    width: 45px;
-    height: 45px;
+    width: 32px;
+    height: 32px;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
 .weather-content .temp {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
     font-weight: 500;
     line-height: 1;
 }
 
 .weather-content .description {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     text-transform: capitalize;
     opacity: 0.8;
     letter-spacing: 0.5px;
@@ -1120,7 +1128,7 @@ input[type="search"]:focus {
 }
 
 .weather-content .city {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     opacity: 0.6;
     letter-spacing: 0.5px;
     line-height: 1;
@@ -1136,12 +1144,36 @@ input[type="search"]:focus {
 
 /* Update mobile layout styles */
 @media (max-width: 600px) {
+    /* Keep datetime centered */
+    #datetime {
+        top: 1rem;
+        gap: 0.2rem;
+    }
+
+    #datetime .time {
+        font-size: 2.8rem;
+        gap: 0.2rem;
+    }
+
+    #datetime .time .period {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    #datetime .date {
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        margin-bottom: 0;
+        opacity: 0.7;
+    }
+
+    /* Position weather widget below datetime */
     #weather {
         position: fixed;
-        top: 1rem;  /* Align with top */
-        left: 1rem;  /* Align with left */
+        top: calc(50vh - 80px);
+        left: 50%;
         right: auto;
-        transform: none;  /* Remove transform since we're using direct positioning */
+        transform: translateX(-50%);
         width: auto;
         max-width: 140px;
         margin: 0;
@@ -1154,15 +1186,12 @@ input[type="search"]:focus {
     }
 
     .weather-content {
-        background: rgba(0, 0, 0, 0.3);
+        background: rgba(0, 0, 0, 0.2);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        border-radius: 100px;
+        border-radius: 12px;
         padding: 0.3rem 0.6rem;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     .weather-main {
