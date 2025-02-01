@@ -2037,7 +2037,7 @@ async function populateCountryDropdown() {
     const savedCountry = localStorage.getItem('weatherCountry') || 'BD';
     
     try {
-        const response = await fetch('https://secure.geonames.org/countryInfoJSON?username=nazhome');
+        const response = await fetch('https://cdn.jsdelivr.net/gh/nazdridoy/nazhome@maintainAltIcons/countryInfo.json');
         if (!response.ok) throw new Error('Failed to fetch countries');
         
         const data = await response.json();
