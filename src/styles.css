@@ -2060,4 +2060,51 @@ input[type="search"]:focus {
         padding: 0.3rem 0.6rem;
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
+}
+
+/* Settings and Vault Buttons */
+.corner-buttons {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 1000;
+}
+
+.corner-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(32, 33, 36, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.corner-btn:hover {
+    background: rgba(32, 33, 36, 1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.corner-btn i,
+.corner-btn .vault-icon {
+    width: 20px;  /* Adjusted size to match cog icon */
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vault-icon {
+    fill: currentColor;  /* This makes the SVG inherit the button text color */
 } 

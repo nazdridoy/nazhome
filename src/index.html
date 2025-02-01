@@ -12,6 +12,7 @@
     <!-- Fallback for browsers that don't support SVG favicons -->
     <link rel="alternate icon" type="image/png" href="/favicons/favicon.ico">
     <link rel="manifest" href="/favicons/site.webmanifest">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <!-- Core Widgets Section -->
@@ -251,6 +252,17 @@
         <div class="orbit-5"></div>
     </button>
 
+    <!-- vault button container -->
+    <div class="corner-buttons">
+        <button class="corner-btn" id="vaultButton">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 370.6" class="vault-icon">
+                <path d="M48 22c-2 0-4 3-6 5l-4 4v57h40v-9c0-8 0-9 4-14l5-4h217l5 4 4 5v95c0 105 1 98-9 103-5 3-212 3-217 0-7-4-9-8-9-18v-8H38v27c0 39 1 40 28 40h16v17c1 23-1 22 29 22 29 0 28 0 28-22v-17h113v17c0 22-1 22 29 22 29 0 27 1 28-22v-17h16c14 0 16 0 20-3 8-5 8 3 8-142V31l-5-5-4-5H197L48 22m49 143v85h197V79H97v86m-59-44v13h40v-27H38v14m123-4 8 8 7-3c11-5 28-5 39 0l7 3 8-8c9-8 13-9 18-4 4 6 3 9-5 18l-7 8 3 7c3 6 3 8 3 19 0 10 0 13-3 19l-3 7 7 8c8 9 9 13 4 18s-8 4-17-5l-8-7-7 3c-6 3-9 4-19 4-11 0-14-1-20-4l-7-3-8 7c-8 9-12 10-17 5s-4-9 4-18l8-8-4-7c-5-10-5-28 0-38l4-7-8-8c-8-9-9-12-5-18 5-5 9-4 18 4m22 22c-29 15-15 57 17 54 25-3 32-38 11-52-8-5-20-6-28-2M38 165v11h39l1-11v-12H38v12m164-7c4 3 3 11 0 14-5 3-11 2-13-1-7-10 4-21 13-13M38 209v13h40v-26H38v13" fill="currentColor" fill-rule="evenodd"/>
+            </svg>
+        </button>
+        <button class="corner-btn" id="settingsButton">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
     <!-- Template Definitions -->
     <!-- These templates are used to dynamically generate UI components
          All dialogs use a consistent styling and behavior pattern -->
@@ -448,5 +460,6 @@
 
     <!-- Main application logic -->
     <script type="module" src="./script.js?v=v1.1.2" defer></script>
+
 </body>
 </html> 

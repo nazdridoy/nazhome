@@ -3131,7 +3131,6 @@ async function checkVersion() {
     }
 }
 
-// Add this line to ensure version is checked when the app loads
 document.addEventListener('DOMContentLoaded', checkVersion);
 
 import './styles.css';
