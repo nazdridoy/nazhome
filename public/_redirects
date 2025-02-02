@@ -1,1 +1,5 @@
 /* /index.html 200 
+
+# Add these favicon redirects
+/favicon.ico    /favicons/favicon.ico    200
+/favicon.svg    /favicons/nazhome.svg    200 
