@@ -432,7 +432,6 @@ input[type="search"]:focus {
     flex-shrink: 0;
     transition: background-color 0.2s;
     order: 2;
-    pointer-events: auto; /* Re-enable click events for checkboxes */
 }
 
 .setting-item input[type="checkbox"]::before {
@@ -480,7 +479,6 @@ input[type="search"]:focus {
     text-align: left;
     cursor: pointer;
     font-size: 0.9rem;
-    pointer-events: none; /* Disable button click events */
 }
 
 .setting-item button:hover {
@@ -515,7 +513,6 @@ input[type="search"]:focus {
     transition: opacity 0.2s;
     margin: 4px;
     position: relative;
-    z-index: 11;
 }
 
 /* Show dots permanently when menu is active or on hover */
@@ -855,7 +852,6 @@ input[type="search"]:focus {
     border-radius: 8px;
     transition: all 0.2s;
     position: relative;  /* Keep this for menu positioning */
-    min-height: 90px;   /* Add minimum height to maintain grid alignment */
 }
 
 .search-engine-item:hover {
@@ -1755,8 +1751,8 @@ input[type="search"]:focus {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: rgba(32, 33, 36, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(32, 33, 36, 0.1);  /* Much more transparent */
+    border: 1px solid rgba(255, 255, 255, 0.05);  /* Nearly invisible border */
     width: 32px;
     height: 32px;
     border-radius: 12px;
@@ -1764,130 +1760,229 @@ input[type="search"]:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: none;  /* Removed shadow */
     z-index: 900;
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     padding: 0;
     transform-style: preserve-3d;
+    transform: translateZ(0);
 }
 
 .corner-about-btn:hover {
-    background: rgba(32, 33, 36, 1);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    background: rgba(32, 33, 36, 0.2);  /* Slightly more visible on hover */
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
     transform: translateY(-2px);
 }
 
-.corner-about-btn::before {
+/* Base orbital elements - behind icon */
+.corner-about-btn::before,
+.corner-about-btn::after,
+.corner-about-btn .orbit-3,
+.corner-about-btn .orbit-4,
+.corner-about-btn .orbit-5 {
     content: '';
     position: absolute;
-    width: 52px;
-    height: 42px;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    border: 1.5px solid rgba(255, 215, 0, 0.6);
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.4);
     border-radius: 50%;
-    z-index: -1;
-    animation: electronOrbit1 6s linear infinite;
+    z-index: -1;  /* Behind icon */
     transform-style: preserve-3d;
-    perspective: 800px;
+    perspective: 1200px;
+    pointer-events: none;
+}
+
+/* Front orbital elements */
+.corner-about-btn .orbit-6,
+.corner-about-btn .orbit-7,
+.corner-about-btn .orbit-8,
+.corner-about-btn .orbit-9 {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    z-index: 1;  /* In front of icon */
+    transform-style: preserve-3d;
+    perspective: 1200px;
+    pointer-events: none;
+}
+
+/* Primary orbits (1,2) */
+.corner-about-btn::before {
+    width: 50px;  /* Reduced from 54px */
+    height: 42px;  /* Increased from 38px */
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.25);
+    animation: electronOrbit1 2.5s linear infinite;
 }
 
 .corner-about-btn::after {
-    content: '';
-    position: absolute;
-    width: 44px;
-    height: 52px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border: 1.5px solid rgba(255, 215, 0, 0.4);
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
-    border-radius: 50%;
-    z-index: -1;
-    animation: electronOrbit2 8s linear infinite reverse;
-    transform-style: preserve-3d;
-    perspective: 800px;
+    width: 38px;
+    height: 54px;
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.25);
+    animation: electronOrbit2 2.8s linear infinite reverse;
 }
 
+/* Static orbit */
 .corner-about-btn .orbit-3 {
-    content: '';
-    position: absolute;
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.1);
+    transform: translate(-50%, -50%) rotateX(15deg) rotateY(0deg);
+}
+
+/* Secondary orbits (4,5) */
+.corner-about-btn .orbit-4 {
+    width: 48px;  /* Reduced from 52px */
+    height: 44px;  /* Increased from 40px */
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.2);
+    animation: electronOrbit4 3s linear infinite reverse;
+}
+
+.corner-about-btn .orbit-5 {
+    width: 40px;
+    height: 52px;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.2);
+    animation: electronOrbit5 2.7s linear infinite;
+}
+
+/* Gentle orbits (6,7,8,9) */
+.corner-about-btn .orbit-6 {
     width: 46px;
     height: 46px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border: 1.5px solid rgba(255, 215, 0, 0.3);
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.2);
-    border-radius: 50%;
-    z-index: -1;
-    animation: electronOrbit3 7s linear infinite reverse;
-    transform-style: preserve-3d;
-    perspective: 800px;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.15);
+    animation: electronOrbit6 3.5s linear infinite;
 }
 
+.corner-about-btn .orbit-7 {
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.15);
+    animation: electronOrbit7 3.8s linear infinite reverse;
+}
+
+.corner-about-btn .orbit-8 {
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.15);
+    animation: electronOrbit8 3.3s linear infinite;
+}
+
+.corner-about-btn .orbit-9 {
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.15);
+    animation: electronOrbit9 3.6s linear infinite reverse;
+}
+
+/* Animation keyframes */
 @keyframes electronOrbit1 {
     0% {
-        transform: translate(-50%, -50%) rotateX(75deg) rotateY(0deg) rotateZ(0deg);
-    }
-    25% {
-        transform: translate(-50%, -50%) rotateX(75deg) rotateY(90deg) rotateZ(90deg);
-    }
-    50% {
-        transform: translate(-50%, -50%) rotateX(75deg) rotateY(180deg) rotateZ(180deg);
-    }
-    75% {
-        transform: translate(-50%, -50%) rotateX(75deg) rotateY(270deg) rotateZ(270deg);
+        transform: translate(-50%, -50%) rotateX(80deg) rotateY(0deg);
     }
     100% {
-        transform: translate(-50%, -50%) rotateX(75deg) rotateY(360deg) rotateZ(360deg);
+        transform: translate(-50%, -50%) rotateX(80deg) rotateY(360deg);
     }
 }
 
 @keyframes electronOrbit2 {
     0% {
-        transform: translate(-50%, -50%) rotateX(-55deg) rotateY(0deg) rotateZ(0deg);
-    }
-    25% {
-        transform: translate(-50%, -50%) rotateX(-55deg) rotateY(90deg) rotateZ(90deg);
-    }
-    50% {
-        transform: translate(-50%, -50%) rotateX(-55deg) rotateY(180deg) rotateZ(180deg);
-    }
-    75% {
-        transform: translate(-50%, -50%) rotateX(-55deg) rotateY(270deg) rotateZ(270deg);
+        transform: translate(-50%, -50%) rotateX(-80deg) rotateY(0deg);
     }
     100% {
-        transform: translate(-50%, -50%) rotateX(-55deg) rotateY(360deg) rotateZ(360deg);
+        transform: translate(-50%, -50%) rotateX(-80deg) rotateY(360deg);
     }
 }
 
-@keyframes electronOrbit3 {
+@keyframes electronOrbit4 {
     0% {
-        transform: translate(-50%, -50%) rotateX(25deg) rotateY(0deg) rotateZ(0deg);
-    }
-    25% {
-        transform: translate(-50%, -50%) rotateX(25deg) rotateY(90deg) rotateZ(90deg);
-    }
-    50% {
-        transform: translate(-50%, -50%) rotateX(25deg) rotateY(180deg) rotateZ(180deg);
-    }
-    75% {
-        transform: translate(-50%, -50%) rotateX(25deg) rotateY(270deg) rotateZ(270deg);
+        transform: translate(-50%, -50%) rotateX(80deg) rotateY(45deg);
     }
     100% {
-        transform: translate(-50%, -50%) rotateX(25deg) rotateY(360deg) rotateZ(360deg);
+        transform: translate(-50%, -50%) rotateX(80deg) rotateY(405deg);
     }
+}
+
+@keyframes electronOrbit5 {
+    0% {
+        transform: translate(-50%, -50%) rotateX(-80deg) rotateY(45deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateX(-80deg) rotateY(405deg);
+    }
+}
+
+@keyframes electronOrbit6 {
+    0% {
+        transform: translate(-50%, -50%) rotateX(15deg) rotateY(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateX(15deg) rotateY(360deg);
+    }
+}
+
+@keyframes electronOrbit7 {
+    0% {
+        transform: translate(-50%, -50%) rotateZ(90deg) rotateX(15deg) rotateY(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateZ(90deg) rotateX(15deg) rotateY(360deg);
+    }
+}
+
+@keyframes electronOrbit8 {
+    0% {
+        transform: translate(-50%, -50%) rotateZ(45deg) rotateX(15deg) rotateY(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateZ(45deg) rotateX(15deg) rotateY(360deg);
+    }
+}
+
+@keyframes electronOrbit9 {
+    0% {
+        transform: translate(-50%, -50%) rotateZ(135deg) rotateX(15deg) rotateY(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateZ(135deg) rotateX(15deg) rotateY(360deg);
+    }
+}
+
+/* Add pause on hover */
+.corner-about-btn:hover::before,
+.corner-about-btn:hover::after,
+.corner-about-btn:hover .orbit-4,
+.corner-about-btn:hover .orbit-5,
+.corner-about-btn:hover .orbit-6,
+.corner-about-btn:hover .orbit-7,
+.corner-about-btn:hover .orbit-8,
+.corner-about-btn:hover .orbit-9 {
+    animation-play-state: running;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);  /* Reduced hover glow */
+    transition: box-shadow 0.3s ease;
+}
+
+.corner-about-btn:hover .orbit-3 {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    transition: box-shadow 0.3s ease;
 }
 
 .corner-about-icon {
     width: 16px;
     height: 16px;
+    position: relative;
+    z-index: 0;  /* Between the orbit layers */
 }
 
 .corner-about-btn:hover .corner-about-icon {
@@ -1900,76 +1995,6 @@ input[type="search"]:focus {
     .corner-about-btn {
         bottom: 16px;
         right: 16px;
-    }
-}
-
-.corner-about-btn .orbit-4 {
-    content: '';
-    position: absolute;
-    width: 50px;
-    height: 44px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border: 1.5px solid rgba(255, 215, 0, 0.25);
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.15);
-    border-radius: 50%;
-    z-index: -1;
-    animation: electronOrbit4 5s linear infinite;
-    transform-style: preserve-3d;
-    perspective: 800px;
-}
-
-.corner-about-btn .orbit-5 {
-    content: '';
-    position: absolute;
-    width: 44px;
-    height: 50px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border: 1.5px solid rgba(255, 215, 0, 0.2);
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.1);
-    border-radius: 50%;
-    z-index: -1;
-    animation: electronOrbit5 9s linear infinite reverse;
-    transform-style: preserve-3d;
-    perspective: 800px;
-}
-
-@keyframes electronOrbit4 {
-    0% {
-        transform: translate(-50%, -50%) rotateX(45deg) rotateY(15deg) rotateZ(0deg);
-    }
-    25% {
-        transform: translate(-50%, -50%) rotateX(45deg) rotateY(15deg) rotateZ(90deg);
-    }
-    50% {
-        transform: translate(-50%, -50%) rotateX(45deg) rotateY(15deg) rotateZ(180deg);
-    }
-    75% {
-        transform: translate(-50%, -50%) rotateX(45deg) rotateY(15deg) rotateZ(270deg);
-    }
-    100% {
-        transform: translate(-50%, -50%) rotateX(45deg) rotateY(15deg) rotateZ(360deg);
-    }
-}
-
-@keyframes electronOrbit5 {
-    0% {
-        transform: translate(-50%, -50%) rotateX(-15deg) rotateY(45deg) rotateZ(0deg);
-    }
-    25% {
-        transform: translate(-50%, -50%) rotateX(-15deg) rotateY(45deg) rotateZ(90deg);
-    }
-    50% {
-        transform: translate(-50%, -50%) rotateX(-15deg) rotateY(45deg) rotateZ(180deg);
-    }
-    75% {
-        transform: translate(-50%, -50%) rotateX(-15deg) rotateY(45deg) rotateZ(270deg);
-    }
-    100% {
-        transform: translate(-50%, -50%) rotateX(-15deg) rotateY(45deg) rotateZ(360deg);
     }
 }
 
