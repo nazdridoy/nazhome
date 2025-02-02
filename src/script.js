@@ -3162,6 +3162,16 @@ function validateAndNormalizeUrl(url) {
         const settings = JSON.parse(localStorage.getItem('settings') || '{}');
         const allowLocalUrls = settings.allowLocalUrls || false;
 
+        // Block file:// URLs early
+        if (url.toLowerCase().startsWith('file:')) {
+            throw new Error('Local file URLs are not supported');
+        }
+
+        // First check if it's a valid URL format
+        if (!isValidBrowserUrl(url)) {
+            throw new Error('Invalid URL format. Example: example.com');
+        }
+
         // Handle local URLs (127.* and localhost)
         if (url.match(/^(http:\/\/)?127\./i) || url.match(/^(http:\/\/)?localhost/i)) {
             if (!allowLocalUrls) {
@@ -3175,12 +3185,25 @@ function validateAndNormalizeUrl(url) {
             url = 'https://' + url;
         }
 
-        // Validate URL format
-        new URL(url); // This will throw if invalid
+        // Validate URL format again after adding protocol
+        const urlObj = new URL(url);
 
-        // Block file:// URLs
-        if (url.startsWith('file://')) {
-            throw new Error('Local file URLs are not supported');
+        // Double check protocol after URL parsing
+        if (!['http:', 'https:'].includes(urlObj.protocol)) {
+            throw new Error('Only HTTP and HTTPS protocols are supported');
+        }
+
+        // Block other local URLs if not allowed
+        if (!allowLocalUrls) {
+            const hostname = urlObj.hostname.toLowerCase();
+            if (hostname === 'localhost' || 
+                hostname.match(/^127\./) ||
+                hostname.match(/^192\.168\./) ||
+                hostname.match(/^10\./) ||
+                hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./) ||
+                hostname.endsWith('.local')) {
+                throw new Error('Local URLs are disabled. Enable them in settings first.');
+            }
         }
 
         return url;
