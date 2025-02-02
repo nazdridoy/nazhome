@@ -310,34 +310,6 @@ function initializeBackground() {
 }
 
 /**
- * Gets the best available favicon URL for a given website URL
- * Uses DuckDuckGo's favicon service for external URLs
- * Falls back to a default icon for local/internal URLs
- */
-function getBestIcon(url) {
-    try {
-        const urlObj = new URL(url);
-        
-        // Check for local URLs
-        if (urlObj.protocol === 'file:' || 
-            urlObj.hostname === 'localhost' || 
-            urlObj.hostname.match(/^127\./) ||
-            urlObj.hostname.match(/^192\.168\./) ||
-            urlObj.hostname.match(/^10\./) ||
-            urlObj.hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./) ||
-            urlObj.hostname.endsWith('.local')) {
-            return FALLBACK_ICONS.GLOBE;  // Changed from DEFAULT_FALLBACK_ICON
-        }
-        
-        return `https://icons.duckduckgo.com/ip3/${urlObj.hostname}.ico`;
-        
-    } catch (error) {
-        // Fallback to default icon
-        return FALLBACK_ICONS.GLOBE;  // Changed from DEFAULT_FALLBACK_ICON
-    }
-}
-
-/**
  * Validates a bookmark object has all required properties and correct types
  */
 function isValidBookmark(bookmark) {
@@ -1026,8 +998,14 @@ function updateSearchEngineLogo() {
         if (engineData.icon) {
             button.style.backgroundImage = `url('${engineData.icon}')`;
         } else {
-            const iconUrl = getDefaultSearchIcon(engineData.url);
-            button.style.backgroundImage = `url('${iconUrl}')`;
+            // Start with fallback
+            button.style.backgroundImage = `url('${FALLBACK_ICONS.SEARCH}')`;
+            // Then try to load actual icon
+            resolveFavicon(engineData.url).then(iconUrl => {
+                button.style.backgroundImage = `url('${iconUrl}')`;
+            }).catch(() => {
+                button.style.backgroundImage = `url('${FALLBACK_ICONS.SEARCH}')`;
+            });
         }
     }
 }
@@ -1202,9 +1180,16 @@ function createSearchEngineSelector() {
         const item = customTemplate.content.cloneNode(true).querySelector('.search-engine-item');
         item.dataset.engine = key;
         const img = item.querySelector('img');
-        img.src = engine.icon || getDefaultSearchIcon(engine.url);
+        img.src = engine.icon || FALLBACK_ICONS.SEARCH; // Start with fallback
         img.alt = engine.name;
-        img.onerror = () => img.src = getDefaultSearchIcon(engine.url);
+        // Load icon asynchronously
+        if (!engine.icon) {
+            resolveFavicon(engine.url).then(iconUrl => {
+                img.src = iconUrl;
+            }).catch(() => {
+                img.src = FALLBACK_ICONS.SEARCH;
+            });
+        }
         item.querySelector('span').textContent = engine.name;
         
         // Add menu dots handler
@@ -1334,19 +1319,6 @@ function handleEngineSelection(engineKey) {
     saveLastSelectedEngine(engineKey);
 }
 
-/**
- * Retrieves favicon for a given search engine URL
- */
-function getDefaultSearchIcon(url) {
-    try {
-        const hostname = new URL(url).hostname;
-        return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
-    } catch {
-        // Fallback to a generic search icon
-        return FALLBACK_ICONS.SEARCH;
-    }
-}
-
 function createSearchEngineOption(engine, name, isCustom = false) {
     const option = document.createElement('option');
     option.value = engine;
@@ -1448,25 +1420,6 @@ document.getElementById('searchEngine').addEventListener('contextmenu', function
         });
     }
 });
-
-/**
- * Retrieves favicon URLs for a search engine in order of preference
- */
-function getSearchEngineIcon(engineUrl, engineName) {
-    try {
-        const url = new URL(engineUrl);
-        const domain = url.hostname;
-        return [
-            `https://${domain}/favicon.ico`,                              // Try direct favicon
-            `https://${domain}/assets/favicon.ico`,                       // Common favicon location
-            `https://${domain}/assets/images/favicon.ico`,                // Another common location
-            `https://www.google.com/s2/favicons?domain=${domain}&sz=128`, // Google's favicon service
-            getDefaultSearchIcon(engineName)                              // Last resort default icon
-        ];
-    } catch {
-        return [getDefaultSearchIcon(engineName)];
-    }
-}
 
 /**
  * Attempts to load icons sequentially until a valid one is found
@@ -3288,7 +3241,6 @@ function createVaultDialog() {
                 const vaultLink = {
                     url: normalizedUrl,
                     name: new URL(normalizedUrl).hostname.replace('www.', ''),
-                    icon: getFaviconUrl(normalizedUrl),
                     addedAt: Date.now()
                 };
 
@@ -3324,10 +3276,14 @@ function updateVaultLinks() {
         
         // Set icon and URL
         const icon = linkItem.querySelector('.vault-link-icon');
-        icon.src = link.icon || getFaviconUrl(link.url);
-        icon.onerror = () => {
+        icon.src = link.icon || FALLBACK_ICONS.GLOBE; // Start with fallback
+        
+        // Load icon asynchronously
+        resolveFavicon(link.url, link.icon).then(iconUrl => {
+            icon.src = iconUrl;
+        }).catch(() => {
             icon.src = FALLBACK_ICONS.GLOBE;
-        };
+        });
         
         linkItem.querySelector('.vault-link-url').textContent = link.url;
 
@@ -3408,7 +3364,7 @@ function openVaultEditDialog(link) {
             const updatedLink = {
                 ...link,
                 url: normalizedUrl,
-                icon: iconInput.value.trim() || getFaviconUrl(normalizedUrl),
+                icon: iconInput.value.trim(), // Let resolveFavicon handle the favicon resolution
                 updatedAt: Date.now()
             };
 
@@ -3485,16 +3441,6 @@ document.addEventListener('click', (e) => {
         hideVaultDialog();
     }
 });
-
-// Add this helper function if not already present
-function getFaviconUrl(url) {
-    try {
-        const urlObj = new URL(url);
-        return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
-    } catch (e) {
-        return FALLBACK_ICONS.GLOBE;  // Use our new search icon as fallback
-    }
-}
 
 // Add toast notification function
 function showToast(message, type = 'error') {
