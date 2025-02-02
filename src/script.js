@@ -3475,20 +3475,20 @@ function showToast(message, type = 'error') {
     let icon;
     switch (type) {
         case 'error':
-            icon = 'exclamation-circle';
+            icon = '⛔'; // or '❌'
             break;
         case 'warning':
-            icon = 'exclamation-triangle';
+            icon = '⚠️';
             break;
         case 'success':
-            icon = 'check-circle';
+            icon = '✅';
             break;
         default:
-            icon = 'info-circle';
+            icon = 'ℹ️';
     }
     
     toast.innerHTML = `
-        <i class="fas fa-${icon}"></i>
+        <i>${icon}</i>
         <span>${message}</span>
     `;
     
