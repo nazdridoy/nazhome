@@ -26,17 +26,6 @@ const FALLBACK_ICONS = {
             " stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none"/>
         </svg>
     `),
-    GRADIENT: 'data:image/svg+xml,' + encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-            <defs>
-                <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="rgba(255,255,255,0.2)"/>
-                    <stop offset="100%" stop-color="rgba(255,255,255,0.1)"/>
-                </linearGradient>
-            </defs>
-            <rect width="100" height="100" rx="20" fill="url(#g)"/>
-        </svg>
-    `),
     SEARCH: 'data:image/svg+xml,' + encodeURIComponent(`
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path fill="rgba(255,255,255,0.3)" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
@@ -681,7 +670,7 @@ async function loadBookmarks() {
         
         link.innerHTML = `
             <div class="icon-wrapper">
-                <img src="${FALLBACK_ICONS.GRADIENT}" 
+                <img src="${FALLBACK_ICONS.GLOBE}" 
                      alt="${sanitizeHTML(bookmark.name)}"
                      style="opacity: 0.8; transition: opacity 0.3s ease;">
             </div>
