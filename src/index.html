@@ -503,6 +503,23 @@
         </div>
     </template>
 
+    <!-- Add this to your templates section -->
+    <template id="vaultLinkItemTemplate">
+        <div class="vault-link-item">
+            <img class="vault-link-icon" alt="">
+            <span class="vault-link-url"></span>
+            <div class="vault-link-actions">
+                <button class="vault-link-menu" title="More options">
+                    <span class="menu-dots-icon">⋮</span>
+                </button>
+                <div class="vault-link-dropdown">
+                    <button class="vault-link-edit">Edit</button>
+                    <button class="vault-link-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <!-- Main application logic -->
     <script type="module" src="./script.js?v=v1.1.2" defer></script>
 

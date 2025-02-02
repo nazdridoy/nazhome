@@ -1,3 +1,5 @@
+import './styles.css';
+
 /**
  * nazHome - A customizable browser homepage with widgets and bookmarks
  * https://github.com/nazdridoy/nazhome
@@ -3149,7 +3151,6 @@ async function checkVersion() {
 
 document.addEventListener('DOMContentLoaded', checkVersion);
 
-// Add these functions to your script.js
 
 // Shared validation and loading functions
 function validateAndNormalizeUrl(url) {
@@ -3281,25 +3282,18 @@ function updateVaultLinks() {
     vaultLinks.sort((a, b) => b.addedAt - a.addedAt);
 
     vaultLinks.forEach(link => {
-        const linkItem = document.createElement('div');
-        linkItem.className = 'vault-link-item';
+        // Create link item from template
+        const template = document.getElementById('vaultLinkItemTemplate');
+        const linkItem = template.content.cloneNode(true).querySelector('.vault-link-item');
         
-        linkItem.innerHTML = `
-            <img src="${link.icon || getFaviconUrl(link.url)}" 
-                 alt="" 
-                 class="vault-link-icon"
-                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>'">
-            <span class="vault-link-url">${link.url}</span>
-            <div class="vault-link-actions">
-                <button class="vault-link-menu" title="More options">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-                <div class="vault-link-dropdown">
-                    <button class="vault-link-edit">Edit</button>
-                    <button class="vault-link-delete">Delete</button>
-                </div>
-            </div>
-        `;
+        // Set icon and URL
+        const icon = linkItem.querySelector('.vault-link-icon');
+        icon.src = link.icon || getFaviconUrl(link.url);
+        icon.onerror = () => {
+            icon.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌐</text></svg>';
+        };
+        
+        linkItem.querySelector('.vault-link-url').textContent = link.url;
 
         // Add click handler to open link
         linkItem.addEventListener('click', (e) => {
@@ -3504,5 +3498,3 @@ function showToast(message, type = 'error') {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-
-import './styles.css';
