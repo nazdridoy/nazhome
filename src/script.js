@@ -12,6 +12,38 @@ const searchEngines = {
     brave: 'https://search.brave.com/search?q=',
     yandex: 'https://yandex.com/search/?text='
 };
+
+// Shared constants
+const FALLBACK_ICONS = {
+    GLOBE: 'data:image/svg+xml,' + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+            <path d="
+                M20 50 h60
+                M50 20 v60
+                M25 30 A40 40 0 0 1 75 30
+                M25 70 A40 40 0 0 0 75 70
+            " stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none"/>
+        </svg>
+    `),
+    GRADIENT: 'data:image/svg+xml,' + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <defs>
+                <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(255,255,255,0.2)"/>
+                    <stop offset="100%" stop-color="rgba(255,255,255,0.1)"/>
+                </linearGradient>
+            </defs>
+            <rect width="100" height="100" rx="20" fill="url(#g)"/>
+        </svg>
+    `),
+    SEARCH: 'data:image/svg+xml,' + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path fill="rgba(255,255,255,0.3)" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+    `)
+};
+
 /**
  * Search form handler - Processes search queries and redirects to appropriate search engine
  * Supports both built-in engines and custom user-defined search engines
@@ -305,24 +337,16 @@ function getBestIcon(url) {
             urlObj.hostname.match(/^10\./) ||
             urlObj.hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./) ||
             urlObj.hostname.endsWith('.local')) {
-            return DEFAULT_FALLBACK_ICON;
+            return FALLBACK_ICONS.GLOBE;  // Changed from DEFAULT_FALLBACK_ICON
         }
         
         return `https://icons.duckduckgo.com/ip3/${urlObj.hostname}.ico`;
         
     } catch (error) {
         // Fallback to default icon
-        return DEFAULT_FALLBACK_ICON;
+        return FALLBACK_ICONS.GLOBE;  // Changed from DEFAULT_FALLBACK_ICON
     }
 }
-
-const DEFAULT_FALLBACK_ICON = 'data:image/svg+xml,' + encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-        <rect width="100" height="100" rx="20" fill="#555"/>
-        <text x="50" y="50" font-family="Arial" font-size="50" 
-              text-anchor="middle" dy=".3em" fill="#fff">?</text>
-    </svg>
-`);
 
 /**
  * Validates a bookmark object has all required properties and correct types
@@ -591,7 +615,7 @@ async function resolveFavicon(url, userIcon = '') {
             urlObj.hostname.match(/^10\./) ||
             urlObj.hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./) ||
             urlObj.hostname.endsWith('.local')) {
-            return DEFAULT_FALLBACK_ICON;
+            return FALLBACK_ICONS.GLOBE;  // Changed from DEFAULT_FALLBACK_ICON
         }
 
         const domain = urlObj.hostname;
@@ -657,7 +681,7 @@ async function loadBookmarks() {
         
         link.innerHTML = `
             <div class="icon-wrapper">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='rgba(255,255,255,0.15)'/%3E%3Cstop offset='100%25' stop-color='rgba(255,255,255,0.05)'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E" 
+                <img src="${FALLBACK_ICONS.GRADIENT}" 
                      alt="${sanitizeHTML(bookmark.name)}"
                      style="opacity: 0.8; transition: opacity 0.3s ease;">
             </div>
@@ -687,7 +711,7 @@ async function loadBookmarks() {
         } catch (error) {
             console.log(`Failed to load icon for ${bookmark.url}:`, error);
             const iconImg = link.querySelector('.icon-wrapper img');
-            iconImg.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='rgba(255,255,255,0.2)'/%3E%3Cstop offset='100%25' stop-color='rgba(255,255,255,0.1)'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M16 8C11.6 8 8 11.6 8 16s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z' fill='rgba(255,255,255,0.5)'/%3E%3C/svg%3E`;
+            iconImg.src = FALLBACK_ICONS.GLOBE;
             iconImg.style.opacity = '1';
         }
 
@@ -1330,7 +1354,7 @@ function getDefaultSearchIcon(url) {
         return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
     } catch {
         // Fallback to a generic search icon
-        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/></svg>';
+        return FALLBACK_ICONS.SEARCH;
     }
 }
 
@@ -3313,7 +3337,7 @@ function updateVaultLinks() {
         const icon = linkItem.querySelector('.vault-link-icon');
         icon.src = link.icon || getFaviconUrl(link.url);
         icon.onerror = () => {
-            icon.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌐</text></svg>';
+            icon.src = FALLBACK_ICONS.GLOBE;
         };
         
         linkItem.querySelector('.vault-link-url').textContent = link.url;
@@ -3479,7 +3503,7 @@ function getFaviconUrl(url) {
         const urlObj = new URL(url);
         return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
     } catch (e) {
-        return null;
+        return FALLBACK_ICONS.GLOBE;  // Use our new search icon as fallback
     }
 }
 
