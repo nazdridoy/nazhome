@@ -190,23 +190,6 @@ async function fetchNewBackgroundImage() {
 }
 
 /**
- * Updates the background image cache by fetching a new image and maintaining
- * a rolling cache of the 3 most recent images
- */
-async function updateBackgroundCache() {
-    const cache = getBackgroundCache();
-    const newImage = await fetchNewBackgroundImage();
-    
-    if (newImage) {
-        cache.push(newImage);
-        while (cache.length > 3) {
-            cache.shift();
-        }
-        setBackgroundCache(cache);
-    }
-}
-
-/**
  * Rotates through cached background images, updating timestamps
  * to maintain proper rotation order
  */
@@ -1326,16 +1309,6 @@ function handleEngineSelection(engineKey) {
     button.dataset.engine = engineKey;
     updateSearchEngineLogo();
     saveLastSelectedEngine(engineKey);
-}
-
-function createSearchEngineOption(engine, name, isCustom = false) {
-    const option = document.createElement('option');
-    option.value = engine;
-    option.textContent = name;
-    if (isCustom) {
-        option.dataset.custom = 'true';
-    }
-    return option;
 }
 
 /**
