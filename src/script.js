@@ -1010,6 +1010,15 @@ function updateSearchEngineLogo() {
     }
 }
 
+// Set initial search engine and icon
+document.addEventListener('DOMContentLoaded', () => {
+    const searchEngine = document.getElementById('searchEngine');
+    if (!searchEngine.dataset.engine) {
+        searchEngine.dataset.engine = 'google';
+    }
+    updateSearchEngineLogo();
+});
+
 /**
  * Main initialization function that runs on DOMContentLoaded
  * Sets up all components and widgets in the correct order

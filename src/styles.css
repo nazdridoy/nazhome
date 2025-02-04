@@ -177,12 +177,6 @@ body::after {
     overflow: hidden;
 }
 
-/* Search engine logos */
-#searchEngine[data-engine="google"] { background-image: url('https://www.google.com/favicon.ico'); }
-#searchEngine[data-engine="ddg"] { background-image: url('https://duckduckgo.com/favicon.ico'); }
-#searchEngine[data-engine="brave"] { background-image: url('https://brave.com/favicon.ico'); }
-#searchEngine[data-engine="yandex"] { background-image: url('https://yandex.com/favicon.ico'); }
-
 /* Style for custom engine icons */
 #searchEngine[style*="background-image"] {
     background-size: 20px;
