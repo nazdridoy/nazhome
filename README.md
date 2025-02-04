@@ -5,9 +5,10 @@ A minimalistic startpage that combines elegance with functionality, featuring cu
 ![001](https://github.com/user-attachments/assets/26f29482-25d1-4f4e-978b-a6dd0e36f002)
 
 <div align="center">
-  
-[![Firefox](./Extensions/assets/BrowserSupport/firefox.svg)](https://addons.mozilla.org/en-GB/firefox/addon/nazhome)
 
+<a href="https://addons.mozilla.org/en-GB/firefox/addon/nazhome"><img src="https://user-images.githubusercontent.com/585534/107280546-7b9b2a00-6a26-11eb-8f9f-f95932f4bfec.png" alt="Get nazHome for Firefox"></a>
+<a href="https://microsoftedge.microsoft.com/addons/detail/nazhome/njgjkpfgbefdejplknkpokeldkebigei"><img src="https://user-images.githubusercontent.com/585534/107280673-a5ece780-6a26-11eb-9cc7-9fa9f9f81180.png" alt="Get nazHome for Microsoft Edge"></a>
+<a href="https://github.com/nazdridoy/nazhome/releases/latest"><img src="https://user-images.githubusercontent.com/585534/107280622-91a8ea80-6a26-11eb-8d07-77c548b28665.png" alt="Get nazHome for Chrome"></a>
 </div>
 
 ## Features
