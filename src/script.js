@@ -177,9 +177,14 @@ async function imageToBase64(url) {
  */
 async function fetchNewBackgroundImage() {
     const timestamp = Date.now();
-    const url = `https://picsum.photos/1920/1080?random=${timestamp}`;
+    const url = `https://unsplash-workers-api.nazdridoy.workers.dev/random?dl=true&addPhotoOfTheDay=true&random=${timestamp}`;
     try {
-        const base64Image = await imageToBase64(url);
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        const base64Image = await imageToBase64(data.imageUrl); // Use imageUrl from the response
         if (!base64Image) {
             // Handle the failure case by using a fallback or previous image
             console.warn('Failed to load new background image, using fallback');
