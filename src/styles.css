@@ -2492,3 +2492,23 @@ input[type="search"]:focus {
     font-style: normal;
     line-height: 1;
 }
+
+/* Attribution Styles */
+.attribution {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    color: white;
+    font-size: 0.8rem;
+    opacity: 0.8;
+    z-index: 10;
+}
+
+.attribution a {
+    color: #2196F3; /* Link color */
+    text-decoration: none;
+}
+
+.attribution a:hover {
+    text-decoration: underline;
+}

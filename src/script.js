@@ -139,7 +139,8 @@ function setBackgroundCache(cache) {
             return item;
         }
         return {
-            image: item,
+            image: item.image,
+            attribution: item.attribution, // Store attribution info
             timestamp: Date.now()
         };
     });
@@ -186,11 +187,18 @@ async function fetchNewBackgroundImage() {
         const data = await response.json();
         const base64Image = await imageToBase64(data.imageUrl); // Use imageUrl from the response
         if (!base64Image) {
-            // Handle the failure case by using a fallback or previous image
             console.warn('Failed to load new background image, using fallback');
             return null;
         }
-        return base64Image;
+
+        // Update attribution
+        const attribution = {
+            artistName: data.artistName,
+            artistProfileUrl: data.artistProfileUrl
+        };
+
+        // Return both image and attribution
+        return { base64Image, attribution };
     } catch (error) {
         console.error('Failed to load new background:', error);
         return null;
@@ -227,29 +235,35 @@ function loadBackground() {
     
     if (cache.length > 0) {
         // Use the oldest cached image
-        const oldestImage = cache[0].image;
-        document.body.style.backgroundImage = `url('${oldestImage}')`;
+        const oldestImage = cache[0];
+        document.body.style.backgroundImage = `url('${oldestImage.image}')`;
+        
+        // Load attribution info
+        document.getElementById('artistName').textContent = oldestImage.attribution.artistName;
+        document.getElementById('unsplashLink').href = `${oldestImage.attribution.artistProfileUrl}?utm_source=nazHome&utm_medium=referral`;
         
         // After page loads, check if we need to fill cache or update
         window.addEventListener('load', () => {
             setTimeout(async () => {
                 if (cache.length < 3) {
-                    const newImage = await fetchNewBackgroundImage();
-                    if (newImage) {
+                    const newImageData = await fetchNewBackgroundImage();
+                    if (newImageData) {
                         setBackgroundCache([...cache, {
-                            image: newImage,
+                            image: newImageData.base64Image,
+                            attribution: newImageData.attribution, // Store attribution with image
                             timestamp: Date.now()
                         }]);
                     }
                 } else {
                     // Find the oldest image by timestamp
                     const oldestTimestamp = Math.min(...cache.map(item => item.timestamp));
-                    const newImage = await fetchNewBackgroundImage();
-                    if (newImage) {
+                    const newImageData = await fetchNewBackgroundImage();
+                    if (newImageData) {
                         const newCache = cache
                             .filter(item => item.timestamp !== oldestTimestamp)
                             .concat({
-                                image: newImage,
+                                image: newImageData.base64Image,
+                                attribution: newImageData.attribution, // Store attribution with image
                                 timestamp: Date.now()
                             });
                         setBackgroundCache(newCache);
@@ -261,11 +275,12 @@ function loadBackground() {
         });
     } else {
         // No cache, start fresh
-        fetchNewBackgroundImage().then(base64Image => {
-            if (base64Image) {
-                document.body.style.backgroundImage = `url('${base64Image}')`;
+        fetchNewBackgroundImage().then(newImageData => {
+            if (newImageData) {
+                document.body.style.backgroundImage = `url('${newImageData.base64Image}')`;
                 setBackgroundCache([{
-                    image: base64Image,
+                    image: newImageData.base64Image,
+                    attribution: newImageData.attribution, // Store attribution with image
                     timestamp: Date.now()
                 }]);
                 
@@ -273,10 +288,11 @@ function loadBackground() {
                 setTimeout(async () => {
                     const cache = getBackgroundCache();
                     while (cache.length < 3) {
-                        const nextImage = await fetchNewBackgroundImage();
-                        if (nextImage) {
+                        const nextImageData = await fetchNewBackgroundImage();
+                        if (nextImageData) {
                             cache.push({
-                                image: nextImage,
+                                image: nextImageData.base64Image,
+                                attribution: nextImageData.attribution, // Store attribution with image
                                 timestamp: Date.now()
                             });
                             setBackgroundCache(cache);
