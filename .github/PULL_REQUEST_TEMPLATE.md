@@ -22,7 +22,7 @@ Fixes #
 - [ ] My code follows the project's coding style
 - [ ] I have tested my changes thoroughly
 - [ ] I have updated documentation as needed
-- [ ] My commits follow the [commit message guidelines](../COMMIT_GUIDELINES.md)
+- [ ] My commits follow the [commit message guidelines](../blob/main/COMMIT_GUIDELINES.md)
 - [ ] I have added tests that prove my fix/feature works
 - [ ] New and existing tests pass with my changes
 
