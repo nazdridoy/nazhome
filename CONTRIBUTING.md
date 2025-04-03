@@ -1,13 +1,15 @@
 # Contributing to NazHome
 
-Thank you for your interest in contributing to this project! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to NazHome! This document provides guidelines and instructions for contributing to this project.
 
 ## Development Setup
 
 1. Fork the repository
 2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/nazHome.git`
 3. Navigate to the project directory: `cd nazHome`
-4. Open the project in your preferred code editor
+4. Install dependencies: `npm install` 
+5. Start the development server: `npm run dev` (using Vite based on your vite.config.js)
+6. Open the project in your preferred code editor
 
 ## Code Structure
 
@@ -15,6 +17,9 @@ Thank you for your interest in contributing to this project! This document provi
 - `src/styles.css` - CSS styles
 - `src/script.js` - JavaScript functionality
 - `src/utils.js` - Helper functions and utilities
+- `public/` - Static assets
+- `scripts/` - Build and utility scripts
+- `Extensions/` - Project extensions
 
 ## Code Style Guidelines
 
@@ -43,6 +48,15 @@ Before submitting a pull request, please make sure that:
 5. Push to your fork: `git push origin feature/your-feature-name`
 6. Open a Pull Request against the main repository
 
+## Testing
+
+Before submitting your changes, please test:
+
+- Basic functionality in different browsers
+- Responsive layout on different screen sizes
+- Any new features you've added
+- Any components you've modified
+
 ## Issue Reporting
 
 When opening an issue, please:
@@ -50,8 +64,22 @@ When opening an issue, please:
 - Use a clear and descriptive title
 - Provide a detailed description of the issue, including the environment and steps to reproduce
 - Include any relevant screenshots, logs, or code snippets
+- Specify your browser and operating system
 - Search the repository for similar issues before creating a new one
+
+## Feature Requests
+
+Feature requests are welcome! To submit a feature request:
+
+- Use a clear and descriptive title
+- Provide a detailed description of the proposed feature
+- Explain why this feature would be useful to NazHome users
+- If possible, suggest how it might be implemented
+
+## Questions and Discussions
+
+For questions about the project that aren't bugs or feature requests, please use GitHub Discussions instead of opening an issue. This helps keep the issue tracker focused on bugs and features.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the same [LICENSE](LICENSE) as the project.
+By contributing to this project, you agree that your contributions will be licensed under the same [LICENSE](LICENSE) as the project.
