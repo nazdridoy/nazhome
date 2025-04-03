@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Contribution Guidelines
+    url: https://github.com/nazdridoy/nazHome/blob/main/CONTRIBUTING.md
+    about: Please review our contribution guidelines before submitting PRs.
+  - name: GitHub Discussions
+    url: https://github.com/nazdridoy/nazHome/discussions
+    about: Please ask and answer questions here.
+  - name: Documentation
+    url: https://github.com/nazdridoy/nazHome/wiki
+    about: Check out the project documentation for guides and FAQs. 
