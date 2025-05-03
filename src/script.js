@@ -46,34 +46,60 @@ document.getElementById('searchForm').onsubmit = function(e) {
     const query = document.querySelector('input[type="search"]').value;
     if (!query) return;
     
-    // Check if the input is a valid URL
+    // Always check if the input is a valid URL first
     if (isValidBrowserUrl(query)) {
+        let url = query.trim();
+        
         // If URL already has a protocol, use it as is
-        if (query.includes('://')) {
-            window.location.href = query.trim();
+        if (url.includes('://')) {
+            // Send navigation message or direct navigation
+            if (window !== window.top) {
+                window.parent.postMessage({
+                    type: 'navigation',
+                    url: url
+                }, '*');
+            } else {
+                window.location.href = url;
+            }
             return;
         }
 
         // For localhost, always use http://
-        if (query.startsWith('localhost')) {
-            window.location.href = `http://${query.trim()}`;
+        if (url.startsWith('localhost')) {
+            url = `http://${url}`;
+            if (window !== window.top) {
+                window.parent.postMessage({
+                    type: 'navigation',
+                    url: url
+                }, '*');
+            } else {
+                window.location.href = url;
+            }
             return;
         }
 
         // For other URLs without protocol, try https:// first, then fallback to http://
-        const url = query.trim();
-        fetch(`https://${url}`, { mode: 'no-cors' })
-            .then(() => {
-                window.location.href = `https://${url}`;
-            })
-            .catch(() => {
-                // If https fails, try http
-                window.location.href = `http://${url}`;
-            });
+        if (window !== window.top) {
+            // In iframe, use https:// (can't do the fetch test)
+            window.parent.postMessage({
+                type: 'navigation',
+                url: `https://${url}`
+            }, '*');
+        } else {
+            // Outside iframe, do the fetch test
+            fetch(`https://${url}`, { mode: 'no-cors' })
+                .then(() => {
+                    window.location.href = `https://${url}`;
+                })
+                .catch(() => {
+                    // If https fails, try http
+                    window.location.href = `http://${url}`;
+                });
+        }
         return;
     }
     
-    // If not a URL, perform search
+    // Check if not a URL, perform search
     const engine = document.getElementById('searchEngine').dataset.engine;
     
     const customEngines = JSON.parse(localStorage.getItem('customSearchEngines') || '{}');
@@ -2534,6 +2560,60 @@ function initializeIframeNavigation() {
         e.preventDefault();
         const query = this.querySelector('input[type="search"]').value;
         if (!query) return;
+        
+        // Always check if the input is a valid URL first
+        if (isValidBrowserUrl(query)) {
+            let url = query.trim();
+            
+            // If URL already has a protocol, use it as is
+            if (url.includes('://')) {
+                // Send navigation message or direct navigation
+                if (window !== window.top) {
+                    window.parent.postMessage({
+                        type: 'navigation',
+                        url: url
+                    }, '*');
+                } else {
+                    window.location.href = url;
+                }
+                return;
+            }
+
+            // For localhost, always use http://
+            if (url.startsWith('localhost')) {
+                url = `http://${url}`;
+                if (window !== window.top) {
+                    window.parent.postMessage({
+                        type: 'navigation',
+                        url: url
+                    }, '*');
+                } else {
+                    window.location.href = url;
+                }
+                return;
+            }
+
+            // For other URLs without protocol, try https:// first, then fallback to http://
+            if (window !== window.top) {
+                // In iframe, use https:// (can't do the fetch test)
+                window.parent.postMessage({
+                    type: 'navigation',
+                    url: `https://${url}`
+                }, '*');
+            } else {
+                // Outside iframe, do the fetch test
+                fetch(`https://${url}`, { mode: 'no-cors' })
+                    .then(() => {
+                        window.location.href = `https://${url}`;
+                    })
+                    .catch(() => {
+                        // If https fails, try http
+                        window.location.href = `http://${url}`;
+                    });
+            }
+            return;
+        }
+        
         // Check if we're in an iframe
         if (window !== window.top) {
             // Get the search URL using the original logic
