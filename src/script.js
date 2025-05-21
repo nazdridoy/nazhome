@@ -2854,10 +2854,18 @@ function updateVaultLinks() {
     const vaultLinks = loadLinks('vaultLinks');
     vaultLinks.sort((a, b) => b.addedAt - a.addedAt);
 
-    vaultLinks.forEach(link => {
+    vaultLinks.forEach((link, index) => {
         // Create link item from template
         const template = document.getElementById('vaultLinkItemTemplate');
         const linkItem = template.content.cloneNode(true).querySelector('.vault-link-item');
+        
+        // Add first/last classes for proper styling
+        if (index === 0) {
+            linkItem.classList.add('first');
+        }
+        if (index === vaultLinks.length - 1) {
+            linkItem.classList.add('last');
+        }
         
         // Set icon and URL
         const icon = linkItem.querySelector('.vault-link-icon');
@@ -2891,7 +2899,7 @@ function updateVaultLinks() {
 
         // Add click handler to open link
         linkItem.addEventListener('click', (e) => {
-            if (!e.target.closest('.vault-link-actions')) {
+            if (!e.target.closest('.vault-link-actions') && !e.target.closest('.vault-link-reorder')) {
                 window.open(link.url, '_blank');
             }
         });
@@ -2922,6 +2930,40 @@ function updateVaultLinks() {
             e.stopPropagation();
             deleteVaultLink(link);
             updateVaultLinks();
+        });
+
+        // Add reorder button handlers
+        const upBtn = linkItem.querySelector('.vault-link-up');
+        const downBtn = linkItem.querySelector('.vault-link-down');
+        
+        upBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (index > 0) {
+                // Move item up by swapping with previous item
+                const currentTimestamp = vaultLinks[index].addedAt;
+                const previousTimestamp = vaultLinks[index - 1].addedAt;
+                
+                vaultLinks[index].addedAt = previousTimestamp;
+                vaultLinks[index - 1].addedAt = currentTimestamp;
+                
+                saveLinks(vaultLinks, 'vaultLinks');
+                updateVaultLinks();
+            }
+        });
+        
+        downBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (index < vaultLinks.length - 1) {
+                // Move item down by swapping with next item
+                const currentTimestamp = vaultLinks[index].addedAt;
+                const nextTimestamp = vaultLinks[index + 1].addedAt;
+                
+                vaultLinks[index].addedAt = nextTimestamp;
+                vaultLinks[index + 1].addedAt = currentTimestamp;
+                
+                saveLinks(vaultLinks, 'vaultLinks');
+                updateVaultLinks();
+            }
         });
 
         linksContainer.appendChild(linkItem);
