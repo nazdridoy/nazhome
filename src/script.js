@@ -2825,7 +2825,7 @@ function createVaultDialog() {
                 // Create new vault link
                 const vaultLink = {
                     url: normalizedUrl,
-                    name: null, // No default name, will show URL
+                    name: new URL(normalizedUrl).hostname.replace('www.', ''), // Use domain as default name
                     addedAt: Date.now()
                 };
 
@@ -2968,7 +2968,7 @@ function openVaultEditDialog(link) {
             const updatedLink = {
                 ...link,
                 url: normalizedUrl,
-                name: nameInput.value.trim() || null,
+                name: nameInput.value.trim() || null, // Set to null if empty string
                 icon: iconInput.value.trim(), // Let resolveFavicon handle the favicon resolution
                 updatedAt: Date.now()
             };
