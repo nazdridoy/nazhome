@@ -2198,6 +2198,9 @@ input[type="search"]:focus {
     background: rgba(255, 255, 255, 0.05);
     transition: all 0.2s;
     cursor: pointer;
+    position: relative;
+    gap: 0.8rem;
+    width: 100%;
 }
 
 .vault-link-item:hover {
@@ -2208,9 +2211,9 @@ input[type="search"]:focus {
 .vault-link-icon {
     width: 20px;
     height: 20px;
-    margin-right: 0.8rem;
     object-fit: contain;
     opacity: 0.9;
+    flex-shrink: 0; /* Prevent icon from shrinking */
 }
 
 .vault-link-url {
@@ -2223,14 +2226,13 @@ input[type="search"]:focus {
     letter-spacing: 0.3px;
 }
 
+/* Remove hover effect since the menu is always visible now */
 .vault-link-actions {
     margin-left: 0.5rem;
-    opacity: 0;
+    opacity: 1; /* Always show the menu button */
     transition: opacity 0.2s;
-}
-
-.vault-link-item:hover .vault-link-actions {
-    opacity: 1;
+    display: flex;
+    flex: 0 0 auto; /* Don't grow or shrink */
 }
 
 .vault-link-menu {
@@ -2250,7 +2252,7 @@ input[type="search"]:focus {
 
 .vault-link-dropdown {
     position: absolute;
-    top: 100%;
+    top: 0;
     right: 0;
     background: rgba(32, 33, 36, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2263,6 +2265,7 @@ input[type="search"]:focus {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    z-index: 10; /* Ensure dropdown is above other elements */
 }
 
 .vault-link-dropdown.show {
@@ -2532,4 +2535,13 @@ input[type="search"]:focus {
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.85rem;
     letter-spacing: 0.3px;
+}
+
+/* Make text container take all available width */
+.vault-link-text {
+    flex: 1;
+    min-width: 0; /* Important for text truncation */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
