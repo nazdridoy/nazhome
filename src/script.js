@@ -2825,7 +2825,7 @@ function createVaultDialog() {
                 // Create new vault link
                 const vaultLink = {
                     url: normalizedUrl,
-                    name: new URL(normalizedUrl).hostname.replace('www.', ''),
+                    name: null, // No default name, will show URL
                     addedAt: Date.now()
                 };
 
@@ -2870,7 +2870,24 @@ function updateVaultLinks() {
             icon.src = FALLBACK_ICONS.GLOBE;
         });
         
-        linkItem.querySelector('.vault-link-url').textContent = link.url;
+        // Set name or URL
+        const nameElement = linkItem.querySelector('.vault-link-name');
+        const urlElement = linkItem.querySelector('.vault-link-url');
+        
+        if (link.name) {
+            // Display name if available
+            nameElement.textContent = link.name;
+            nameElement.style.display = 'block';
+            urlElement.textContent = link.url;
+            urlElement.style.display = 'block';
+            urlElement.style.opacity = '0.5';
+            urlElement.style.fontSize = '0.7rem';
+        } else {
+            // Display only URL if no name
+            nameElement.style.display = 'none';
+            urlElement.textContent = link.url;
+            urlElement.style.display = 'block';
+        }
 
         // Add click handler to open link
         linkItem.addEventListener('click', (e) => {
@@ -2921,10 +2938,12 @@ function openVaultEditDialog(link) {
     const editDialog = document.querySelector('.vault-edit-dialog');
     const form = document.getElementById('vaultEditForm');
     const urlInput = document.getElementById('editUrl');
+    const nameInput = document.getElementById('editName');
     const iconInput = document.getElementById('editIcon');
 
     // Populate form with current values
     urlInput.value = link.url;
+    nameInput.value = link.name || '';
     iconInput.value = link.icon || '';
 
     // Handle form submission
@@ -2949,6 +2968,7 @@ function openVaultEditDialog(link) {
             const updatedLink = {
                 ...link,
                 url: normalizedUrl,
+                name: nameInput.value.trim() || null,
                 icon: iconInput.value.trim(), // Let resolveFavicon handle the favicon resolution
                 updatedAt: Date.now()
             };

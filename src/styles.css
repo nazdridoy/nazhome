@@ -2512,3 +2512,24 @@ input[type="search"]:focus {
 .attribution a:hover {
     text-decoration: underline;
 }
+
+/* Vault link name and URL styles */
+.vault-link-name {
+    color: white;
+    font-size: 0.9rem;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.vault-link-url {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+}
