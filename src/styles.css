@@ -2228,7 +2228,7 @@ input[type="search"]:focus {
 
 /* Remove hover effect since the menu is always visible now */
 .vault-link-actions {
-    margin-left: 0.5rem;
+    margin-left: 0px; /* Reduced from 0.5rem to 0px */
     opacity: 1; /* Always show the menu button */
     transition: opacity 0.2s;
     display: flex;
@@ -2236,13 +2236,16 @@ input[type="search"]:focus {
 }
 
 .vault-link-menu {
-    padding: 0.4rem;
+    padding: 0.25rem; /* Reduced from 0.4rem */
     color: rgba(255, 255, 255, 0.6);
     background: none;
     border: none;
-    border-radius: 6px;
+    border-radius: 3px; /* Reduced from 6px */
     cursor: pointer;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .vault-link-menu:hover {
@@ -2544,4 +2547,43 @@ input[type="search"]:focus {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+
+/* Styles for vault link reordering buttons */
+.vault-link-reorder {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-right: 2px; /* Reduced from 4px to 2px */
+    flex: 0 0 auto; /* Don't grow or shrink */
+}
+
+.vault-link-up,
+.vault-link-down {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 10px; /* Reduced from 12px */
+    cursor: pointer;
+    padding: 1px 2px; /* Reduced from 2px 4px */
+    border-radius: 3px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.vault-link-up:hover,
+.vault-link-down:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Disable up button for first item and down button for last item */
+.vault-link-item.first .vault-link-up,
+.vault-link-item.last .vault-link-down {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
 }
