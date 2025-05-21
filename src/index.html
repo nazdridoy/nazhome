@@ -486,6 +486,11 @@
                 <h3>Edit Link</h3>
                 <form id="vaultEditForm">
                     <div class="input-group">
+                        <label for="editName">Name (optional):</label>
+                        <input type="text" id="editName" placeholder="Leave empty to use URL">
+                        <small class="help-text">Custom name to display instead of URL</small>
+                    </div>
+                    <div class="input-group">
                         <label for="editUrl">URL:</label>
                         <input type="url" id="editUrl" required>
                     </div>
@@ -503,10 +508,10 @@
         </div>
     </template>
 
-    <!-- Add this to your templates section -->
     <template id="vaultLinkItemTemplate">
         <div class="vault-link-item">
             <img class="vault-link-icon" alt="">
+            <span class="vault-link-name"></span>
             <span class="vault-link-url"></span>
             <div class="vault-link-actions">
                 <button class="vault-link-menu" title="More options">
