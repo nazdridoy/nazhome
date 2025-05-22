@@ -139,7 +139,7 @@
         </div>
 
         <!-- Quick Links Grid: Dynamic bookmark management
-             - Supports drag-and-drop (implemented in script.js)
+             - Supports smooth reordering via SortableJS
              - Local storage persistence
              - Custom icons and names -->
         <div class="grid-container" id="quickLinks"></div>
@@ -536,6 +536,9 @@
         Photo by <a id="unsplashLink" href="https://unsplash.com/?utm_source=nazHome&utm_medium=referral" target="_blank"><span id="artistName"></span></a> on <a href="https://unsplash.com/?utm_source=nazHome&utm_medium=referral" target="_blank">Unsplash</a>
     </div>
 
+    <!-- SortableJS for improved drag and drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    
     <!-- Main application logic -->
     <script type="module" src="./script.js?v=v1.1.2" defer></script>
 

@@ -2587,3 +2587,33 @@ input[type="search"]:focus {
     cursor: default;
     pointer-events: none;
 }
+
+/* SortableJS Styles 
+   ----------------- 
+   - Styles for drag and drop interactions
+   - Visual feedback during drag operations
+   - Item transform and transition effects */
+.sortable-ghost {
+  opacity: 0.4;
+}
+
+.sortable-chosen {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+.sortable-drag {
+  opacity: 0.9;
+  cursor: grabbing;
+  transform: scale(1.05);
+}
+
+/* Add grab cursor to quick links to indicate they're draggable */
+.quick-link {
+  cursor: grab;
+}
+
+.quick-link:active {
+  cursor: grabbing;
+}
