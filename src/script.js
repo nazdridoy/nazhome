@@ -2393,15 +2393,15 @@ window.addEventListener('scroll', () => {
  */
 async function fetchLatestVersion() {
     try {
-        // First try to get the latest tag
-        const tagsResponse = await fetch('https://api.github.com/repos/nazdridoy/nazhome/tags');
-        if (!tagsResponse.ok) throw new Error('Failed to fetch tags');
+        // Use jsDelivr API instead of GitHub API
+        const response = await fetch('https://data.jsdelivr.com/v1/package/gh/nazdridoy/nazhome');
+        if (!response.ok) throw new Error('Failed to fetch package info');
         
-        const tags = await tagsResponse.json();
-        if (!tags || !tags.length) throw new Error('No tags found');
+        const data = await response.json();
+        if (!data || !data.versions || !data.versions.length) throw new Error('No version info found');
         
-        // Get the most recent tag
-        const latestTag = tags[0].name;
+        // Get the latest version (first item in the versions array)
+        const latestTag = data.versions[0];
         
         // Update all version tags in the document
         const versionTags = document.getElementsByClassName('version-tag');
@@ -2616,20 +2616,20 @@ function initializeExport() {
     exportButton.addEventListener('click', exportUserData); // Add the listener once
 }
 
-// Replace the checkVersion function with this improved version
+// Replace the checkVersion function with the correct implementation
 async function checkVersion() {
     try {
-        // First try to get the latest tag from GitHub
-        const tagsResponse = await fetch('https://api.github.com/repos/nazdridoy/nazhome/tags', {
-            cache: 'no-store'  // Prevent caching of the tags request
+        // Use jsDelivr API instead of GitHub API
+        const response = await fetch('https://data.jsdelivr.com/v1/package/gh/nazdridoy/nazhome', {
+            cache: 'no-store'  // Prevent caching of the request
         });
-        if (!tagsResponse.ok) throw new Error('Failed to fetch tags');
+        if (!response.ok) throw new Error('Failed to fetch package info');
         
-        const tags = await tagsResponse.json();
-        if (!tags || !tags.length) throw new Error('No tags found');
+        const data = await response.json();
+        if (!data || !data.versions || !data.versions.length) throw new Error('No version info found');
         
-        // Get the most recent tag
-        const latestVersion = tags[0].name;
+        // Get the latest version (first item in the versions array)
+        const latestVersion = data.versions[0];
         
         // Get current version from localStorage, defaulting to '0' if not set
         const currentVersion = localStorage.getItem('appVersion') || '0';
