@@ -393,7 +393,7 @@ async function fetchAlternativeIcons() {
     
     try {
         // Store the promise so concurrent calls can use it
-        alternativeIconsPromise = fetch('https://cdn.jsdelivr.net/gh/nazdridoy/nazhome@maintainAltIcons/alternativeIcons.json')
+        alternativeIconsPromise = fetch('/lib/alternativeIcons.json')
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch alternative icons');
                 return response.json();
