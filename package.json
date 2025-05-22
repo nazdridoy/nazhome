@@ -1,6 +1,6 @@
 {
   "name": "nazhome",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "scripts": {
     "dev": "node scripts/dev-version.js --dev && vite",
     "build": "node scripts/dev-version.js --prod && vite build",
