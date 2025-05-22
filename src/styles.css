@@ -1071,6 +1071,10 @@ input[type="search"]:focus {
     width: 32px;
     height: 32px;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    background: rgba(0, 0, 0, 0.4); /* Add semi-transparent dark background */
+    border-radius: 50%; /* Make it circular */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Add shadow for depth */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Add subtle border */
 }
 
 .weather-content .temp {
@@ -1171,6 +1175,10 @@ input[type="search"]:focus {
     .weather-icon {
         width: 18px;
         height: 18px;
+        background: rgba(0, 0, 0, 0.4); /* Add same background for mobile */
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .weather-content .temp {
