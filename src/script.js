@@ -345,69 +345,37 @@ function initializeBackground() {
 /**
  * Drag and drop handlers for bookmark reordering
  */
-function handleDragStart(e) {
-    e.target.classList.add('dragging');
-}
-
-function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
-}
-
-/**
- * Handles drag and drop reordering of bookmarks
- * Calculates insertion position based on mouse coordinates
- */
-function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const draggedItem = document.querySelector('.dragging');
-    if (!draggedItem) return;
-
+function initSortable() {
     const grid = document.getElementById('quickLinks');
-    const siblings = [...grid.querySelectorAll('.quick-link:not(.dragging)')];
+    if (!grid) return;
     
-    // Get the closest sibling based on mouse position
-    let closestSibling = null;
-    let closestOffset = Number.NEGATIVE_INFINITY;
+    // Destroy any existing sortable instance
+    if (grid.sortable) {
+        grid.sortable.destroy();
+    }
     
-    siblings.forEach(sibling => {
-        const box = sibling.getBoundingClientRect();
-        const offset = e.clientX - box.left - box.width / 2;
-        
-        if (offset < 0 && offset > closestOffset) {
-            closestOffset = offset;
-            closestSibling = sibling;
+    // Initialize SortableJS
+    grid.sortable = new Sortable(grid, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        filter: '.add-bookmark', // Prevent dragging the add button
+        onEnd: function(evt) {
+            // Save the new order
+            const items = [...grid.querySelectorAll('.quick-link')];
+            const newOrder = items.map(item => parseInt(item.dataset.index));
+            
+            // Get current bookmarks
+            const bookmarks = safeGet('bookmarks') || [];
+            
+            // Create new array with reordered bookmarks
+            const reorderedBookmarks = newOrder.map(index => bookmarks[index]).filter(Boolean);
+            
+            // Save and reload (but don't reload the entire UI to prevent flickering)
+            if (!safeSet('bookmarks', reorderedBookmarks)) return;
         }
     });
-    
-    // If we found a closest sibling, insert before it
-    if (closestSibling) {
-        grid.insertBefore(draggedItem, closestSibling);
-    } else {
-        // If no closest sibling found, append to the end (before the add button)
-        const addButton = grid.querySelector('.add-bookmark');
-        grid.insertBefore(draggedItem, addButton);
-    }
-}
-
-function handleDrop(e) {
-    e.preventDefault();
-    const draggedItem = document.querySelector('.dragging');
-    if (!draggedItem) return;
-    
-    const grid = document.getElementById('quickLinks');
-    const items = [...grid.querySelectorAll('.quick-link')];
-    const newOrder = items.map(item => parseInt(item.dataset.index));
-    
-    // Get current bookmarks
-    const bookmarks = safeGet('bookmarks') || [];
-    
-    // Create new array with reordered bookmarks
-    const reorderedBookmarks = newOrder.map(index => bookmarks[index]).filter(Boolean);
-    
-    // Save and reload
-    if (!safeSet('bookmarks', reorderedBookmarks)) return;
-    loadBookmarks();
 }
 
 function getBookmarkSettings() {
@@ -448,21 +416,12 @@ async function loadBookmarks() {
     const grid = document.getElementById('quickLinks');
     grid.innerHTML = '';
 
-    // Add drag and drop event listeners to the grid
-    grid.addEventListener('dragover', handleDragOver);
-    grid.addEventListener('drop', handleDrop);
-
     // Create all bookmark elements first but keep them invisible
     const bookmarkPromises = bookmarks.map(async (bookmark, index) => {
         const link = document.createElement('a');
         link.href = bookmark.url;
         link.className = 'quick-link invisible';
-        link.draggable = true;
         link.dataset.index = index;
-        
-        // Add drag event listeners
-        link.addEventListener('dragstart', handleDragStart);
-        link.addEventListener('dragend', handleDragEnd);
         
         link.innerHTML = `
             <div class="icon-wrapper">
@@ -623,7 +582,6 @@ async function loadBookmarks() {
     const addButton = document.createElement('a');
     addButton.href = '#';
     addButton.className = 'add-bookmark invisible';
-    addButton.draggable = false;
     addButton.innerHTML = `
         <div class="add-button">
             <span class="plus-icon">+</span>
@@ -725,6 +683,9 @@ async function loadBookmarks() {
             item.classList.remove('invisible');
         }, index * 50); // 50ms delay between each item
     });
+    
+    // Initialize SortableJS after adding all elements
+    initSortable();
 }
 
 /**
