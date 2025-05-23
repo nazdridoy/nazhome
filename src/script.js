@@ -2391,34 +2391,6 @@ window.addEventListener('scroll', () => {
  * Creates and displays the About dialog
  * Shows information about the application and its features
  */
-async function fetchLatestVersion() {
-    try {
-        // Use jsDelivr API instead of GitHub API
-        const response = await fetch('https://data.jsdelivr.com/v1/package/gh/nazdridoy/nazhome');
-        if (!response.ok) throw new Error('Failed to fetch package info');
-        
-        const data = await response.json();
-        if (!data || !data.versions || !data.versions.length) throw new Error('No version info found');
-        
-        // Get the latest version (first item in the versions array)
-        const latestTag = data.versions[0];
-        
-        // Update all version tags in the document
-        const versionTags = document.getElementsByClassName('version-tag');
-        Array.from(versionTags).forEach(tag => {
-            tag.textContent = latestTag;
-            tag.style.display = 'inline'; // Show the version tag
-        });
-    } catch (error) {
-        console.warn('Failed to fetch version:', error);
-        // Don't show version tag if fetch fails
-        const versionTags = document.getElementsByClassName('version-tag');
-        Array.from(versionTags).forEach(tag => {
-            tag.style.display = 'none';
-        });
-    }
-}
-
 // Call this function when showing the about dialog
 function showAboutDialog() {
     // Close the settings panel first
@@ -2432,8 +2404,25 @@ function showAboutDialog() {
     const template = document.getElementById('aboutDialogTemplate');
     dialog.appendChild(template.content.cloneNode(true));
     
-    // Fetch version when dialog is shown
-    fetchLatestVersion();
+    // Version is already injected by Vite in the template
+    // Check if there's a newer version available
+    fetch('https://raw.githubusercontent.com/nazdridoy/nazhome/main/package.json')
+        .then(response => response.ok ? response.json() : null)
+        .then(packageData => {
+            if (packageData) {
+                const latestVersion = 'v' + packageData.version;
+                const currentVersion = __APP_VERSION__;
+                
+                // If there's a newer version, show a note
+                if (latestVersion !== currentVersion) {
+                    const versionTag = dialog.querySelector('.version-tag');
+                    if (versionTag) {
+                        versionTag.textContent = `${currentVersion} (${latestVersion} available)`;
+                    }
+                }
+            }
+        })
+        .catch(error => console.warn('Failed to check latest version:', error));
     
     dialog.querySelector('.cancel-btn').addEventListener('click', () => {
         dialog.remove();
@@ -2619,27 +2608,34 @@ function initializeExport() {
 // Replace the checkVersion function with the correct implementation
 async function checkVersion() {
     try {
-        // Use jsDelivr API instead of GitHub API
-        const response = await fetch('https://data.jsdelivr.com/v1/package/gh/nazdridoy/nazhome', {
+        // Get the current app version directly from the build
+        const buildVersion = __APP_VERSION__;
+        
+        // Get stored version from localStorage, defaulting to buildVersion if not set
+        const storedVersion = localStorage.getItem('appVersion') || buildVersion;
+        
+        // Always update localStorage with at least the current build version if missing
+        if (!localStorage.getItem('appVersion')) {
+            localStorage.setItem('appVersion', buildVersion);
+        }
+        
+        // Fetch version directly from raw GitHub content
+        const response = await fetch('https://raw.githubusercontent.com/nazdridoy/nazhome/main/package.json', {
             cache: 'no-store'  // Prevent caching of the request
         });
-        if (!response.ok) throw new Error('Failed to fetch package info');
         
-        const data = await response.json();
-        if (!data || !data.versions || !data.versions.length) throw new Error('No version info found');
+        if (!response.ok) throw new Error('Failed to fetch version info');
         
-        // Get the latest version (first item in the versions array)
-        const latestVersion = data.versions[0];
+        const packageData = await response.json();
+        const latestVersion = 'v' + packageData.version; // Add 'v' prefix to match tag format
         
-        // Get current version from localStorage, defaulting to '0' if not set
-        const currentVersion = localStorage.getItem('appVersion') || '0';
+        console.log('Version check:', { buildVersion, storedVersion, latestVersion });
         
-        console.log('Version check:', { current: currentVersion, latest: latestVersion });
-        
-        if (currentVersion !== latestVersion) {
+        // Check if either the build version or stored version is outdated
+        if (buildVersion !== latestVersion || storedVersion !== latestVersion) {
             console.log('New version detected, clearing cache...');
             
-            // Clear localStorage version first
+            // Update localStorage with latest version
             localStorage.setItem('appVersion', latestVersion);
             
             // Clear browser cache if available
@@ -2658,6 +2654,11 @@ async function checkVersion() {
     } catch (error) {
         console.warn('Version check failed:', error);
         // Don't clear cache or reload on error to prevent disruption
+        
+        // Make sure appVersion exists even if check fails
+        if (!localStorage.getItem('appVersion')) {
+            localStorage.setItem('appVersion', __APP_VERSION__);
+        }
     }
 }
 

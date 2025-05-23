@@ -431,7 +431,7 @@
         <div class="edit-dialog-content">
             <div class="about-header">
                 <h3>nazHome</h3>
-                <span class="version-tag" style="display: none;"></span>
+                <span class="version-tag"><%- VERSION %></span>
             </div>
             <div class="about-content">
                 <img src="/favicons/nazhome.svg" alt="Logo" class="about-logo">
@@ -540,7 +540,7 @@
     <script src="/lib/Sortable.min.js"></script>
     
     <!-- Main application logic -->
-    <script type="module" src="./script.js?v=v1.1.2" defer></script>
+    <script type="module" src="./script.js?v=<%- VERSION %>" defer></script>
 
     <!-- Add this near the end of body -->
     <div class="toast-container"></div>
