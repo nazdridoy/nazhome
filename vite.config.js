@@ -1,5 +1,13 @@
 import { defineConfig } from 'vite'
 import { createHtmlPlugin } from 'vite-plugin-html'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
+
+// Read version from package.json
+const packageJson = JSON.parse(
+  readFileSync(resolve(__dirname, 'package.json'), 'utf8')
+)
+const version = 'v' + packageJson.version
 
 export default defineConfig({
   root: './src',
@@ -23,7 +31,12 @@ export default defineConfig({
   },
   plugins: [
     createHtmlPlugin({
-      minify: true
+      minify: true,
+      inject: {
+        data: {
+          VERSION: version
+        }
+      }
     })
   ],
   css: {
@@ -33,8 +46,6 @@ export default defineConfig({
     }
   },
   define: {
-    __VERSION_FILE__: JSON.stringify(
-      process.env.NODE_ENV === 'development' ? '/version.dev.json' : '/version.json'
-    )
+    __APP_VERSION__: JSON.stringify(version)
   }
 }) 
