@@ -2608,16 +2608,8 @@ function initializeExport() {
 // Replace the checkVersion function with the correct implementation
 async function checkVersion() {
     try {
-        // Get the current app version directly from the build
+        // Get the current app version directly from the build (for logging only)
         const buildVersion = __APP_VERSION__;
-        
-        // Get stored version from localStorage, defaulting to buildVersion if not set
-        const storedVersion = localStorage.getItem('appVersion') || buildVersion;
-        
-        // Always update localStorage with at least the current build version if missing
-        if (!localStorage.getItem('appVersion')) {
-            localStorage.setItem('appVersion', buildVersion);
-        }
         
         // Fetch version directly from raw GitHub content
         const response = await fetch('https://raw.githubusercontent.com/nazdridoy/nazhome/main/package.json', {
@@ -2629,10 +2621,20 @@ async function checkVersion() {
         const packageData = await response.json();
         const latestVersion = 'v' + packageData.version; // Add 'v' prefix to match tag format
         
+        // Get stored version from localStorage
+        let storedVersion = localStorage.getItem('appVersion');
+        
         console.log('Version check:', { buildVersion, storedVersion, latestVersion });
         
-        // Check if either the build version or stored version is outdated
-        if (buildVersion !== latestVersion || storedVersion !== latestVersion) {
+        // If no stored version, initialize with GitHub version
+        if (!storedVersion) {
+            console.log('Initializing version tracking with latest version');
+            localStorage.setItem('appVersion', latestVersion);
+            return; // No reload needed since this is first initialization
+        }
+        
+        // Compare the stored version with GitHub version for update decisions
+        if (storedVersion !== latestVersion) {
             console.log('New version detected, clearing cache...');
             
             // Update localStorage with latest version
@@ -2653,10 +2655,9 @@ async function checkVersion() {
         }
     } catch (error) {
         console.warn('Version check failed:', error);
-        // Don't clear cache or reload on error to prevent disruption
-        
-        // Make sure appVersion exists even if check fails
+        // If API call fails and no version in localStorage, use build version as fallback
         if (!localStorage.getItem('appVersion')) {
+            console.log('Failed to get latest version, using build version as fallback');
             localStorage.setItem('appVersion', __APP_VERSION__);
         }
     }
