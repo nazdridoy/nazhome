@@ -2405,24 +2405,7 @@ function showAboutDialog() {
     dialog.appendChild(template.content.cloneNode(true));
     
     // Version is already injected by Vite in the template
-    // Check if there's a newer version available
-    fetch('https://raw.githubusercontent.com/nazdridoy/nazhome/main/package.json')
-        .then(response => response.ok ? response.json() : null)
-        .then(packageData => {
-            if (packageData) {
-                const latestVersion = 'v' + packageData.version;
-                const currentVersion = __APP_VERSION__;
-                
-                // If there's a newer version, show a note
-                if (latestVersion !== currentVersion) {
-                    const versionTag = dialog.querySelector('.version-tag');
-                    if (versionTag) {
-                        versionTag.textContent = `${currentVersion} (${latestVersion} available)`;
-                    }
-                }
-            }
-        })
-        .catch(error => console.warn('Failed to check latest version:', error));
+    // No need for additional version checks here
     
     dialog.querySelector('.cancel-btn').addEventListener('click', () => {
         dialog.remove();
@@ -2611,8 +2594,9 @@ async function checkVersion() {
         // Get the current app version directly from the build (for logging only)
         const buildVersion = __APP_VERSION__;
         
-        // Fetch version directly from raw GitHub content
-        const response = await fetch('https://raw.githubusercontent.com/nazdridoy/nazhome/main/package.json', {
+        // Fetch version directly from raw GitHub content with cache busting
+        const cacheBuster = new Date().getTime();
+        const response = await fetch(`https://raw.githubusercontent.com/nazdridoy/nazhome/main/package.json?_=${cacheBuster}`, {
             cache: 'no-store'  // Prevent caching of the request
         });
         
