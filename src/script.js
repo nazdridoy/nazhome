@@ -199,12 +199,53 @@ async function imageToBase64(url) {
 }
 
 /**
+ * Tests the Unsplash API connection with the provided key and collections
+ * @param {string} apiKey - Unsplash API key
+ * @param {string} collections - Comma-separated collection IDs
+ * @returns {Promise<boolean>} - True if successful, false if failed
+ */
+async function testUnsplashConnection(apiKey, collections) {
+    if (!apiKey || !collections) return false;
+    
+    try {
+        const timestamp = Date.now();
+        const url = `https://unsplash-workers-api.nazdridoy.workers.dev/random?dl=true&apiKey=${encodeURIComponent(apiKey)}&collections=${encodeURIComponent(collections)}&random=${timestamp}`;
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`API returned ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        return !!data.imageUrl; // Return true if we got a valid image URL
+    } catch (error) {
+        console.error('Unsplash API test failed:', error);
+        return false;
+    }
+}
+
+/**
  * Fetches a random background image from Picsum Photos API and converts it to base64
  * Returns null if the fetch or conversion fails
  */
 async function fetchNewBackgroundImage() {
     const timestamp = Date.now();
-    const url = `https://unsplash-workers-api.nazdridoy.workers.dev/random?dl=true&addPhotoOfTheDay=true&random=${timestamp}`;
+    
+    // Check if we have Unsplash API key and collection IDs
+    const apiKey = localStorage.getItem('unsplashApiKey');
+    const collections = localStorage.getItem('unsplashCollections');
+    
+    // Construct the URL based on available settings
+    let url = `https://unsplash-workers-api.nazdridoy.workers.dev/random?dl=true&random=${timestamp}`;
+    
+    // If API key and collection IDs are set, use them instead of addPhotoOfTheDay
+    if (apiKey && collections && apiKey.trim() !== '' && collections.trim() !== '') {
+        url += `&apiKey=${encodeURIComponent(apiKey)}&collections=${encodeURIComponent(collections)}`;
+    } else {
+        // Otherwise use the default photo of the day
+        url += '&addPhotoOfTheDay=true';
+    }
+    
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -340,6 +381,21 @@ function initializeBackground() {
     document.body.style.backgroundRepeat = 'no-repeat';
     document.body.style.backgroundAttachment = 'fixed';
     loadBackground();
+}
+
+/**
+ * Loads Unsplash API settings from localStorage
+ */
+function loadUnsplashSettings() {
+    const apiKey = localStorage.getItem('unsplashApiKey') || '';
+    const collections = localStorage.getItem('unsplashCollections') || '';
+    
+    const apiKeyInput = document.getElementById('unsplashApiKey');
+    const collectionsInput = document.getElementById('unsplashCollections');
+    
+    // Only set values if the inputs exist and are empty (initial load only)
+    if (apiKeyInput && apiKeyInput.value === '') apiKeyInput.value = apiKey;
+    if (collectionsInput && collectionsInput.value === '') collectionsInput.value = collections;
 }
 
 /**
@@ -833,6 +889,85 @@ document.addEventListener('DOMContentLoaded', function() {
     loadBookmarks();
     initializeIframeNavigation();
     initializeExport();
+    
+    // Load Unsplash settings
+    loadUnsplashSettings();
+
+    // Add event handler for the Unsplash settings save button
+    document.getElementById('saveUnsplashSettings').addEventListener('click', async function() {
+        const apiKey = document.getElementById('unsplashApiKey').value.trim();
+        const collections = document.getElementById('unsplashCollections').value.trim();
+        
+        // Validate: if collections are provided but API key is empty, show warning
+        if (collections !== '' && apiKey === '') {
+            showToast('API key is required when using collection IDs', 'warning');
+            return;
+        }
+        
+        // Show loading toast
+        showToast('Testing connection...', 'info');
+        
+        // If both are provided, test the connection first
+        if (apiKey !== '' && collections !== '') {
+            // Test the connection
+            const button = this;
+            button.disabled = true;
+            button.textContent = 'Testing...';
+            
+            try {
+                const connectionSuccessful = await testUnsplashConnection(apiKey, collections);
+                
+                if (!connectionSuccessful) {
+                    showToast('Unsplash API test failed. Check your API key and collection IDs', 'error');
+                    button.disabled = false;
+                    button.textContent = 'Save Unsplash Settings';
+                    return;
+                }
+            } catch (error) {
+                console.error('Error testing Unsplash connection:', error);
+                showToast('Connection test failed. Using default settings', 'error');
+                button.disabled = false;
+                button.textContent = 'Save Unsplash Settings';
+                return;
+            }
+            
+            button.disabled = false;
+            button.textContent = 'Save Unsplash Settings';
+        }
+        
+        // Save settings to localStorage
+        localStorage.setItem('unsplashApiKey', apiKey);
+        localStorage.setItem('unsplashCollections', collections);
+        
+        // Show confirmation toast
+        showToast('Unsplash settings saved successfully', 'success');
+        
+        // Refresh background to use new settings immediately
+        setTimeout(() => {
+            loadBackground();
+        }, 500);
+    });
+
+    // Prevent automatic saving on input focus/click
+    const unsplashInputs = document.querySelectorAll('#unsplashApiKey, #unsplashCollections');
+    unsplashInputs.forEach(input => {
+        // Prevent any browser autofill/autosave behavior
+        input.setAttribute('autocomplete', 'off');
+        
+        // Stop input events from triggering save
+        input.addEventListener('focus', (e) => {
+            e.stopPropagation();
+        });
+        
+        input.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+        });
+        
+        // Prevent change events from saving directly
+        input.addEventListener('change', (e) => {
+            e.stopPropagation();
+        });
+    });
 });
 
 /**
@@ -1343,6 +1478,9 @@ function validateSearchEngineUrl(url) {
 
 document.getElementById('closeSettings').addEventListener('click', function() {
     document.querySelector('.settings-panel').style.display = 'none';
+    
+    // Reset unsplash input fields to their saved values to prevent stale data
+    loadUnsplashSettings();
 });
 
 // function to restore default bookmarks
@@ -1407,6 +1545,10 @@ function exportUserData() {
         weather: {
             city: localStorage.getItem('weatherCity') || 'Dhaka',
             country: localStorage.getItem('weatherCountry') || 'BD'
+        },
+        unsplash: {
+            apiKey: localStorage.getItem('unsplashApiKey') || '',
+            collections: localStorage.getItem('unsplashCollections') || ''
         }
     };
 
@@ -1490,6 +1632,16 @@ async function importUserData(file) {
             }
             if (data.weather.country) {
                 localStorage.setItem('weatherCountry', data.weather.country);
+            }
+        }
+        
+        // Import Unsplash settings
+        if (data.unsplash) {
+            if (data.unsplash.apiKey) {
+                localStorage.setItem('unsplashApiKey', data.unsplash.apiKey);
+            }
+            if (data.unsplash.collections) {
+                localStorage.setItem('unsplashCollections', data.unsplash.collections);
             }
         }
 

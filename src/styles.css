@@ -1030,6 +1030,66 @@ input[type="search"]:focus {
     background: rgba(220, 53, 69, 1);
 }
 
+
+/* Unsplash Settings */
+.unsplash-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.unsplash-settings .input-group {
+    flex: 1;
+    min-width: 0;
+}
+
+.unsplash-settings input {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+}
+
+.settings-link {
+    color: rgb(33, 150, 243);
+    text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: inline-block;
+}
+
+.settings-link:hover {
+    color: rgb(100, 181, 246);
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.settings-link:active {
+    transform: translateY(0px);
+}
+
+.unsplash-settings input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.unsplash-settings label {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.85rem;
+}
+
+.unsplash-api-label {
+    margin-bottom: 0.5rem;
+    cursor: default;
+}
+
 /* Weather Widget - Desktop */
 #weather {
     color: white;
@@ -2480,6 +2540,15 @@ input[type="search"]:focus {
 
 .toast.warning i {
     color: rgba(255, 165, 0, 0.8);
+}
+
+/* Add info state for toast */
+.toast.info {
+    border-left: 3px solid rgba(33, 150, 243, 0.8);
+}
+
+.toast.info i {
+    color: rgba(33, 150, 243, 0.8);
 }
 
 /* Add success state for toast */

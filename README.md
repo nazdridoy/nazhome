@@ -41,6 +41,7 @@ A minimalistic startpage that combines elegance with functionality, featuring cu
   - Configurable widget visibility
   - Theme customization options
   - Background rotation control
+  - Custom Unsplash collections for backgrounds
 
 ## Preview
 
@@ -80,6 +81,7 @@ A minimalistic startpage that combines elegance with functionality, featuring cu
 - CSS3 with modern features
 - Local Storage for data persistence
 - OpenWeatherMap API for weather data
+- Unsplash API for background images
 
 ## Browser Support
 
@@ -103,7 +105,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Acknowledgments
 
 - Weather data provided by [OpenWeatherMap](https://openweathermap.org/)
-- Background images from [Picsum Photos](https://picsum.photos/)
+- Background images from [Unsplash](https://unsplash.com/)
 
 ---
 

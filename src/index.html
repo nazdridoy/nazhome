@@ -204,6 +204,22 @@
                 <small class="help-text">Hide the "+" button used to add new bookmarks</small>
             </div>
             <div class="setting-item">
+                <label class="unsplash-api-label">Unsplash Settings</label>
+                <div class="unsplash-settings">
+                    <div class="input-group">
+                        <label for="unsplashApiKey">API Key:</label>
+                        <input type="text" id="unsplashApiKey" placeholder="Required when using collection IDs" autocomplete="off">
+                        <small class="help-text"><a href="https://unsplash.com/developers" target="_blank" rel="noopener" class="settings-link">Get an Unsplash API key</a></small>
+                    </div>
+                    <div class="input-group">
+                        <label for="unsplashCollections">Collection IDs:</label>
+                        <input type="text" id="unsplashCollections" placeholder="Optional: Comma-separated collection IDs" autocomplete="off">
+                    </div>
+                    <small class="help-text">Customize background images with your own Unsplash collections</small>
+                    <button id="saveUnsplashSettings" class="update-btn">Save Unsplash Settings</button>
+                </div>
+            </div>
+            <div class="setting-item">
                 <label class="weather-location-label">Weather Location</label>
                 <div class="weather-location">
                     <div class="input-group">

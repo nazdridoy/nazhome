@@ -44,3 +44,6 @@ debug.log
 
 # Development version file
 public/version.dev.json
+
+# Reference files
+ref-*
