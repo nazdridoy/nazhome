@@ -994,11 +994,17 @@ input[type="search"]:focus {
 /* Add styles for storage manager */
 .storage-manager {
     max-width: 400px !important;
+    max-height: 90vh !important; /* Limit height to 90% of viewport */
+    display: flex;
+    flex-direction: column;
 }
 
 .storage-info {
     margin: 1rem 0;
     color: white;
+    overflow-y: auto; /* Add scrolling */
+    max-height: 60vh; /* Limit height to allow room for buttons */
+    padding-right: 0.5rem; /* Add padding for scrollbar */
 }
 
 .storage-items {
