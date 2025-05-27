@@ -251,6 +251,7 @@ input[type="search"]:focus {
     padding: 1rem;
     position: relative;
     margin-top: calc(50vh + 20px);
+    z-index: 5; /* Added to ensure it's above attribution but below other UI elements */
 }
 
 .grid-container a {
@@ -2590,7 +2591,7 @@ input[type="search"]:focus {
     color: white;
     font-size: 0.8rem;
     opacity: 0.8;
-    z-index: 10;
+    z-index: 2; /* Decreased from 10 to ensure it's below the grid */
 }
 
 .attribution a {
